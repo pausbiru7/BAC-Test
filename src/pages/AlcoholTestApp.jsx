@@ -1,6 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, Button, Badge, Input, Textarea, Label } from '@/components/ui';
 import { LayoutDashboard, Users, ClipboardPlus, History, Search, FileText, Shield, Settings, LogOut, ArrowRight, Calendar, Printer, Share2, Eye, HelpCircle } from 'lucide-react';
+import {
+  getInitialData,
+  createPerson,
+  updatePerson,
+  deletePerson,
+  createTest,
+  updateSettings,
+} from './services/gasApi';
 
 const menu = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -154,7 +162,40 @@ const emptyPersonForm = {
   notes: '',
   isActive: true,
 };
+const defaultAppSettings = {
+  appName: 'Alcohol Test App',
+  companyName: 'Internal Company',
+  defaultLocation: 'Gerbang Utama',
+  defaultOfficer: 'Admin Internal',
+  defaultDevice: 'Breathalyzer A',
+  reportTemplate: 'standard',
+  normalThreshold: 0,
+  failThreshold: 0.01,
+};
 
+function getTodayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getCurrentTime() {
+  const now = new Date();
+
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+function getFirstDayOfMonth() {
+  const now = new Date();
+
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+}
+
+function getTodayLabel() {
+  return new Date().toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+}
 function getResultStatus(value) {
   if (value < 0) return { status: 'invalid', text: 'Nilai alkohol tidak boleh negatif.' };
   if (value === 0) return { status: 'normal', text: 'Nilai 0, hasil otomatis normal.' };
@@ -193,11 +234,21 @@ function PlaceholderPage({ title, description }) {
   );
 }
 
-function DashboardPage({ onNavigate, tests }) {
+function DashboardPage({ onNavigate, tests, persons }) {
+  const today = getTodayDate();
+
+  const todayTests = tests.filter((test) => test.testDate === today);
+
+  const dashboardSummary = [
+    { label: 'Total Tes Hari Ini', value: todayTests.length },
+    { label: 'Normal', value: todayTests.filter((test) => test.resultStatus === 'normal').length },
+    { label: 'Fail', value: todayTests.filter((test) => test.resultStatus === 'fail').length },
+    { label: 'Jumlah Orang', value: persons.length },
+  ];
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {summary.map((item) => (
+        {dashboardSummary.map((item) => (
           <Card key={item.label} className="border-blue-100 bg-white shadow-sm">
             <CardHeader>
               <CardDescription>{item.label}</CardDescription>
@@ -250,14 +301,15 @@ function DashboardPage({ onNavigate, tests }) {
 function InputTesPage({ persons, onSaveTest, appSettings }) {
   const [query, setQuery] = useState('');
   const [selectedPerson, setSelectedPerson] = useState(persons[0] || null);
-  const [testDate, setTestDate] = useState('2026-06-13');
-  const [testTime, setTestTime] = useState('08:15');
+  const [testDate, setTestDate] = useState(getTodayDate());
+const [testTime, setTestTime] = useState(getCurrentTime());
   const [location, setLocation] = useState(appSettings.defaultLocation);
   const [officer, setOfficer] = useState(appSettings.defaultOfficer);
   const [device, setDevice] = useState(appSettings.defaultDevice);
   const [alcoholValue, setAlcoholValue] = useState('0');
   const [notes, setNotes] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const filteredPeople = useMemo(() => {
     const q = query.toLowerCase();
@@ -274,8 +326,8 @@ function InputTesPage({ persons, onSaveTest, appSettings }) {
   const resetForm = () => {
     setQuery('');
     setSelectedPerson(persons[0] || null);
-    setTestDate('2026-06-13');
-    setTestTime('08:15');
+    setTestDate(getTodayDate());
+setTestTime(getCurrentTime());
     setLocation(appSettings.defaultLocation);
     setOfficer(appSettings.defaultOfficer);
     setDevice(appSettings.defaultDevice);
@@ -284,9 +336,13 @@ function InputTesPage({ persons, onSaveTest, appSettings }) {
     setSubmitted(false);
   };
 
-  const handleSave = () => {
-    if (!canSubmit) return;
-    onSaveTest({
+  const handleSave = async () => {
+  if (!canSubmit || saving) return;
+
+  try {
+    setSaving(true);
+
+    await onSaveTest({
       personId: selectedPerson.id,
       personName: selectedPerson.fullName,
       identityNumber: selectedPerson.identityNumber,
@@ -300,8 +356,13 @@ function InputTesPage({ persons, onSaveTest, appSettings }) {
       resultStatus: result.status,
       notes,
     });
-    setSubmitted(true);
-  };
+
+  } catch (error) {
+    alert(error.message || 'Gagal menyimpan hasil tes.');
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (!persons.length) {
     return (
@@ -435,7 +496,13 @@ function InputTesPage({ persons, onSaveTest, appSettings }) {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button className="bg-blue-700 text-white hover:bg-blue-800" disabled={!canSubmit} onClick={handleSave}>Simpan Tes</Button>
+                <Button
+  className="bg-blue-700 text-white hover:bg-blue-800"
+  disabled={!canSubmit || saving}
+  onClick={handleSave}
+>
+  {saving ? 'Menyimpan...' : 'Simpan Tes'}
+</Button>
                 <Button variant="outline" className="border-blue-200 text-blue-800" onClick={resetForm}>Reset</Button>
                 <Button variant="outline" className="border-blue-200 text-blue-800">Batal</Button>
               </div>
@@ -482,7 +549,7 @@ function InputTesPage({ persons, onSaveTest, appSettings }) {
   );
 }
 
-function PersonFormPanel({ mode, form, setForm, onSave, onCancel }) {
+function PersonFormPanel({ mode, form, setForm, onSave, onCancel, saving = false }) {
   const isDetail = mode === 'detail';
   const title = mode === 'create' ? 'Tambah Data Orang' : mode === 'edit' ? 'Edit Data Orang' : 'Detail Data Orang';
 
@@ -535,7 +602,13 @@ function PersonFormPanel({ mode, form, setForm, onSave, onCancel }) {
 
         <div className="flex flex-wrap gap-3">
           {mode !== 'detail' && (
-            <Button className="bg-blue-700 text-white hover:bg-blue-800" disabled={!form.fullName || !form.identityNumber} onClick={onSave}>Simpan</Button>
+            <Button
+  className="bg-blue-700 text-white hover:bg-blue-800"
+  disabled={!form.fullName || !form.identityNumber || saving}
+  onClick={onSave}
+>
+  {saving ? 'Menyimpan...' : 'Simpan'}
+</Button>
           )}
           <Button variant="outline" className="border-blue-200 text-blue-800" onClick={onCancel}>{mode === 'detail' ? 'Tutup' : 'Batal'}</Button>
         </div>
@@ -544,18 +617,30 @@ function PersonFormPanel({ mode, form, setForm, onSave, onCancel }) {
   );
 }
 
-function DataOrangPage({ persons, setPersons }) {
+function DataOrangPage({ persons, onCreatePerson, onUpdatePerson, onDeletePerson }) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [mode, setMode] = useState('list');
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [form, setForm] = useState(emptyPersonForm);
+  const [saving, setSaving] = useState(false);
 
   const filteredPersons = useMemo(() => {
     return persons.filter((person) => {
-      const searchable = [person.id, person.fullName, person.identityNumber, person.department, person.position].join(' ').toLowerCase();
+      const searchable = [
+        person.id,
+        person.fullName,
+        person.identityNumber,
+        person.department,
+        person.position,
+      ].join(' ').toLowerCase();
+
       const matchesQuery = searchable.includes(query.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' && person.isActive) || (statusFilter === 'inactive' && !person.isActive);
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' && person.isActive) ||
+        (statusFilter === 'inactive' && !person.isActive);
+
       return matchesQuery && matchesStatus;
     });
   }, [persons, query, statusFilter]);
@@ -569,29 +654,57 @@ function DataOrangPage({ persons, setPersons }) {
   const startEdit = (person) => {
     setMode('edit');
     setSelectedPerson(person);
-    setForm(person);
+    setForm({ ...person });
   };
 
   const openDetail = (person) => {
     setMode('detail');
     setSelectedPerson(person);
-    setForm(person);
+    setForm({ ...person });
   };
 
-  const savePerson = () => {
-    if (mode === 'create') {
-      const nextId = `PRS-${String(persons.length + 1).padStart(3, '0')}`;
-      setPersons([{ ...form, id: nextId }, ...persons]);
-      setMode('list');
-      setForm(emptyPersonForm);
-      return;
-    }
+  const closePanel = () => {
+    setMode('list');
+    setSelectedPerson(null);
+    setForm(emptyPersonForm);
+  };
 
-    if (mode === 'edit' && selectedPerson) {
-      setPersons(persons.map((person) => (person.id === selectedPerson.id ? { ...form, id: selectedPerson.id } : person)));
-      setMode('list');
-      setSelectedPerson(null);
-      setForm(emptyPersonForm);
+  const savePerson = async () => {
+    if (saving) return;
+
+    try {
+      setSaving(true);
+
+      if (mode === 'create') {
+        await onCreatePerson(form);
+        closePanel();
+        return;
+      }
+
+      if (mode === 'edit' && selectedPerson) {
+        await onUpdatePerson({
+          ...form,
+          id: selectedPerson.id,
+        });
+
+        closePanel();
+      }
+    } catch (error) {
+      alert(error.message || 'Gagal menyimpan data orang.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeactivate = async (person) => {
+    const confirmed = window.confirm(`Nonaktifkan data ${person.fullName}?`);
+
+    if (!confirmed) return;
+
+    try {
+      await onDeletePerson(person.id);
+    } catch (error) {
+      alert(error.message || 'Gagal menonaktifkan data orang.');
     }
   };
 
@@ -605,45 +718,108 @@ function DataOrangPage({ persons, setPersons }) {
                 <CardTitle className="text-blue-950">Data Orang</CardTitle>
                 <CardDescription>Kelola master data orang untuk kebutuhan pemeriksaan dan tracing.</CardDescription>
               </div>
-              <Button className="bg-blue-700 text-white hover:bg-blue-800" onClick={startCreate}>+ Tambah Orang</Button>
+              <Button className="bg-blue-700 text-white hover:bg-blue-800" onClick={startCreate}>
+                + Tambah Orang
+              </Button>
             </div>
           </CardHeader>
+
           <CardContent className="space-y-4">
             <div className="grid gap-3 md:grid-cols-3">
-              <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari nama / ID / identitas" className="border-blue-200 md:col-span-2" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Cari nama / ID / identitas"
+                className="border-blue-200 md:col-span-2"
+              />
+
               <div className="grid grid-cols-3 gap-2">
-                <Button variant={statusFilter === 'all' ? 'default' : 'outline'} className={statusFilter === 'all' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'} onClick={() => setStatusFilter('all')}>Semua</Button>
-                <Button variant={statusFilter === 'active' ? 'default' : 'outline'} className={statusFilter === 'active' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'} onClick={() => setStatusFilter('active')}>Aktif</Button>
-                <Button variant={statusFilter === 'inactive' ? 'default' : 'outline'} className={statusFilter === 'inactive' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'} onClick={() => setStatusFilter('inactive')}>Nonaktif</Button>
+                <Button
+                  variant={statusFilter === 'all' ? 'default' : 'outline'}
+                  className={statusFilter === 'all' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  Semua
+                </Button>
+                <Button
+                  variant={statusFilter === 'active' ? 'default' : 'outline'}
+                  className={statusFilter === 'active' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'}
+                  onClick={() => setStatusFilter('active')}
+                >
+                  Aktif
+                </Button>
+                <Button
+                  variant={statusFilter === 'inactive' ? 'default' : 'outline'}
+                  className={statusFilter === 'inactive' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'}
+                  onClick={() => setStatusFilter('inactive')}
+                >
+                  Nonaktif
+                </Button>
               </div>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-blue-100">
               <div className="grid grid-cols-12 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-950">
-                <div className="col-span-2">ID Orang</div>
                 <div className="col-span-3">Nama</div>
                 <div className="col-span-2">Identitas</div>
                 <div className="col-span-2">Departemen</div>
+                <div className="col-span-2">Lokasi</div>
                 <div className="col-span-1">Status</div>
                 <div className="col-span-2">Aksi</div>
               </div>
+
               {filteredPersons.map((person) => (
                 <div key={person.id} className="grid grid-cols-12 items-center border-t border-blue-100 px-4 py-3 text-sm">
-                  <div className="col-span-2 font-medium text-blue-950">{person.id}</div>
-                  <div className="col-span-3">{person.fullName}</div>
-                  <div className="col-span-2">{person.identityNumber}</div>
-                  <div className="col-span-2">{person.department}</div>
+                  <div className="col-span-3">
+                    <div className="font-semibold text-blue-950">{person.fullName}</div>
+                    <div className="text-xs text-slate-500">{person.id}</div>
+                  </div>
+
+                  <div className="col-span-2 text-slate-700">{person.identityNumber}</div>
+                  <div className="col-span-2 text-slate-700">{person.department || '-'}</div>
+                  <div className="col-span-2 text-slate-700">{person.workLocation || '-'}</div>
+
                   <div className="col-span-1">
                     <StatusBadge status={person.isActive ? 'active' : 'inactive'} />
                   </div>
+
                   <div className="col-span-2 flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" className="border-blue-200 text-blue-800" onClick={() => openDetail(person)}>Detail</Button>
-                    <Button size="sm" variant="outline" className="border-blue-200 text-blue-800" onClick={() => startEdit(person)}>Edit</Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-blue-200 text-blue-800"
+                      onClick={() => openDetail(person)}
+                    >
+                      Detail
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-blue-200 text-blue-800"
+                      onClick={() => startEdit(person)}
+                    >
+                      Edit
+                    </Button>
+
+                    {person.isActive && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-red-200 text-red-700"
+                        onClick={() => handleDeactivate(person)}
+                      >
+                        Nonaktif
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
+
               {filteredPersons.length === 0 && (
-                <div className="p-6 text-sm text-slate-600">Tidak ada data orang yang sesuai dengan filter.</div>
+                <div className="p-6 text-sm text-slate-600">
+                  Tidak ada data orang yang sesuai dengan filter.
+                </div>
               )}
             </div>
           </CardContent>
@@ -654,8 +830,8 @@ function DataOrangPage({ persons, setPersons }) {
         {mode === 'list' ? (
           <Card className="border-blue-100 bg-white shadow-sm">
             <CardHeader>
-              <CardTitle className="text-blue-950">Ringkasan Data Orang</CardTitle>
-              <CardDescription>Gambaran cepat master data orang saat ini.</CardDescription>
+              <CardTitle className="text-blue-950">Ringkasan Data</CardTitle>
+              <CardDescription>Statistik master data orang.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
@@ -664,16 +840,23 @@ function DataOrangPage({ persons, setPersons }) {
               </div>
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
                 <div className="text-xs text-slate-500">Aktif</div>
-                <div className="text-2xl font-semibold text-blue-950">{persons.filter((person) => person.isActive).length}</div>
+                <div className="text-2xl font-semibold text-blue-950">{persons.filter((p) => p.isActive).length}</div>
               </div>
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
                 <div className="text-xs text-slate-500">Nonaktif</div>
-                <div className="text-2xl font-semibold text-blue-950">{persons.filter((person) => !person.isActive).length}</div>
+                <div className="text-2xl font-semibold text-blue-950">{persons.filter((p) => !p.isActive).length}</div>
               </div>
             </CardContent>
           </Card>
         ) : (
-          <PersonFormPanel mode={mode} form={form} setForm={setForm} onSave={savePerson} onCancel={() => { setMode('list'); setSelectedPerson(null); setForm(emptyPersonForm); }} />
+          <PersonFormPanel
+            mode={mode}
+            form={form}
+            setForm={setForm}
+            onSave={savePerson}
+            onCancel={closePanel}
+            saving={saving}
+          />
         )}
       </div>
     </div>
@@ -683,18 +866,34 @@ function DataOrangPage({ persons, setPersons }) {
 function RiwayatTesPage({ tests }) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter, setTestDate] = useState('');
   const [selectedTest, setSelectedTest] = useState(null);
 
   const filteredTests = useMemo(() => {
     return tests.filter((test) => {
-      const searchable = [test.id, test.personName, test.locationName, test.officerName].join(' ').toLowerCase();
+      const searchable = [
+        test.id,
+        test.personName,
+        test.personId,
+        test.identityNumber,
+        test.department,
+        test.locationName,
+        test.officerName,
+      ].join(' ').toLowerCase();
+
       const matchesQuery = searchable.includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || test.resultStatus === statusFilter;
-      const matchesDate = !dateFilter || test.testDate === dateFilter;
-      return matchesQuery && matchesStatus && matchesDate;
+
+      return matchesQuery && matchesStatus;
     });
-  }, [tests, query, statusFilter, dateFilter]);
+  }, [tests, query, statusFilter]);
+
+  const sortedTests = useMemo(() => {
+    return [...filteredTests].sort((a, b) => {
+      const dateA = `${a.testDate || ''} ${a.testTime || ''}`;
+      const dateB = `${b.testDate || ''} ${b.testTime || ''}`;
+      return dateB.localeCompare(dateA);
+    });
+  }, [filteredTests]);
 
   return (
     <div className="grid gap-6 xl:grid-cols-3">
@@ -702,46 +901,77 @@ function RiwayatTesPage({ tests }) {
         <Card className="border-blue-100 bg-white shadow-sm">
           <CardHeader>
             <CardTitle className="text-blue-950">Riwayat Tes</CardTitle>
-            <CardDescription>Daftar seluruh hasil pemeriksaan alkohol internal dengan filter pencarian.</CardDescription>
+            <CardDescription>Daftar seluruh hasil pemeriksaan alkohol yang tersimpan di Google Spreadsheet.</CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-4">
-              <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari nama / ID tes / petugas / lokasi" className="border-blue-200 md:col-span-2" />
-              <Input type="date" value={dateFilter} onChange={(e) => setTestDate(e.target.value)} className="border-blue-200" />
-              <div className="grid grid-cols-3 gap-2">
-                <Button variant={statusFilter === 'all' ? 'default' : 'outline'} className={statusFilter === 'all' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'} onClick={() => setStatusFilter('all')}>Semua</Button>
-                <Button variant={statusFilter === 'normal' ? 'default' : 'outline'} className={statusFilter === 'normal' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'} onClick={() => setStatusFilter('normal')}>Normal</Button>
-                <Button variant={statusFilter === 'fail' ? 'default' : 'outline'} className={statusFilter === 'fail' ? 'bg-blue-700 text-white hover:bg-blue-800' : 'border-blue-200 text-blue-800'} onClick={() => setStatusFilter('fail')}>Fail</Button>
-              </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Cari nama / ID / lokasi / petugas..."
+                className="border-blue-200 md:col-span-2"
+              />
+
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-lg border border-blue-200 p-2 text-sm bg-white"
+              >
+                <option value="all">Semua Status</option>
+                <option value="normal">Normal</option>
+                <option value="fail">Fail</option>
+              </select>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-blue-100">
               <div className="grid grid-cols-12 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-950">
-                <div className="col-span-2">ID Tes</div>
-                <div className="col-span-3">Nama</div>
                 <div className="col-span-2">Waktu</div>
+                <div className="col-span-3">Nama</div>
+                <div className="col-span-2">Departemen</div>
                 <div className="col-span-2">Lokasi</div>
                 <div className="col-span-1">Nilai</div>
                 <div className="col-span-1">Status</div>
                 <div className="col-span-1">Aksi</div>
               </div>
-              {filteredTests.map((test) => (
+
+              {sortedTests.map((test) => (
                 <div key={test.id} className="grid grid-cols-12 items-center border-t border-blue-100 px-4 py-3 text-sm">
-                  <div className="col-span-2 font-medium text-blue-950">{test.id}</div>
-                  <div className="col-span-3">{test.personName}</div>
-                  <div className="col-span-2">{test.testDate} {test.testTime}</div>
-                  <div className="col-span-2">{test.locationName}</div>
-                  <div className="col-span-1 font-semibold">{test.alcoholValue}</div>
+                  <div className="col-span-2">
+                    <div className="font-medium text-blue-950">{test.testDate}</div>
+                    <div className="text-xs text-slate-500">{test.testTime}</div>
+                  </div>
+
+                  <div className="col-span-3">
+                    <div className="font-semibold text-blue-950">{test.personName}</div>
+                    <div className="text-xs text-slate-500">{test.personId}</div>
+                  </div>
+
+                  <div className="col-span-2 text-slate-700">{test.department || '-'}</div>
+                  <div className="col-span-2 text-slate-700">{test.locationName || '-'}</div>
+                  <div className="col-span-1 font-semibold text-blue-950">{test.alcoholValue}</div>
+
                   <div className="col-span-1">
                     <StatusBadge status={test.resultStatus} />
                   </div>
+
                   <div className="col-span-1">
-                    <Button size="sm" variant="outline" className="border-blue-200 text-blue-800" onClick={() => setSelectedTest(test)}>Detail</Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-blue-200 text-blue-800"
+                      onClick={() => setSelectedTest(test)}
+                    >
+                      Detail
+                    </Button>
                   </div>
                 </div>
               ))}
-              {filteredTests.length === 0 && (
-                <div className="p-6 text-sm text-slate-600">Tidak ada hasil pemeriksaan yang sesuai dengan filter.</div>
+
+              {sortedTests.length === 0 && (
+                <div className="p-6 text-sm text-slate-600">
+                  Tidak ada riwayat tes yang sesuai dengan filter.
+                </div>
               )}
             </div>
           </CardContent>
@@ -752,82 +982,71 @@ function RiwayatTesPage({ tests }) {
         {selectedTest ? (
           <Card className="border-blue-100 bg-white shadow-sm">
             <CardHeader>
-              <CardTitle className="text-blue-950">Detail Hasil Tes</CardTitle>
-              <CardDescription>Informasi lengkap dan jejak audit pemeriksaan.</CardDescription>
+              <CardTitle className="text-blue-950">Detail Pemeriksaan</CardTitle>
+              <CardDescription>Informasi lengkap hasil tes alkohol.</CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-4">
-              <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-                <div className="grid gap-3 md:grid-cols-2">
-                  <div>
-                    <div className="text-xs text-slate-500">ID Tes</div>
-                    <div className="font-semibold text-blue-950">{selectedTest.id}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">Status</div>
-                    <div className="mt-1"><StatusBadge status={selectedTest.resultStatus} /></div>
+              <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 space-y-3">
+                <div>
+                  <div className="text-xs text-slate-500">ID Tes</div>
+                  <div className="font-semibold text-blue-950">{selectedTest.id}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Nama</div>
+                  <div className="font-semibold text-blue-950">{selectedTest.personName}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Waktu Tes</div>
+                  <div className="font-medium text-slate-900">{selectedTest.testDate} {selectedTest.testTime}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Nilai Alkohol</div>
+                  <div className="font-semibold text-blue-950">{selectedTest.alcoholValue}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Status</div>
+                  <div className="mt-1">
+                    <StatusBadge status={selectedTest.resultStatus} />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-3 border-t pt-3">
-                <div className="text-sm font-semibold text-blue-900">A. Identitas Orang</div>
-                <div className="grid gap-2 text-sm md:grid-cols-2">
-                  <div>
-                    <div className="text-xs text-slate-500">Nama Lengkap</div>
-                    <div className="font-medium text-slate-900">{selectedTest.personName}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">ID Orang</div>
-                    <div className="font-medium text-slate-900">{selectedTest.personId}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">Departemen</div>
-                    <div className="font-medium text-slate-900">{selectedTest.department}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">Identitas</div>
-                    <div className="font-medium text-slate-900">{selectedTest.identityNumber}</div>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <div className="text-xs text-slate-500">Lokasi</div>
+                  <div className="font-medium text-slate-800">{selectedTest.locationName || '-'}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Petugas</div>
+                  <div className="font-medium text-slate-800">{selectedTest.officerName || '-'}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Device</div>
+                  <div className="font-medium text-slate-800">{selectedTest.deviceName || '-'}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Catatan</div>
+                  <div className="rounded-lg border bg-slate-50 p-3 text-slate-700">
+                    {selectedTest.notes || '-'}
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-3 border-t pt-3">
-                <div className="text-sm font-semibold text-blue-900">B. Data Pemeriksaan</div>
-                <div className="grid gap-2 text-sm md:grid-cols-2">
-                  <div>
-                    <div className="text-xs text-slate-500">Tanggal & Jam</div>
-                    <div className="font-medium text-slate-900">{selectedTest.testDate} {selectedTest.testTime}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">Lokasi</div>
-                    <div className="font-medium text-slate-900">{selectedTest.locationName}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">Petugas</div>
-                    <div className="font-medium text-slate-900">{selectedTest.officerName}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">Alat</div>
-                    <div className="font-medium text-slate-900">{selectedTest.deviceName}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500">Nilai Alkohol</div>
-                    <div className="font-semibold text-blue-950">{selectedTest.alcoholValue}</div>
-                  </div>
-                </div>
-                {selectedTest.notes && (
-                  <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-                    <div className="text-xs text-slate-500 mb-1">Catatan</div>
-                    {selectedTest.notes}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-2 border-t pt-4">
-                <Button className="bg-blue-700 text-white hover:bg-blue-800">Download PDF</Button>
-                <Button variant="outline" className="border-blue-200 text-blue-800">Share</Button>
-                <Button variant="outline" className="border-blue-200 text-blue-800" onClick={() => setSelectedTest(null)}>Tutup</Button>
-              </div>
+              <Button
+                variant="outline"
+                className="w-full border-blue-200 text-blue-800"
+                onClick={() => setSelectedLog(null)}
+              >
+                Tutup
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -836,18 +1055,25 @@ function RiwayatTesPage({ tests }) {
               <CardTitle className="text-blue-950">Statistik Pemeriksaan</CardTitle>
               <CardDescription>Ringkasan akumulasi seluruh data tes.</CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-3">
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
                 <div className="text-xs text-slate-500">Total Pemeriksaan</div>
                 <div className="text-2xl font-semibold text-blue-950">{tests.length}</div>
               </div>
+
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
                 <div className="text-xs text-slate-500">Hasil Normal</div>
-                <div className="text-2xl font-semibold text-blue-950">{tests.filter((t) => t.resultStatus === 'normal').length}</div>
+                <div className="text-2xl font-semibold text-blue-950">
+                  {tests.filter((t) => t.resultStatus === 'normal').length}
+                </div>
               </div>
+
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
                 <div className="text-xs text-slate-500">Hasil Fail</div>
-                <div className="text-2xl font-semibold text-blue-950">{tests.filter((t) => t.resultStatus === 'fail').length}</div>
+                <div className="text-2xl font-semibold text-red-600">
+                  {tests.filter((t) => t.resultStatus === 'fail').length}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1262,7 +1488,7 @@ function LaporanPage({ persons, tests }) {
 function AuditLogPage({ auditLogs }) {
   const [query, setQuery] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
-  const [selectedLog, setSelectedTest] = useState(null);
+ const [selectedLog, setSelectedLog] = useState(null);
 
   const filteredLogs = useMemo(() => {
     return auditLogs.filter((log) => {
@@ -1284,12 +1510,14 @@ function AuditLogPage({ auditLogs }) {
           <CardContent className="space-y-4">
             <div className="grid gap-3 md:grid-cols-3">
               <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari deskripsi / aktor / record ID..." className="border-blue-200 md:col-span-2" />
-              <select value={actionFilter} onChange={(e) => setActionFilter(e.target.value)} className="rounded-lg border border-blue-200 p-2 text-sm bg-white">
-                <option value="all">Semua Aksi</option>
-                <option value="CREATE">CREATE</option>
-                <option value="UPDATE">UPDATE</option>
-                <option value="DELETE">DELETE</option>
-              </select>
+             <select value={actionFilter} onChange={(e) => setActionFilter(e.target.value)} className="rounded-lg border border-blue-200 p-2 text-sm bg-white">
+  <option value="all">Semua Aksi</option>
+  <option value="SETUP">SETUP</option>
+  <option value="CREATE">CREATE</option>
+  <option value="UPDATE">UPDATE</option>
+  <option value="DELETE">DELETE</option>
+  <option value="RESET">RESET</option>
+</select>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-blue-100">
@@ -1313,7 +1541,7 @@ function AuditLogPage({ auditLogs }) {
                   <div className="col-span-5 text-slate-600 truncate pr-3">{log.description}</div>
                   <div className="col-span-1 text-xs text-blue-900 font-semibold">{log.actorName}</div>
                   <div className="col-span-1">
-                    <Button size="sm" variant="outline" className="border-blue-200 text-blue-800 p-2" onClick={() => setSelectedTest(log)}>
+                    <Button size="sm" variant="outline" className="border-blue-200 text-blue-800 p-2" onClick={() => setSelectedLog(log)}>
                       <Eye className="h-4 w-4" />
                     </Button>
                   </div>
@@ -1400,23 +1628,41 @@ function AuditLogPage({ auditLogs }) {
 }
 
 function SettingsPage({ settings, onSaveSettings }) {
-  const [appName, setAppName] = useState(settings.appName);
-  const [defaultLocation, setDefaultLocation] = useState(settings.defaultLocation);
-  const [defaultOfficer, setDefaultOfficer] = useState(settings.defaultOfficer);
-  const [defaultDevice, setDefaultDevice] = useState(settings.defaultDevice);
-  const [reportTemplate, setReportTemplate] = useState(settings.reportTemplate);
+  const [appName, setAppName] = useState(settings.appName || 'Alcohol Test App');
+  const [defaultLocation, setDefaultLocation] = useState(settings.defaultLocation || 'Gerbang Utama');
+  const [defaultOfficer, setDefaultOfficer] = useState(settings.defaultOfficer || 'Admin Internal');
+  const [defaultDevice, setDefaultDevice] = useState(settings.defaultDevice || 'Breathalyzer A');
+  const [reportTemplate, setReportTemplate] = useState(settings.reportTemplate || 'standard');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    onSaveSettings({
-      appName,
-      defaultLocation,
-      defaultOfficer,
-      defaultDevice,
-      reportTemplate,
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  useEffect(() => {
+    setAppName(settings.appName || 'Alcohol Test App');
+    setDefaultLocation(settings.defaultLocation || 'Gerbang Utama');
+    setDefaultOfficer(settings.defaultOfficer || 'Admin Internal');
+    setDefaultDevice(settings.defaultDevice || 'Breathalyzer A');
+    setReportTemplate(settings.reportTemplate || 'standard');
+  }, [settings]);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+
+      await onSaveSettings({
+        appName,
+        defaultLocation,
+        defaultOfficer,
+        defaultDevice,
+        reportTemplate,
+      });
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (error) {
+      alert(error.message || 'Gagal menyimpan pengaturan.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -1427,41 +1673,48 @@ function SettingsPage({ settings, onSaveSettings }) {
             <CardTitle className="text-blue-950">Konfigurasi Sistem</CardTitle>
             <CardDescription>Kelola parameter bawaan aplikasi dan preferensi cetak internal.</CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Nama Aplikasi</Label>
                 <Input value={appName} onChange={(e) => setAppName(e.target.value)} className="border-blue-200" />
               </div>
+
               <div className="space-y-2">
                 <Label>Bawaan Lokasi Stasiun Tes</Label>
                 <Input value={defaultLocation} onChange={(e) => setDefaultLocation(e.target.value)} className="border-blue-200" />
               </div>
+
               <div className="space-y-2">
                 <Label>Bawaan Petugas Pemeriksa</Label>
                 <Input value={defaultOfficer} onChange={(e) => setDefaultOfficer(e.target.value)} className="border-blue-200" />
               </div>
+
               <div className="space-y-2">
                 <Label>Bawaan Nama Alat (Breathalyzer)</Label>
                 <Input value={defaultDevice} onChange={(e) => setDefaultDevice(e.target.value)} className="border-blue-200" />
               </div>
+
               <div className="space-y-2 md:col-span-2">
                 <Label>Template Laporan PDF</Label>
                 <select value={reportTemplate} onChange={(e) => setReportTemplate(e.target.value)} className="w-full rounded-lg border border-blue-200 p-2 text-sm bg-white">
-                  <option value="standard">Standard Internal (Kop Biru)</option>
+                  <option value="standard">Standard Internal Kop Biru</option>
                   <option value="minimalist">Minimalis Hitam Putih</option>
-                  <option value="compact">Kompak (Tanpa Kop)</option>
+                  <option value="compact">Kompak Tanpa Kop</option>
                 </select>
               </div>
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button className="bg-blue-700 text-white hover:bg-blue-800" onClick={handleSave}>Simpan Perubahan</Button>
+              <Button className="bg-blue-700 text-white hover:bg-blue-800" onClick={handleSave} disabled={saving}>
+                {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+              </Button>
             </div>
 
             {saved && (
               <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-700">
-                Pengaturan sistem berhasil disimpan secara lokal dan akan langsung diterapkan pada transaksi berikutnya.
+                Pengaturan sistem berhasil disimpan ke Google Spreadsheet dan akan langsung diterapkan pada transaksi berikutnya.
               </div>
             )}
           </CardContent>
@@ -1474,15 +1727,17 @@ function SettingsPage({ settings, onSaveSettings }) {
             <CardTitle className="text-blue-950">Petunjuk Bantuan</CardTitle>
             <CardDescription>Bantuan operasional pengaturan default stasiun tes.</CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-3 text-sm text-slate-600 leading-relaxed">
             <div className="flex gap-3 items-start">
               <HelpCircle className="h-5 w-5 text-blue-700 shrink-0 mt-0.5" />
               <p>
-                Mengubah **Bawaan Lokasi, Petugas, dan Nama Alat** akan secara otomatis mengisi kolom formulir ketika admin membuka menu **Input Tes Baru**, sehingga mengurangi repetisi pengetikan manual di lapangan.
+                Mengubah bawaan lokasi, petugas, dan nama alat akan otomatis mengisi kolom formulir ketika admin membuka menu Input Tes Baru.
               </p>
             </div>
+
             <p className="pt-2">
-              Pengaturan ini tersimpan di memory sesi MVP dan akan langsung terhubung ke database terpusat pada fase integrasi backend REST API.
+              Pengaturan ini tersimpan di Google Spreadsheet melalui backend Google Apps Script.
             </p>
           </CardContent>
         </Card>
@@ -1493,57 +1748,134 @@ function SettingsPage({ settings, onSaveSettings }) {
 
 export default function AlcoholTestAppSkeleton() {
   const [active, setActive] = useState('dashboard');
-  const [persons, setPersons] = useState(initialPeople);
-  const [tests, setTests] = useState(initialTests);
-  const [auditLogs, setAuditLogs] = useState(initialAuditLogs);
-  const [appSettings, setAppSettings] = useState({
-    appName: 'Alcohol Test App',
-    defaultLocation: 'Gerbang Utama',
-    defaultOfficer: 'Admin Internal',
-    defaultDevice: 'Breathalyzer A',
-    reportTemplate: 'standard',
-  });
+  const [persons, setPersons] = useState([]);
+  const [tests, setTests] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [appSettings, setAppSettings] = useState(defaultAppSettings);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   const activeItem = useMemo(() => menu.find((item) => item.key === active), [active]);
 
-  const saveTest = (newTest) => {
-    const nextId = `TST-${String(tests.length + 1).padStart(3, '0')}`;
-    const nextTest = { ...newTest, id: nextId };
-    setTests([nextTest, ...tests]);
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+      setError('');
 
-    // Record automatically to audit log
-    const nextAuditId = `AUD-${String(auditLogs.length + 1).padStart(3, '0')}`;
-    const newLog = {
-      id: nextAuditId,
-      action: 'CREATE',
-      module: 'TEST',
-      recordId: nextId,
-      description: `Menambahkan hasil tes baru untuk ${newTest.personName} (${newTest.personId}) dengan nilai ${newTest.alcoholValue.toFixed(2)} (${newTest.resultStatus.toUpperCase()})`,
-      actorName: 'admin_internal',
-      createdAt: '2026-06-13 08:35:00',
-      beforeData: null,
-      afterData: { personId: newTest.personId, alcoholValue: newTest.alcoholValue, resultStatus: newTest.resultStatus },
-    };
-    setAuditLogs([newLog, ...auditLogs]);
+      const data = await getInitialData();
+
+      setPersons(data.persons || []);
+      setTests(data.tests || []);
+      setAuditLogs(data.auditLogs || []);
+      setAppSettings({
+        ...defaultAppSettings,
+        ...(data.settings || {}),
+      });
+    } catch (err) {
+      setError(err.message || 'Gagal memuat data dari Google Spreadsheet.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const saveSettings = (newSettings) => {
-    setAppSettings(newSettings);
+  useEffect(() => {
+    loadInitialData();
+  }, []);
 
-    // Record automatically to audit log
-    const nextAuditId = `AUD-${String(auditLogs.length + 1).padStart(3, '0')}`;
-    const newLog = {
-      id: nextAuditId,
-      action: 'UPDATE',
-      module: 'SETTINGS',
-      recordId: 'CFG-001',
-      description: `Mengubah konfigurasi default sistem oleh admin`,
+  const handleCreatePerson = async (payload) => {
+    const savedPerson = await createPerson({
+      ...payload,
       actorName: 'admin_internal',
-      createdAt: '2026-06-13 08:40:00',
-      beforeData: appSettings,
-      afterData: newSettings,
-    };
-    setAuditLogs([newLog, ...auditLogs]);
+    });
+
+    await loadInitialData();
+
+    return savedPerson;
   };
+
+  const handleUpdatePerson = async (payload) => {
+    const savedPerson = await updatePerson({
+      ...payload,
+      actorName: 'admin_internal',
+    });
+
+    await loadInitialData();
+
+    return savedPerson;
+  };
+
+  const handleDeletePerson = async (id) => {
+    const updatedPerson = await deletePerson({
+      id,
+      actorName: 'admin_internal',
+    });
+
+    await loadInitialData();
+
+    return updatedPerson;
+  };
+
+  const saveTest = async (newTest) => {
+    const savedTest = await createTest({
+      ...newTest,
+      actorName: 'admin_internal',
+    });
+
+    await loadInitialData();
+
+    return savedTest;
+  };
+
+  const saveSettings = async (newSettings) => {
+    const savedSettings = await updateSettings({
+      ...appSettings,
+      ...newSettings,
+      actorName: 'admin_internal',
+    });
+
+    await loadInitialData();
+
+    return savedSettings;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
+        <Card className="border-blue-100 bg-white shadow-sm max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-blue-950">Memuat Data</CardTitle>
+            <CardDescription>Mengambil data dari Google Spreadsheet...</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-slate-600">
+              Mohon tunggu sebentar.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-red-50 text-slate-900 flex items-center justify-center p-6">
+        <Card className="border-red-100 bg-white shadow-sm max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-red-700">Gagal Memuat Data</CardTitle>
+            <CardDescription>Terjadi masalah saat menghubungkan frontend ke Google Apps Script.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
+            <Button className="bg-red-600 text-white hover:bg-red-700" onClick={loadInitialData}>
+              Coba Lagi
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -1558,6 +1890,7 @@ export default function AlcoholTestAppSkeleton() {
             {menu.map((item) => {
               const Icon = item.icon;
               const selected = active === item.key;
+
               return (
                 <button
                   key={item.key}
@@ -1583,21 +1916,73 @@ export default function AlcoholTestAppSkeleton() {
           <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
             <div>
               <h1 className="text-2xl font-semibold text-blue-950">{activeItem?.label}</h1>
-              <p className="text-sm text-slate-600">Skeleton frontend untuk MVP pemeriksaan alkohol internal dengan tampilan dominan biru.</p>
+              <p className="text-sm text-slate-600">
+                Frontend MVP pemeriksaan alkohol internal terhubung ke Google Spreadsheet via Google Apps Script.
+              </p>
             </div>
-            <div className="rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-900">
-              Admin Internal
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="border-blue-200 text-blue-800"
+                onClick={loadInitialData}
+              >
+                Refresh Data
+              </Button>
+
+              <div className="rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-900">
+                Admin Internal
+              </div>
             </div>
           </div>
 
-          {active === 'dashboard' && <DashboardPage onNavigate={setActive} tests={tests} />}
-          {active === 'persons' && <DataOrangPage persons={persons} setPersons={setPersons} />}
-          {active === 'new-test' && <InputTesPage persons={persons.filter((person) => person.isActive)} onSaveTest={saveTest} appSettings={appSettings} />}
-          {active === 'tests' && <RiwayatTesPage tests={tests} />}
-          {active === 'trace' && <TracePage persons={persons} tests={tests} />}
-          {active === 'reports' && <LaporanPage persons={persons} tests={tests} />}
-          {active === 'audit' && <AuditLogPage auditLogs={auditLogs} />}
-          {active === 'settings' && <SettingsPage settings={appSettings} onSaveSettings={saveSettings} />}
+          {active === 'dashboard' && (
+            <DashboardPage
+              onNavigate={setActive}
+              tests={tests}
+              persons={persons}
+            />
+          )}
+
+          {active === 'persons' && (
+            <DataOrangPage
+              persons={persons}
+              onCreatePerson={handleCreatePerson}
+              onUpdatePerson={handleUpdatePerson}
+              onDeletePerson={handleDeletePerson}
+            />
+          )}
+
+          {active === 'new-test' && (
+            <InputTesPage
+              persons={persons.filter((person) => person.isActive)}
+              onSaveTest={saveTest}
+              appSettings={appSettings}
+            />
+          )}
+
+          {active === 'tests' && (
+            <RiwayatTesPage tests={tests} />
+          )}
+
+          {active === 'trace' && (
+            <TracePage persons={persons} tests={tests} />
+          )}
+
+          {active === 'reports' && (
+            <LaporanPage persons={persons} tests={tests} />
+          )}
+
+          {active === 'audit' && (
+            <AuditLogPage auditLogs={auditLogs} />
+          )}
+
+          {active === 'settings' && (
+            <SettingsPage
+              settings={appSettings}
+              onSaveSettings={saveSettings}
+            />
+          )}
         </main>
       </div>
     </div>
