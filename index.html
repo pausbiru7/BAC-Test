@@ -446,10 +446,34 @@
         .replace(/'/g, '&#039;');
     }
 
-    function formatDateTime(dateStr, timeStr) {
-      if (!dateStr && !timeStr) return '-';
-      return [dateStr, timeStr].filter(Boolean).join(' ');
+   function formatDateTime(dateStr, timeStr) {
+  if (!dateStr && !timeStr) return '-';
+
+  // Ambil bagian tanggal dari "2026-06-13 00:00:00"
+  let d = dateStr ? String(dateStr).split(' ')[0] : '';
+  // d: "2026-06-13"
+  let formattedDate = d;
+  if (d && d.includes('-')) {
+    const [yyyy, mm, dd] = d.split('-');
+    if (yyyy && mm && dd) {
+      formattedDate = `${dd}-${mm}-${yyyy}`; // 13-06-2026
     }
+  }
+
+  // Ambil bagian waktu dari "1899-12-30 08:10:00"
+  let t = timeStr ? String(timeStr).split(' ')[1] || String(timeStr) : '';
+  // t: "08:10:00"
+  let formattedTime = t;
+  if (t && t.includes(':')) {
+    const [hh, min] = t.split(':');
+    formattedTime = `${hh}:${min}`; // 08:10
+  }
+
+  if (!formattedDate && !formattedTime) return '-';
+  if (!formattedDate) return formattedTime;
+  if (!formattedTime) return formattedDate;
+  return `${formattedDate} ${formattedTime}`;
+}
 
     loadBtn.addEventListener('click', loadData);
 
