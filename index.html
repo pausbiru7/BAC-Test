@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HSE Alcohol Test System</title>
+<title>🧪 HSE Alcohol Test System</title>
 
 <style>
 body {
@@ -11,6 +11,15 @@ body {
   color:#fff;
   margin:0;
   padding:20px;
+}
+
+.header {
+  margin-bottom:15px;
+}
+
+.subtitle {
+  font-size:12px;
+  opacity:0.7;
 }
 
 .grid {
@@ -54,164 +63,214 @@ td,th {
 .pass { background:green; }
 .fail { background:red; }
 
-.small {
-  font-size:11px;
-  opacity:0.8;
+/* FOOTER */
+.footer {
+  margin-top:20px;
+  text-align:center;
+  font-size:12px;
+  opacity:0.6;
 }
 </style>
 </head>
 
 <body>
 
-<h2>HSE Alcohol Test System</h2>
+<!-- HEADER -->
+<div class="header">
+  <h2>🧪 HSE Alcohol Test System</h2>
+  <div class="subtitle">Real-time Workforce Compliance & Safety Monitoring</div>
+</div>
 
 <div class="grid">
 
 <!-- WORKER -->
 <div class="card">
-<h3>Worker Management</h3>
+<h3>👷 Worker Management</h3>
 
-<input id="name" placeholder="Nama">
-<input id="phone" placeholder="No HP (WA)">
-<input id="dept" placeholder="Department">
+<input id="name" placeholder="👤 Nama">
+<input id="phone" placeholder="📱 No HP (WA)">
+<input id="dept" placeholder="🏭 Department">
 
-<button onclick="saveWorker()">Save Worker</button>
+<button onclick="saveWorker()">💾 Save Worker</button>
 
-<h4>Worker List</h4>
+<h4>📋 Worker List</h4>
 <div id="workerList"></div>
 </div>
 
 <!-- TEST -->
 <div class="card">
-<h3>Alcohol Test Input</h3>
+<h3>🧪 Alcohol Test Input</h3>
 
 <select id="workerSelect"></select>
-<input id="bac" placeholder="BAC Value">
 
-<button onclick="submitTest()">Submit Test</button>
+<input id="bac" placeholder="🍺 BAC Value">
+
+<button onclick="submitTest()">🚀 Submit Test</button>
 </div>
 
 </div>
 
 <!-- HISTORY -->
 <div class="card" style="margin-top:15px;">
-<h3>History</h3>
-<button onclick="loadData()">Refresh</button>
+<h3>📊 Test History</h3>
+<button onclick="loadData()">🔄 Refresh</button>
 <div id="history"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Powered by Pausbiru7
 </div>
 
 <script>
 
-const API = "YOUR_GAS_URL";
+const API = "https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec";
+const API_KEY = "HSE-ALCOHOL-2026";
 
 let workers = [];
-let editIndex = null;
 
-/* ================= WORKERS ================= */
-
-function saveWorker() {
-  const payload = {
-    type:"worker",
-    name:document.getElementById("name").value,
-    phone:document.getElementById("phone").value,
-    dept:document.getElementById("dept").value,
-    index:editIndex
-  };
-
-  fetch(API,{
-    method:"POST",
-    body:JSON.stringify(payload)
-  }).then(()=> {
-    editIndex=null;
-    loadData();
-  });
-}
-
-/* ================= TEST ================= */
-
-function submitTest() {
-  const payload = {
-    type:"test",
-    workerIndex:document.getElementById("workerSelect").value,
-    bac:document.getElementById("bac").value
-  };
-
-  fetch(API,{
-    method:"POST",
-    body:JSON.stringify(payload)
-  }).then(loadData);
-}
-
-/* ================= LOAD ================= */
-
+/* =========================
+   LOAD DATA
+========================= */
 function loadData() {
-  fetch(API)
-  .then(r=>r.json())
-  .then(data=>{
+
+  fetch(`${API}?key=${API_KEY}`)
+  .then(r => r.json())
+  .then(data => {
 
     workers = data.workers || [];
 
-    // worker dropdown
-    let opt = "";
-    workers.forEach((w,i)=>{
-      opt += `<option value="${i}">${w.name}</option>`;
-    });
-    document.getElementById("workerSelect").innerHTML = opt;
-
-    // worker list
-    let whtml = "<table><tr><th>Name</th><th>HP</th></tr>";
-    workers.forEach(w=>{
-      whtml += `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`;
-    });
-    whtml += "</table>";
-    document.getElementById("workerList").innerHTML = whtml;
-
-    // history
-    let h = "<table><tr><th>Name</th><th>BAC</th><th>Status</th><th>Action</th></tr>";
-
-    (data.tests || []).forEach((t,i)=>{
-
-      const cls = t.bac > 0 ? "fail" : "pass";
-
-      h += `
-      <tr class="${cls}">
-        <td>${t.name}</td>
-        <td>${t.bac}</td>
-        <td>${t.bac > 0 ? "FAIL":"PASS"}</td>
-        <td>
-          <button onclick="printPDF()">PDF</button>
-          <button onclick="shareWA(${i})">WA</button>
-        </td>
-      </tr>`;
-    });
-
-    h += "</table>";
-    document.getElementById("history").innerHTML = h;
+    renderWorkers();
+    renderDropdown();
+    renderHistory(data.tests || []);
   });
 }
 
-/* ================= PDF ================= */
+/* =========================
+   SAVE WORKER
+========================= */
+function saveWorker() {
 
+  const payload = {
+    key: API_KEY,
+    action: "worker_save",
+    name: document.getElementById("name").value,
+    phone: document.getElementById("phone").value,
+    department: document.getElementById("dept").value
+  };
+
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  }).then(() => loadData());
+}
+
+/* =========================
+   SUBMIT TEST
+========================= */
+function submitTest() {
+
+  const payload = {
+    key: API_KEY,
+    action: "test_insert",
+    worker_id: workers[document.getElementById("workerSelect").value].worker_id,
+    bac: document.getElementById("bac").value
+  };
+
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  }).then(() => loadData());
+}
+
+/* =========================
+   RENDER WORKERS
+========================= */
+function renderWorkers() {
+
+  let html = "<table><tr><th>👤 Name</th><th>📱 HP</th></tr>";
+
+  workers.forEach(w => {
+    html += `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`;
+  });
+
+  html += "</table>";
+
+  document.getElementById("workerList").innerHTML = html;
+}
+
+/* =========================
+   DROPDOWN
+========================= */
+function renderDropdown() {
+
+  let html = "";
+
+  workers.forEach((w, i) => {
+    html += `<option value="${i}">👷 ${w.name}</option>`;
+  });
+
+  document.getElementById("workerSelect").innerHTML = html;
+}
+
+/* =========================
+   HISTORY
+========================= */
+function renderHistory(data) {
+
+  let html = "<table><tr><th>👤 Name</th><th>🍺 BAC</th><th>📌 Status</th><th>⚙ Action</th></tr>";
+
+  data.forEach((t, i) => {
+
+    const cls = t.status === "FAIL" ? "fail" : "pass";
+
+    html += `
+      <tr class="${cls}">
+        <td>${t.name}</td>
+        <td>${t.bac}</td>
+        <td>${t.status}</td>
+        <td>
+          <button onclick="printPDF()">📄 PDF</button>
+          <button onclick="shareWA(${i})">💬 WA</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += "</table>";
+
+  document.getElementById("history").innerHTML = html;
+}
+
+/* =========================
+   PRINT PDF
+========================= */
 function printPDF() {
   window.print();
 }
 
-/* ================= WA SHARE ================= */
-
+/* =========================
+   WHATSAPP SHARE
+========================= */
 function shareWA(i) {
-  fetch(API)
-  .then(r=>r.json())
-  .then(data=>{
+
+  fetch(`${API}?key=${API_KEY}`)
+  .then(r => r.json())
+  .then(data => {
+
     const t = data.tests[i];
 
     const msg =
-`HSE Alcohol Test Result
-Name: ${t.name}
-BAC: ${t.bac}
-Status: ${t.bac > 0 ? "FAIL":"PASS"}`;
+`🧪 HSE Alcohol Test Result
+👤 Name: ${t.name}
+🍺 BAC: ${t.bac}
+📌 Status: ${t.status}
+
+Powered by Pausbiru7`;
 
     const url = `https://wa.me/${t.phone}?text=${encodeURIComponent(msg)}`;
-    window.open(url,"_blank");
+
+    window.open(url, "_blank");
   });
 }
 
