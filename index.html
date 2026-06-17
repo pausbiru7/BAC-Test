@@ -1,22 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  
-<!-- PWA META -->
+
+<meta charset="UTF-8">
+
+<title>🧪 HSE Alcohol Test System</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b1220">
-
-<!-- PWA MANIFEST -->
 <link rel="manifest" href="manifest.json">
 
-<!-- APPLE SUPPORT -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="HSE Alcohol Test Workforce Monitoring System">
-<meta name="mobile-web-app-capable" content="yes">
-<meta charset="UTF-8">
-  
-<title>🧪 HSE Alcohol Test System</title>
 
 <style>
 body {
@@ -27,13 +22,11 @@ body {
   padding:20px;
 }
 
-.header {
-  margin-bottom:15px;
-}
-
-.subtitle {
-  font-size:12px;
-  opacity:0.7;
+.card {
+  background:#1e293b;
+  padding:15px;
+  border-radius:10px;
+  margin-top:15px;
 }
 
 .grid {
@@ -42,19 +35,12 @@ body {
   gap:15px;
 }
 
-.card {
-  background:#1e293b;
-  padding:15px;
-  border-radius:10px;
-  margin-top:15px;
-}
-
 input, select, button {
   width:100%;
   padding:10px;
   margin:5px 0;
-  border-radius:5px;
   border:none;
+  border-radius:5px;
 }
 
 button {
@@ -66,7 +52,6 @@ button {
 table {
   width:100%;
   border-collapse:collapse;
-  margin-top:10px;
 }
 
 td,th {
@@ -79,48 +64,57 @@ td,th {
 .fail { background:red; }
 
 .footer {
-  margin-top:20px;
   text-align:center;
   font-size:12px;
   opacity:0.6;
+  margin-top:20px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- ================= LOGIN ================= -->
+<div id="loginBox" class="card">
+  <h2>🔐 HSE Login System</h2>
+
+  <input id="user" placeholder="Username">
+  <input id="pass" type="password" placeholder="Password">
+
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" style="display:none;">
+
 <!-- HEADER -->
-<div class="header">
+<div class="card">
   <h2>🧪 HSE Alcohol Test System</h2>
-  <div class="subtitle">Real-time Workforce Compliance & Safety Monitoring</div>
+  <small>Real-time Workforce Compliance & Safety Monitoring</small>
 </div>
 
 <!-- WORKER + TEST -->
 <div class="grid">
 
-  <!-- WORKER -->
   <div class="card">
     <h3>👷 Worker Management</h3>
 
-    <input id="name" placeholder="👤 Nama">
-    <input id="phone" placeholder="📱 No HP (WA)">
-    <input id="dept" placeholder="🏭 Department">
+    <input id="name" placeholder="Nama">
+    <input id="phone" placeholder="No HP">
+    <input id="dept" placeholder="Department">
 
-    <button onclick="saveWorker()">💾 Save Worker</button>
+    <button onclick="saveWorker()">Save Worker</button>
 
-    <h4>📋 Worker List</h4>
     <div id="workerList"></div>
   </div>
 
-  <!-- TEST -->
   <div class="card">
     <h3>🧪 Alcohol Test Input</h3>
 
     <select id="workerSelect"></select>
+    <input id="bac" placeholder="BAC Value">
 
-    <input id="bac" placeholder="🍺 BAC Value">
-
-    <button onclick="submitTest()">🚀 Submit Test</button>
+    <button onclick="submitTest()">Submit</button>
   </div>
 
 </div>
@@ -128,17 +122,21 @@ td,th {
 <!-- HISTORY -->
 <div class="card">
   <h3>📊 Test History</h3>
-  <button onclick="loadData()">🔄 Refresh</button>
+  <button onclick="loadData()">Refresh</button>
   <div id="history"></div>
 </div>
 
-<!-- KPI DASHBOARD -->
+<!-- KPI -->
 <div class="card">
   <h3>📈 HSE KPI Dashboard</h3>
 
   <div id="kpiBox"></div>
 
   <canvas id="chart" width="400" height="200"></canvas>
+
+  <br><br>
+
+  <button onclick="generatePDF()" id="pdfBtn">📄 Generate HSE Report</button>
 </div>
 
 <!-- FOOTER -->
@@ -146,19 +144,48 @@ td,th {
   Powered by Pausbiru7
 </div>
 
+</div>
+
 <script>
 
-/* =========================
-   CONFIG
-========================= */
-const API = "https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec";
+const API = "YOUR_GAS_URL";
 const API_KEY = "HSE-ALCOHOL-2026";
 
 let workers = [];
+let currentRole = null;
 
-/* =========================
-   LOAD DATA
-========================= */
+/* ================= LOGIN ================= */
+function login() {
+
+  const u = document.getElementById("user").value;
+  const p = document.getElementById("pass").value;
+
+  if (u === "admin" && p === "admin123") currentRole = "ADMIN";
+  else if (u === "operator" && p === "op123") currentRole = "OPERATOR";
+  else if (u === "viewer" && p === "view123") currentRole = "VIEWER";
+  else return alert("Login gagal");
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  applyRoleUI();
+  loadData();
+}
+
+/* ================= ROLE CONTROL ================= */
+function applyRoleUI() {
+
+  if (currentRole === "OPERATOR") {
+    document.querySelector(".card:nth-last-child(1)").style.display = "none";
+  }
+
+  if (currentRole === "VIEWER") {
+    document.querySelectorAll(".grid .card")[0].style.display = "none";
+    document.querySelectorAll(".grid .card")[1].style.display = "none";
+  }
+}
+
+/* ================= LOAD DATA ================= */
 function loadData() {
 
   fetch(`${API}?key=${API_KEY}`)
@@ -174,222 +201,139 @@ function loadData() {
   });
 }
 
-/* =========================
-   SAVE WORKER
-========================= */
+/* ================= WORKER ================= */
 function saveWorker() {
 
-  const payload = {
-    key: API_KEY,
-    action: "worker_save",
-    name: document.getElementById("name").value,
-    phone: document.getElementById("phone").value,
-    department: document.getElementById("dept").value
-  };
-
   fetch(API, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  }).then(() => loadData());
+    method:"POST",
+    body: JSON.stringify({
+      key: API_KEY,
+      action: "worker_save",
+      name: name.value,
+      phone: phone.value,
+      department: dept.value
+    })
+  }).then(()=>loadData());
 }
 
-/* =========================
-   SUBMIT TEST
-========================= */
+/* ================= TEST ================= */
 function submitTest() {
 
-  const payload = {
-    key: API_KEY,
-    action: "test_insert",
-    worker_id: workers[document.getElementById("workerSelect").value].worker_id,
-    bac: document.getElementById("bac").value
-  };
-
   fetch(API, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  }).then(() => loadData());
+    method:"POST",
+    body: JSON.stringify({
+      key: API_KEY,
+      action: "test_insert",
+      worker_id: workers[workerSelect.value].worker_id,
+      bac: bac.value
+    })
+  }).then(()=>loadData());
 }
 
-/* =========================
-   RENDER WORKERS
-========================= */
+/* ================= RENDER ================= */
 function renderWorkers() {
 
-  let html = "<table><tr><th>👤 Name</th><th>📱 HP</th></tr>";
+  let html = "<table><tr><th>Name</th><th>Phone</th></tr>";
 
-  workers.forEach(w => {
+  workers.forEach(w=>{
     html += `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`;
   });
 
   html += "</table>";
-
-  document.getElementById("workerList").innerHTML = html;
+  workerList.innerHTML = html;
 }
 
-/* =========================
-   DROPDOWN
-========================= */
 function renderDropdown() {
 
-  let html = "";
-
-  workers.forEach((w, i) => {
-    html += `<option value="${i}">👷 ${w.name}</option>`;
-  });
-
-  document.getElementById("workerSelect").innerHTML = html;
+  workerSelect.innerHTML = workers.map((w,i)=>
+    `<option value="${i}">👷 ${w.name}</option>`
+  ).join("");
 }
 
-/* =========================
-   HISTORY
-========================= */
 function renderHistory(data) {
 
-  let html = "<table><tr><th>👤 Name</th><th>🍺 BAC</th><th>📌 Status</th><th>⚙ Action</th></tr>";
-
-  data.forEach((t, i) => {
-
-    const cls = t.status === "FAIL" ? "fail" : "pass";
-
-    html += `
-      <tr class="${cls}">
+  history.innerHTML = `
+  <table>
+    <tr><th>Name</th><th>BAC</th><th>Status</th></tr>
+    ${data.map(t=>`
+      <tr class="${t.status==='FAIL'?'fail':'pass'}">
         <td>${t.name}</td>
         <td>${t.bac}</td>
         <td>${t.status}</td>
-        <td>
-          <button onclick="printPDF()">📄 PDF</button>
-          <button onclick="shareWA(${i})">💬 WA</button>
-        </td>
-      </tr>
-    `;
-  });
-
-  html += "</table>";
-
-  document.getElementById("history").innerHTML = html;
+      </tr>`).join("")}
+  </table>`;
 }
 
-/* =========================
-   KPI ENGINE
-========================= */
+/* ================= KPI ENGINE ================= */
 function renderKPI(data) {
 
-  let total = data.length;
-  let pass = 0;
-  let fail = 0;
+  let pass=0, fail=0;
+  let daily={};
 
-  let dailyMap = {};
+  data.forEach(t=>{
 
-  data.forEach(t => {
-
-    if (t.status === "FAIL") fail++;
+    if(t.status==="FAIL") fail++;
     else pass++;
 
-    const date = t.timestamp
+    let date = t.timestamp
       ? new Date(t.timestamp).toISOString().slice(0,10)
       : null;
 
-    if (date) {
-      dailyMap[date] = (dailyMap[date] || 0) + 1;
-    }
+    if(date) daily[date]=(daily[date]||0)+1;
   });
 
-  let compliance = total > 0 ? ((pass / total) * 100).toFixed(2) : 0;
+  let total = data.length;
+  let compliance = total?((pass/total)*100).toFixed(2):0;
 
-  /* KPI TABLE */
-  let html = `
-    <table>
-      <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
-      <tr>
-        <td>${total}</td>
-        <td>${pass}</td>
-        <td>${fail}</td>
-        <td>${compliance}%</td>
-      </tr>
-    </table>
-  `;
+  kpiBox.innerHTML = `
+  <table>
+    <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
+    <tr>
+      <td>${total}</td>
+      <td>${pass}</td>
+      <td>${fail}</td>
+      <td>${compliance}%</td>
+    </tr>
+  </table>`;
 
-  document.getElementById("kpiBox").innerHTML = html;
-
-  drawChart(dailyMap);
+  drawChart(daily);
 }
 
-/* =========================
-   CHART ENGINE
-========================= */
-function drawChart(dailyMap) {
+/* ================= CHART ================= */
+function drawChart(daily) {
 
-  const canvas = document.getElementById("chart");
-  const ctx = canvas.getContext("2d");
+  const c = chart.getContext("2d");
+  c.clearRect(0,0,400,200);
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  let keys = Object.keys(daily).slice(-7);
+  let vals = keys.map(k=>daily[k]);
+  let max = vals.length?Math.max(...vals):1;
 
-  ctx.font = "10px Arial";
-  ctx.fillStyle = "#ffffff";
+  keys.forEach((k,i)=>{
 
-  let keys = Object.keys(dailyMap).slice(-7);
-  let values = keys.map(k => dailyMap[k]);
+    let h = (daily[k]/max)*150;
 
-  let max = values.length ? Math.max(...values) : 1;
+    c.fillStyle="#2563eb";
+    c.fillRect(i*50,150-h,30,h);
 
-  let barWidth = 40;
-  let gap = 20;
-
-  keys.forEach((k, i) => {
-
-    let value = dailyMap[k];
-    let height = (value / max) * 150;
-
-    ctx.fillStyle = "#2563eb";
-    ctx.fillRect(i*(barWidth+gap), 180-height, barWidth, height);
-
-    ctx.fillStyle = "#fff";
-    ctx.fillText(value, i*(barWidth+gap), 170-height);
-    ctx.fillText(k.slice(5), i*(barWidth+gap), 195);
+    c.fillStyle="#fff";
+    c.fillText(daily[k],i*50,140-h);
   });
 }
 
-/* =========================
-   PDF
-========================= */
-function printPDF() {
+/* ================= PDF ================= */
+function generatePDF() {
+
+  if(currentRole!=="ADMIN") return alert("Denied");
+
   window.print();
 }
 
-/* =========================
-   WHATSAPP SHARE
-========================= */
-function shareWA(i) {
-
-  fetch(`${API}?key=${API_KEY}`)
-  .then(r => r.json())
-  .then(data => {
-
-    const t = data.tests[i];
-
-    const msg =
-`🧪 HSE Alcohol Test Result
-👤 Name: ${t.name}
-🍺 BAC: ${t.bac}
-📌 Status: ${t.status}
-
-Powered by Pausbiru7`;
-
-    const url = `https://wa.me/${t.phone}?text=${encodeURIComponent(msg)}`;
-
-    window.open(url, "_blank");
-  });
+/* ================= PWA ================= */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js');
 }
 
-loadData();
-
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
-    .then(() => console.log("SW registered"))
-    .catch(err => console.log("SW error:", err));
-}
 </script>
 
 </body>
