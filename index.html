@@ -32,6 +32,7 @@ body {
   background:#1e293b;
   padding:15px;
   border-radius:10px;
+  margin-top:15px;
 }
 
 input, select, button {
@@ -63,7 +64,6 @@ td,th {
 .pass { background:green; }
 .fail { background:red; }
 
-/* FOOTER */
 .footer {
   margin-top:20px;
   text-align:center;
@@ -81,40 +81,50 @@ td,th {
   <div class="subtitle">Real-time Workforce Compliance & Safety Monitoring</div>
 </div>
 
+<!-- WORKER + TEST -->
 <div class="grid">
 
-<!-- WORKER -->
-<div class="card">
-<h3>👷 Worker Management</h3>
+  <!-- WORKER -->
+  <div class="card">
+    <h3>👷 Worker Management</h3>
 
-<input id="name" placeholder="👤 Nama">
-<input id="phone" placeholder="📱 No HP (WA)">
-<input id="dept" placeholder="🏭 Department">
+    <input id="name" placeholder="👤 Nama">
+    <input id="phone" placeholder="📱 No HP (WA)">
+    <input id="dept" placeholder="🏭 Department">
 
-<button onclick="saveWorker()">💾 Save Worker</button>
+    <button onclick="saveWorker()">💾 Save Worker</button>
 
-<h4>📋 Worker List</h4>
-<div id="workerList"></div>
-</div>
+    <h4>📋 Worker List</h4>
+    <div id="workerList"></div>
+  </div>
 
-<!-- TEST -->
-<div class="card">
-<h3>🧪 Alcohol Test Input</h3>
+  <!-- TEST -->
+  <div class="card">
+    <h3>🧪 Alcohol Test Input</h3>
 
-<select id="workerSelect"></select>
+    <select id="workerSelect"></select>
 
-<input id="bac" placeholder="🍺 BAC Value">
+    <input id="bac" placeholder="🍺 BAC Value">
 
-<button onclick="submitTest()">🚀 Submit Test</button>
-</div>
+    <button onclick="submitTest()">🚀 Submit Test</button>
+  </div>
 
 </div>
 
 <!-- HISTORY -->
-<div class="card" style="margin-top:15px;">
-<h3>📊 Test History</h3>
-<button onclick="loadData()">🔄 Refresh</button>
-<div id="history"></div>
+<div class="card">
+  <h3>📊 Test History</h3>
+  <button onclick="loadData()">🔄 Refresh</button>
+  <div id="history"></div>
+</div>
+
+<!-- KPI DASHBOARD -->
+<div class="card">
+  <h3>📈 HSE KPI Dashboard</h3>
+
+  <div id="kpiBox"></div>
+
+  <canvas id="chart" width="400" height="200"></canvas>
 </div>
 
 <!-- FOOTER -->
@@ -124,6 +134,9 @@ td,th {
 
 <script>
 
+/* =========================
+   CONFIG
+========================= */
 const API = "https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec";
 const API_KEY = "HSE-ALCOHOL-2026";
 
@@ -143,6 +156,7 @@ function loadData() {
     renderWorkers();
     renderDropdown();
     renderHistory(data.tests || []);
+    renderKPI(data.tests || []);
   });
 }
 
@@ -243,7 +257,87 @@ function renderHistory(data) {
 }
 
 /* =========================
-   PRINT PDF
+   KPI ENGINE
+========================= */
+function renderKPI(data) {
+
+  let total = data.length;
+  let pass = 0;
+  let fail = 0;
+
+  let dailyMap = {};
+
+  data.forEach(t => {
+
+    if (t.status === "FAIL") fail++;
+    else pass++;
+
+    const date = t.timestamp
+      ? new Date(t.timestamp).toISOString().slice(0,10)
+      : null;
+
+    if (date) {
+      dailyMap[date] = (dailyMap[date] || 0) + 1;
+    }
+  });
+
+  let compliance = total > 0 ? ((pass / total) * 100).toFixed(2) : 0;
+
+  /* KPI TABLE */
+  let html = `
+    <table>
+      <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
+      <tr>
+        <td>${total}</td>
+        <td>${pass}</td>
+        <td>${fail}</td>
+        <td>${compliance}%</td>
+      </tr>
+    </table>
+  `;
+
+  document.getElementById("kpiBox").innerHTML = html;
+
+  drawChart(dailyMap);
+}
+
+/* =========================
+   CHART ENGINE
+========================= */
+function drawChart(dailyMap) {
+
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  ctx.font = "10px Arial";
+  ctx.fillStyle = "#ffffff";
+
+  let keys = Object.keys(dailyMap).slice(-7);
+  let values = keys.map(k => dailyMap[k]);
+
+  let max = values.length ? Math.max(...values) : 1;
+
+  let barWidth = 40;
+  let gap = 20;
+
+  keys.forEach((k, i) => {
+
+    let value = dailyMap[k];
+    let height = (value / max) * 150;
+
+    ctx.fillStyle = "#2563eb";
+    ctx.fillRect(i*(barWidth+gap), 180-height, barWidth, height);
+
+    ctx.fillStyle = "#fff";
+    ctx.fillText(value, i*(barWidth+gap), 170-height);
+    ctx.fillText(k.slice(5), i*(barWidth+gap), 195);
+  });
+}
+
+/* =========================
+   PDF
 ========================= */
 function printPDF() {
   window.print();
