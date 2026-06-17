@@ -70,6 +70,7 @@ td,th {
   margin-top:20px;
 }
 </style>
+
 </head>
 
 <body>
@@ -87,13 +88,11 @@ td,th {
 <!-- ================= APP ================= -->
 <div id="app" style="display:none;">
 
-<!-- HEADER -->
 <div class="card">
   <h2>🧪 HSE Alcohol Test System</h2>
-  <small>Real-time Workforce Compliance & Safety Monitoring</small>
+  <small>Real-time Safety Monitoring System</small>
 </div>
 
-<!-- WORKER + TEST -->
 <div class="grid">
 
   <div class="card">
@@ -109,7 +108,7 @@ td,th {
   </div>
 
   <div class="card">
-    <h3>🧪 Alcohol Test Input</h3>
+    <h3>🧪 Alcohol Test</h3>
 
     <select id="workerSelect"></select>
     <input id="bac" placeholder="BAC Value">
@@ -128,7 +127,7 @@ td,th {
 
 <!-- KPI -->
 <div class="card">
-  <h3>📈 HSE KPI Dashboard</h3>
+  <h3>📈 KPI Dashboard</h3>
 
   <div id="kpiBox"></div>
 
@@ -136,10 +135,9 @@ td,th {
 
   <br><br>
 
-  <button onclick="generatePDF()" id="pdfBtn">📄 Generate HSE Report</button>
+  <button onclick="generatePDF()">📄 Generate Report</button>
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
   Powered by Pausbiru7
 </div>
@@ -153,121 +151,147 @@ const API_KEY = "HSE-ALCOHOL-2026";
 
 let workers = [];
 let currentRole = null;
+let isLoading = false;
 
 /* ================= LOGIN ================= */
 function login() {
 
-  const u = document.getElementById("user").value;
-  const p = document.getElementById("pass").value;
+  const u = user.value;
+  const p = pass.value;
 
-  if (u === "admin" && p === "admin123") currentRole = "ADMIN";
-  else if (u === "operator" && p === "op123") currentRole = "OPERATOR";
-  else if (u === "viewer" && p === "view123") currentRole = "VIEWER";
+  if(u==="admin" && p==="admin123") currentRole="ADMIN";
+  else if(u==="operator" && p==="op123") currentRole="OPERATOR";
+  else if(u==="viewer" && p==="view123") currentRole="VIEWER";
   else return alert("Login gagal");
 
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("app").style.display = "block";
+  loginBox.style.display="none";
+  app.style.display="block";
 
   applyRoleUI();
   loadData();
 }
 
-/* ================= ROLE CONTROL ================= */
-function applyRoleUI() {
+/* ================= ROLE ================= */
+function applyRoleUI(){
 
-  if (currentRole === "OPERATOR") {
-    document.querySelector(".card:nth-last-child(1)").style.display = "none";
+  if(currentRole==="OPERATOR"){
+    document.querySelector(".card:nth-last-child(1)").style.display="none";
   }
 
-  if (currentRole === "VIEWER") {
-    document.querySelectorAll(".grid .card")[0].style.display = "none";
-    document.querySelectorAll(".grid .card")[1].style.display = "none";
+  if(currentRole==="VIEWER"){
+    document.querySelectorAll(".grid .card")[0].style.display="none";
+    document.querySelectorAll(".grid .card")[1].style.display="none";
   }
 }
 
+/* ================= LIVE AUTO REFRESH ================= */
+setInterval(()=>loadData(),5000);
+
 /* ================= LOAD DATA ================= */
-function loadData() {
+function loadData(){
+
+  if(isLoading) return;
+  isLoading=true;
 
   fetch(`${API}?key=${API_KEY}`)
-  .then(r => r.json())
-  .then(data => {
+  .then(r=>r.json())
+  .then(data=>{
 
-    workers = data.workers || [];
+    workers=data.workers||[];
 
     renderWorkers();
     renderDropdown();
-    renderHistory(data.tests || []);
-    renderKPI(data.tests || []);
+    renderHistory(data.tests||[]);
+    renderKPI(data.tests||[]);
+
+    isLoading=false;
   });
 }
 
 /* ================= WORKER ================= */
-function saveWorker() {
+function saveWorker(){
 
-  fetch(API, {
+  fetch(API,{
     method:"POST",
-    body: JSON.stringify({
-      key: API_KEY,
-      action: "worker_save",
-      name: name.value,
-      phone: phone.value,
-      department: dept.value
+    body:JSON.stringify({
+      key:API_KEY,
+      action:"worker_save",
+      name:name.value,
+      phone:phone.value,
+      department:dept.value
     })
   }).then(()=>loadData());
 }
 
 /* ================= TEST ================= */
-function submitTest() {
+function submitTest(){
 
-  fetch(API, {
+  fetch(API,{
     method:"POST",
-    body: JSON.stringify({
-      key: API_KEY,
-      action: "test_insert",
-      worker_id: workers[workerSelect.value].worker_id,
-      bac: bac.value
+    body:JSON.stringify({
+      key:API_KEY,
+      action:"test_insert",
+      worker_id:workers[workerSelect.value].worker_id,
+      bac:bac.value
     })
   }).then(()=>loadData());
 }
 
 /* ================= RENDER ================= */
-function renderWorkers() {
+function renderWorkers(){
 
-  let html = "<table><tr><th>Name</th><th>Phone</th></tr>";
-
-  workers.forEach(w=>{
-    html += `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`;
-  });
-
-  html += "</table>";
-  workerList.innerHTML = html;
+  workerList.innerHTML =
+  "<table><tr><th>Name</th><th>Phone</th></tr>" +
+  workers.map(w=>
+    `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`
+  ).join("") + "</table>";
 }
 
-function renderDropdown() {
+function renderDropdown(){
 
-  workerSelect.innerHTML = workers.map((w,i)=>
-    `<option value="${i}">👷 ${w.name}</option>`
+  workerSelect.innerHTML =
+  workers.map((w,i)=>
+    `<option value="${i}">${w.name}</option>`
   ).join("");
 }
 
-function renderHistory(data) {
+/* ================= HISTORY ================= */
+function renderHistory(data){
 
-  history.innerHTML = `
-  <table>
-    <tr><th>Name</th><th>BAC</th><th>Status</th></tr>
-    ${data.map(t=>`
-      <tr class="${t.status==='FAIL'?'fail':'pass'}">
-        <td>${t.name}</td>
-        <td>${t.bac}</td>
-        <td>${t.status}</td>
-      </tr>`).join("")}
-  </table>`;
+  history.innerHTML =
+  "<table><tr><th>Name</th><th>BAC</th><th>Status</th><th>Alert</th></tr>" +
+  data.map(t=>`
+    <tr class="${t.status==='FAIL'?'fail':'pass'}">
+      <td>${t.name}</td>
+      <td>${t.bac}</td>
+      <td>${t.status}</td>
+      <td>
+        ${t.status==="FAIL"
+          ? `<button onclick='triggerAlert(${JSON.stringify(t)})'>🚨 Alert</button>`
+          : ""
+        }
+      </td>
+    </tr>
+  `).join("") + "</table>";
 }
 
-/* ================= KPI ENGINE ================= */
-function renderKPI(data) {
+/* ================= ALERT SYSTEM ================= */
+function triggerAlert(t){
 
-  let pass=0, fail=0;
+  const msg = `🚨 HSE ALERT
+Name: ${t.name}
+Dept: ${t.department}
+BAC: ${t.bac}
+Status: ${t.status}`;
+
+  const url = `https://wa.me/${t.phone||""}?text=${encodeURIComponent(msg)}`;
+  window.open(url,"_blank");
+}
+
+/* ================= KPI ================= */
+function renderKPI(data){
+
+  let pass=0,fail=0;
   let daily={};
 
   data.forEach(t=>{
@@ -275,17 +299,17 @@ function renderKPI(data) {
     if(t.status==="FAIL") fail++;
     else pass++;
 
-    let date = t.timestamp
+    let date=t.timestamp
       ? new Date(t.timestamp).toISOString().slice(0,10)
       : null;
 
     if(date) daily[date]=(daily[date]||0)+1;
   });
 
-  let total = data.length;
-  let compliance = total?((pass/total)*100).toFixed(2):0;
+  let total=data.length;
+  let compliance=total?((pass/total)*100).toFixed(2):0;
 
-  kpiBox.innerHTML = `
+  kpiBox.innerHTML=`
   <table>
     <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
     <tr>
@@ -300,18 +324,18 @@ function renderKPI(data) {
 }
 
 /* ================= CHART ================= */
-function drawChart(daily) {
+function drawChart(daily){
 
-  const c = chart.getContext("2d");
+  const c=chart.getContext("2d");
   c.clearRect(0,0,400,200);
 
-  let keys = Object.keys(daily).slice(-7);
-  let vals = keys.map(k=>daily[k]);
-  let max = vals.length?Math.max(...vals):1;
+  let keys=Object.keys(daily).slice(-7);
+  let vals=keys.map(k=>daily[k]);
+  let max=vals.length?Math.max(...vals):1;
 
   keys.forEach((k,i)=>{
 
-    let h = (daily[k]/max)*150;
+    let h=(daily[k]/max)*150;
 
     c.fillStyle="#2563eb";
     c.fillRect(i*50,150-h,30,h);
@@ -322,9 +346,10 @@ function drawChart(daily) {
 }
 
 /* ================= PDF ================= */
-function generatePDF() {
+function generatePDF(){
 
-  if(currentRole!=="ADMIN") return alert("Denied");
+  if(currentRole!=="ADMIN")
+    return alert("Denied");
 
   window.print();
 }
