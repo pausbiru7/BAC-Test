@@ -4,14 +4,13 @@
 
 <meta charset="UTF-8">
 
-<title>🧪 HSE Alcohol Test System</title>
+<title>🧪 HSE Safety Intelligence System</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b1220">
 <link rel="manifest" href="manifest.json">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <style>
 body {
@@ -78,10 +77,8 @@ td,th {
 <!-- LOGIN -->
 <div id="loginBox" class="card">
   <h2>🔐 HSE Login</h2>
-
   <input id="user" placeholder="Username">
   <input id="pass" type="password" placeholder="Password">
-
   <button onclick="login()">Login</button>
 </div>
 
@@ -89,30 +86,24 @@ td,th {
 <div id="app" style="display:none;">
 
 <div class="card">
-  <h2>🧪 HSE Alcohol Test System</h2>
-  <small>Real-time Safety Monitoring System</small>
+  <h2>🧪 HSE Safety Intelligence System</h2>
 </div>
 
 <div class="grid">
 
   <div class="card">
     <h3>👷 Worker</h3>
-
     <input id="name" placeholder="Nama">
     <input id="phone" placeholder="No HP">
     <input id="dept" placeholder="Department">
-
-    <button onclick="saveWorker()">Save Worker</button>
-
+    <button onclick="saveWorker()">Save</button>
     <div id="workerList"></div>
   </div>
 
   <div class="card">
-    <h3>🧪 Test Input</h3>
-
+    <h3>🧪 Test</h3>
     <select id="workerSelect"></select>
     <input id="bac" placeholder="Value">
-
     <button onclick="submitTest()">Submit</button>
   </div>
 
@@ -125,23 +116,19 @@ td,th {
   <div id="history"></div>
 </div>
 
-<!-- KPI -->
+<!-- KPI + INTELLIGENCE -->
 <div class="card">
-  <h3>📈 KPI Dashboard</h3>
+  <h3>📈 Intelligence Dashboard</h3>
 
   <div id="kpiBox"></div>
 
   <canvas id="chart" width="400" height="200"></canvas>
+</div>
 
-  <br><br>
-
-  <button onclick="generatePDF()">📄 Report</button>
 </div>
 
 <div class="footer">
-  Powered by Pausbiru7
-</div>
-
+Powered by Pausbiru7
 </div>
 
 <script>
@@ -156,8 +143,8 @@ let isLoading = false;
 /* ================= LOGIN ================= */
 function login(){
 
-  const u = user.value;
-  const p = pass.value;
+  const u=user.value;
+  const p=pass.value;
 
   if(u==="admin" && p==="admin123") currentRole="ADMIN";
   else if(u==="operator" && p==="op123") currentRole="OPERATOR";
@@ -167,45 +154,36 @@ function login(){
   loginBox.style.display="none";
   app.style.display="block";
 
-  applyRoleUI();
   loadData();
 }
 
-/* ================= ROLE ================= */
-function applyRoleUI(){
-
-  if(currentRole==="OPERATOR"){
-    document.querySelector(".card:nth-last-child(1)").style.display="none";
-  }
-
-  if(currentRole==="VIEWER"){
-    document.querySelectorAll(".grid .card")[0].style.display="none";
-    document.querySelectorAll(".grid .card")[1].style.display="none";
-  }
-}
-
-/* ================= AUTO REFRESH (STEP 7) ================= */
+/* ================= AUTO REFRESH ================= */
 setInterval(()=>loadData(),5000);
 
-/* ================= LOAD ================= */
+/* ================= LOAD DATA ================= */
 function loadData(){
 
   if(isLoading) return;
-  isLoading = true;
+  isLoading=true;
 
   fetch(`${API}?key=${API_KEY}`)
   .then(r=>r.json())
   .then(data=>{
 
-    workers = data.workers || [];
+    workers=data.workers||[];
 
     renderWorkers();
     renderDropdown();
-    renderHistory(data.tests || []);
-    renderKPI(data.tests || []);
+    renderHistory(data.tests||[]);
+    renderKPI(data.tests||[]);
 
-    isLoading = false;
+    isLoading=false;
   });
+}
+
+/* ================= RULE ENGINE ================= */
+function getStatus(val){
+  return parseFloat(val) === 0 ? "PASS" : "FAIL";
 }
 
 /* ================= WORKER ================= */
@@ -237,89 +215,84 @@ function submitTest(){
   }).then(()=>loadData());
 }
 
-/* ================= RENDER ================= */
-function renderWorkers(){
+/* ================= ALERT ENGINE ================= */
+function triggerAlert(t){
 
-  workerList.innerHTML =
-  "<table><tr><th>Name</th><th>Phone</th></tr>" +
-  workers.map(w=>
-    `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`
-  ).join("") + "</table>";
+  if(getStatus(t.bac)==="PASS") return;
+
+  const msg =
+`🚨 HSE ALERT
+Name: ${t.name}
+Dept: ${t.department}
+Value: ${t.bac}
+Status: FAIL`;
+
+  const url=`https://wa.me/${t.phone||""}?text=${encodeURIComponent(msg)}`;
+  window.open(url,"_blank");
 }
 
-function renderDropdown(){
-
-  workerSelect.innerHTML =
-  workers.map((w,i)=>
-    `<option value="${i}">${w.name}</option>`
-  ).join("");
-}
-
-/* ================= HISTORY + AUTO ALERT ================= */
+/* ================= HISTORY ================= */
 function renderHistory(data){
 
   history.innerHTML =
   "<table><tr><th>Name</th><th>Value</th><th>Status</th><th>Alert</th></tr>" +
+
   data.map(t=>{
 
-    const status = (parseFloat(t.bac) === 0) ? "PASS" : "FAIL";
+    const status=getStatus(t.bac);
 
-    // AUTO ALERT ENGINE (STEP 7)
-    if(status === "FAIL"){
-      triggerAlert(t);
-    }
+    if(status==="FAIL") triggerAlert(t);
 
     return `
       <tr class="${status==='FAIL'?'fail':'pass'}">
         <td>${t.name}</td>
         <td>${t.bac}</td>
         <td>${status}</td>
-        <td>${status==='FAIL'?'🚨 AUTO ALERT':'-'}</td>
+        <td>${status==="FAIL"?"🚨 AUTO":""}</td>
       </tr>
     `;
   }).join("") +
+
   "</table>";
 }
 
-/* ================= ALERT SYSTEM ================= */
-function triggerAlert(t){
-
-  const msg =
-`🚨 HSE AUTO ALERT
-Name: ${t.name}
-Dept: ${t.department}
-Value: ${t.bac}
-Status: FAIL`;
-
-  const url = `https://wa.me/${t.phone || ""}?text=${encodeURIComponent(msg)}`;
-
-  window.open(url,"_blank");
-}
-
-/* ================= KPI (SIMPLE RULE: PASS=0 FAIL>0) ================= */
+/* ================= KPI + INTELLIGENCE ENGINE ================= */
 function renderKPI(data){
 
   let pass=0, fail=0;
-  let daily={};
+
+  let deptMap={};
+  let userMap={};
+  let hourlyMap={};
 
   data.forEach(t=>{
 
-    const status = (parseFloat(t.bac) === 0) ? "PASS" : "FAIL";
+    let status=getStatus(t.bac);
 
     if(status==="PASS") pass++;
     else fail++;
 
-    let date = t.timestamp
-      ? new Date(t.timestamp).toISOString().slice(0,10)
-      : null;
+    /* DEPT RISK */
+    let d=t.department||"UNKNOWN";
+    deptMap[d]=deptMap[d]||{pass:0,fail:0};
+    deptMap[d][status.toLowerCase()]++;
 
-    if(date) daily[date]=(daily[date]||0)+1;
+    /* USER BEHAVIOR */
+    userMap[t.name]=userMap[t.name]||{pass:0,fail:0};
+    userMap[t.name][status.toLowerCase()]++;
+
+    /* ANOMALY DETECTION */
+    let h=t.timestamp?new Date(t.timestamp).getHours():null;
+    if(h!==null){
+      hourlyMap[h]=(hourlyMap[h]||0)+1;
+    }
   });
 
   let total=data.length;
   let compliance=total?((pass/total)*100).toFixed(2):0;
 
-  kpiBox.innerHTML=`
+  /* KPI CORE */
+  let html=`
   <table>
     <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
     <tr>
@@ -328,9 +301,51 @@ function renderKPI(data){
       <td>${fail}</td>
       <td>${compliance}%</td>
     </tr>
-  </table>`;
+  </table>
+  `;
 
-  drawChart(daily);
+  /* RISK ENGINE */
+  html+=`
+  <br><table>
+    <tr><th>Department</th><th>FAIL</th></tr>
+    ${Object.keys(deptMap).map(d=>`
+      <tr>
+        <td>${d}</td>
+        <td>${deptMap[d].fail||0}</td>
+      </tr>
+    `).join("")}
+  </table>
+  `;
+
+  /* USER ANALYTICS */
+  html+=`
+  <br><table>
+    <tr><th>User</th><th>FAIL</th></tr>
+    ${Object.keys(userMap).map(u=>`
+      <tr>
+        <td>${u}</td>
+        <td>${userMap[u].fail||0}</td>
+      </tr>
+    `).join("")}
+  </table>
+  `;
+
+  /* ANOMALY */
+  html+=`
+  <br><table>
+    <tr><th>Hour</th><th>Activity</th></tr>
+    ${Object.keys(hourlyMap).map(h=>`
+      <tr>
+        <td>${h}:00</td>
+        <td>${hourlyMap[h]}</td>
+      </tr>
+    `).join("")}
+  </table>
+  `;
+
+  kpiBox.innerHTML=html;
+
+  drawChart(hourlyMap);
 }
 
 /* ================= CHART ================= */
@@ -353,15 +368,6 @@ function drawChart(daily){
     c.fillStyle="#fff";
     c.fillText(daily[k],i*50,140-h);
   });
-}
-
-/* ================= PDF ================= */
-function generatePDF(){
-
-  if(currentRole!=="ADMIN")
-    return alert("Denied");
-
-  window.print();
 }
 
 /* ================= PWA ================= */
