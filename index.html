@@ -1,484 +1,223 @@
 <!DOCTYPE html>
-<html lang="id">
-  <head>
-  <meta charset="UTF-8" />
-  <title>BAC Test – Simple Dashboard</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 2rem;
-      background: #f8fafc;
-      color: #0f172a;
-    }
-    h1 {
-      margin-bottom: 0.5rem;
-    }
-    h2 {
-      margin-top: 2rem;
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      border: 1px solid #1d4ed8;
-      background: #1d4ed8;
-      color: white;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    button:hover {
-      background: #1e40af;
-    }
-    .info {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #475569;
-    }
-    .section {
-      margin-top: 1.5rem;
-      background: #ffffff;
-      border-radius: 0.75rem;
-      padding: 1rem 1.25rem;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-      border: 1px solid #e2e8f0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-      margin-top: 0.75rem;
-    }
-    th, td {
-      border: 1px solid #e2e8f0;
-      padding: 0.4rem 0.5rem;
-      text-align: left;
-    }
-    th {
-      background: #eff6ff;
-      color: #1d4ed8;
-      font-weight: 600;
-    }
-    tbody tr:nth-child(even) {
-      background: #f8fafc;
-    }
-    .badge {
-      display: inline-block;
-      padding: 0.1rem 0.4rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-    .badge-active {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-    .badge-inactive {
-      background: #e5e7eb;
-      color: #4b5563;
-    }
-    .badge-normal {
-      background: #dcfce7;
-      color: #166534;
-    }
-    .badge-fail {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-    pre {
-      margin-top: 0.75rem;
-      padding: 0.75rem;
-      background: #0f172a;
-      color: #e5e7eb;
-      border-radius: 0.5rem;
-      max-height: 280px;
-      overflow: auto;
-      font-size: 0.75rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
-    }
-    .stat {
-      padding: 0.75rem;
-      border-radius: 0.75rem;
-      background: #eff6ff;
-      border: 1px solid #dbeafe;
-      font-size: 0.8rem;
-    }
-    .stat-title {
-      font-size: 0.7rem;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .stat-value {
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #1e293b;
-      margin-top: 0.1rem;
-    }
-  </style>
-</head>
-<body>
-  <h1>BAC Test – Simple Dashboard</h1>
-  <p class="info">
-    Contoh frontend sederhana di GitHub Pages yang membaca data dari Google Apps Script & Google Spreadsheet (getInitialData).
-  </p>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HSE Alcohol Test System</title>
 
-  <button id="load">Refresh Data dari GAS</button>
-  <div class="section" id="create-test-section" style="margin-top:1.5rem; display:none;">
-    <h2>Input Tes Baru (Simple)</h2>
-    <p class="info">Form ini akan memanggil aksi <code>createTest</code> di Google Apps Script.</p>
-    <form id="create-test-form">
-      <div style="margin-top:0.5rem;">
-        <label>
-          Orang
-          <select id="person-select" required style="margin-left:0.5rem; min-width:220px;">
-            <option value="">Pilih orang...</option>
-          </select>
-        </label>
-      </div>
-      <div style="margin-top:0.5rem;">
-        <label>
-          Tanggal Tes
-          <input id="test-date" type="date" required style="margin-left:0.5rem;">
-        </label>
-      </div>
-      <div style="margin-top:0.5rem;">
-        <label>
-          Jam Tes
-          <input id="test-time" type="time" required style="margin-left:0.5rem;">
-        </label>
-      </div>
-      <div style="margin-top:0.5rem;">
-        <label>
-          Nilai Alkohol
-          <input id="alcohol-value" type="number" step="0.01" required style="margin-left:0.5rem; width:80px;">
-        </label>
-        <span class="info">0 = normal, &gt; 0 = fail.</span>
-      </div>
-      <div style="margin-top:0.75rem;">
-        <button type="submit">Simpan Tes</button>
-        <span id="create-test-status" class="info"></span>
-      </div>
-    </form>
-  </div>
-  <div id="status" class="info" style="margin-top:0.5rem;"></div>
-
-  <div class="section" id="dashboard-section" style="display:none;">
-    <h2>Ringkasan Dashboard</h2>
-    <div class="grid" id="dashboard-cards"></div>
-  </div>
-
-  <div class="section" id="persons-section" style="display:none;">
-    <h2>Persons</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nama</th>
-          <th>Departemen</th>
-          <th>Lokasi</th>
-          <th>HP</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="persons-body"></tbody>
-    </table>
-  </div>
-
-  <div class="section" id="tests-section" style="display:none;">
-    <h2>Tests</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nama</th>
-          <th>Tanggal</th>
-          <th>Lokasi</th>
-          <th>Nilai</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="tests-body"></tbody>
-    </table>
-  </div>
-
-  <div class="section">
-    <h2>Raw JSON (debug)</h2>
-    <pre id="output">Belum ada data. Klik "Refresh Data dari GAS".</pre>
-  </div>
-
-  <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec';
-
-    const loadBtn = document.getElementById('load');
-    const statusEl = document.getElementById('status');
-    const outputEl = document.getElementById('output');
-    const personsBody = document.getElementById('persons-body');
-    const testsBody = document.getElementById('tests-body');
-    const personsSection = document.getElementById('persons-section');
-    const testsSection = document.getElementById('tests-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const dashboardCards = document.getElementById('dashboard-cards');
-    const createTestSection = document.getElementById('create-test-section');
-    const createTestForm = document.getElementById('create-test-form');
-    const personSelect = document.getElementById('person-select');
-    const createTestStatus = document.getElementById('create-test-status');
-    async function loadData() {
-      statusEl.textContent = 'Mengambil data dari Google Apps Script...';
-      loadBtn.disabled = true;
-      loadBtn.textContent = 'Loading...';
-
-      try {
-        const res = await fetch(GAS_URL + '?action=getInitialData');
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          throw new Error('HTTP ' + res.status + ': ' + (text || 'Gagal memanggil GAS'));
-        }
-        const json = await res.json();
-
-        outputEl.textContent = JSON.stringify(json, null, 2);
-
-        if (!json.success) {
-          throw new Error(json.message || 'success=false dari backend');
-        }
-
-        const data = json.data || {};
-        renderDashboard(data.dashboard || {});
-        renderPersons(data.persons || []);
-        renderTests(data.tests || []);
-
-        statusEl.textContent = 'Berhasil memuat data dari GAS.';
-      } catch (err) {
-        statusEl.textContent = 'Error: ' + err.message;
-        personsSection.style.display = 'none';
-        testsSection.style.display = 'none';
-        dashboardSection.style.display = 'none';
-      } finally {
-        loadBtn.disabled = false;
-        loadBtn.textContent = 'Refresh Data dari GAS';
-      }
-    }
-
-    function renderDashboard(dashboard) {
-      dashboardCards.innerHTML = '';
-      const items = [
-        { title: 'Tanggal Hari Ini', value: dashboard.today || '-' },
-        { title: 'Tes Hari Ini', value: dashboard.totalTestsToday ?? 0 },
-        { title: 'Normal Hari Ini', value: dashboard.normal ?? 0 },
-        { title: 'Fail Hari Ini', value: dashboard.fail ?? 0 },
-        { title: 'Total Orang', value: dashboard.totalPersons ?? 0 },
-        { title: 'Aktif', value: dashboard.activePersons ?? 0 },
-        { title: 'Nonaktif', value: dashboard.inactivePersons ?? 0 },
-        { title: 'Total Tes Semua Waktu', value: dashboard.totalTestsAllTime ?? 0 },
-      ];
-
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'stat';
-        div.innerHTML = `
-          <div class="stat-title">${item.title}</div>
-          <div class="stat-value">${item.value}</div>
-        `;
-        dashboardCards.appendChild(div);
-      });
-
-      dashboardSection.style.display = 'block';
-    }
-
-    function renderPersons(persons) {
-      personsBody.innerHTML = '';
-      persons.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${escapeHtml(p.id)}</td>
-          <td>${escapeHtml(p.fullName)}</td>
-          <td>${escapeHtml(p.department || '-')}</td>
-          <td>${escapeHtml(p.workLocation || '-')}</td>
-          <td>${escapeHtml(p.phoneNumber || '-')}</td>
-          <td>
-            <span class="badge ${p.isActive ? 'badge-active' : 'badge-inactive'}">
-              ${p.isActive ? 'AKTIF' : 'NONAKTIF'}
-            </span>
-          </td>
-        `;
-        personsBody.appendChild(tr);
-      });
-      personsSection.style.display = persons.length ? 'block' : 'none';
-    }
-    let latestPersons = [];
-            const data = json.data || {};
-        latestPersons = data.persons || [];
-        renderDashboard(data.dashboard || {});
-        renderPersons(latestPersons);
-        renderTests(data.tests || []);
-        populatePersonSelect(latestPersons);
-        createTestSection.style.display = latestPersons.length ? 'block' : 'none';
-        function populatePersonSelect(persons) {
-      personSelect.innerHTML = '<option value="">Pilih orang...</option>';
-      persons.forEach(p => {
-        if (!p.isActive) return;
-        const opt = document.createElement('option');
-        opt.value = p.id;
-        opt.textContent = `${p.fullName} (${p.id})`;
-        personSelect.appendChild(opt);
-      });
-    }
-
-    function toIsoDate(dateStr) {
-      // "2026-06-14" → "2026-06-14"
-      return dateStr;
-    }
-
-    function toTimeString(timeStr) {
-      // "08:10" → "08:10"
-      return timeStr;
-    }
-
-    async function createTest(payload) {
-      createTestStatus.textContent = 'Mengirim data ke GAS...';
-      try {
-        const res = await fetch(GAS_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'createTest',
-            payload,
-          }),
-        });
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          throw new Error('HTTP ' + res.status + ': ' + (text || 'Gagal memanggil createTest'));
-        }
-        const json = await res.json();
-        if (!json.success) {
-          throw new Error(json.message || 'createTest success=false');
-        }
-        createTestStatus.textContent = 'Berhasil menyimpan tes.';
-        return json.data;
-      } catch (err) {
-        createTestStatus.textContent = 'Error: ' + err.message;
-        throw err;
-      }
-    }
-
-    createTestForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      createTestStatus.textContent = '';
-
-      const personId = personSelect.value;
-      const testDate = document.getElementById('test-date').value;
-      const testTime = document.getElementById('test-time').value;
-      const alcoholValueStr = document.getElementById('alcohol-value').value;
-
-      if (!personId || !testDate || !testTime || alcoholValueStr === '') {
-        createTestStatus.textContent = 'Lengkapi semua field.';
-        return;
-      }
-
-      const person = latestPersons.find(p => String(p.id) === String(personId));
-      if (!person) {
-        createTestStatus.textContent = 'Person tidak ditemukan.';
-        return;
-      }
-
-      const alcoholValue = Number(alcoholValueStr);
-      if (Number.isNaN(alcoholValue) || alcoholValue < 0) {
-        createTestStatus.textContent = 'Nilai alkohol harus angka >= 0.';
-        return;
-      }
-
-      const payload = {
-        personId: person.id,
-        personName: person.fullName,
-        identityNumber: person.identityNumber,
-        department: person.department,
-        testDate: toIsoDate(testDate),   // backend sudah pakai string tanggal
-        testTime: toTimeString(testTime),
-        locationName: person.workLocation || 'Gerbang Utama',
-        officerName: 'Admin Internal',
-        deviceName: 'Breathalyzer A',
-        alcoholValue,
-        notes: '',
-        actorName: 'admin_internal',
-      };
-
-      try {
-        await createTest(payload);
-        // setelah berhasil, refresh tabel dari GAS
-        await loadData();
-        createTestForm.reset();
-        personSelect.value = person.id;
-      } catch (_) {
-        // error sudah ditampilkan di createTestStatus
-      }
-    });
-    function renderTests(tests) {
-      testsBody.innerHTML = '';
-      tests.forEach(t => {
-        const tr = document.createElement('tr');
-        const statusClass = t.resultStatus === 'fail' ? 'badge-fail' : 'badge-normal';
-        tr.innerHTML = `
-          <td>${escapeHtml(t.id)}</td>
-          <td>${escapeHtml(t.personName)}</td>
-          <td>${escapeHtml(formatDateTime(t.testDate, t.testTime))}</td>
-          <td>${escapeHtml(t.locationName || '-')}</td>
-          <td>${t.alcoholValue}</td>
-          <td><span class="badge ${statusClass}">${(t.resultStatus || '').toUpperCase()}</span></td>
-        `;
-        testsBody.appendChild(tr);
-      });
-      testsSection.style.display = tests.length ? 'block' : 'none';
-    }
-
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-   function formatDateTime(dateStr, timeStr) {
-  if (!dateStr && !timeStr) return '-';
-
-  // Ambil bagian tanggal dari "2026-06-13 00:00:00"
-  let d = dateStr ? String(dateStr).split(' ')[0] : '';
-  // d: "2026-06-13"
-  let formattedDate = d;
-  if (d && d.includes('-')) {
-    const [yyyy, mm, dd] = d.split('-');
-    if (yyyy && mm && dd) {
-      formattedDate = `${dd}-${mm}-${yyyy}`; // 13-06-2026
-    }
-  }
-
-  // Ambil bagian waktu dari "1899-12-30 08:10:00"
-  let t = timeStr ? String(timeStr).split(' ')[1] || String(timeStr) : '';
-  // t: "08:10:00"
-  let formattedTime = t;
-  if (t && t.includes(':')) {
-    const [hh, min] = t.split(':');
-    formattedTime = `${hh}:${min}`; // 08:10
-  }
-
-  if (!formattedDate && !formattedTime) return '-';
-  if (!formattedDate) return formattedTime;
-  if (!formattedTime) return formattedDate;
-  return `${formattedDate} ${formattedTime}`;
+<style>
+body {
+  font-family: Arial;
+  background:#0b1220;
+  color:#fff;
+  margin:0;
+  padding:20px;
 }
 
-    loadBtn.addEventListener('click', loadData);
+.grid {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:15px;
+}
 
-    // Auto load saat halaman dibuka
+.card {
+  background:#1e293b;
+  padding:15px;
+  border-radius:10px;
+}
+
+input, select, button {
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border-radius:5px;
+  border:none;
+}
+
+button {
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+
+td,th {
+  border:1px solid #334155;
+  padding:6px;
+  font-size:12px;
+}
+
+.pass { background:green; }
+.fail { background:red; }
+
+.small {
+  font-size:11px;
+  opacity:0.8;
+}
+</style>
+</head>
+
+<body>
+
+<h2>HSE Alcohol Test System</h2>
+
+<div class="grid">
+
+<!-- WORKER -->
+<div class="card">
+<h3>Worker Management</h3>
+
+<input id="name" placeholder="Nama">
+<input id="phone" placeholder="No HP (WA)">
+<input id="dept" placeholder="Department">
+
+<button onclick="saveWorker()">Save Worker</button>
+
+<h4>Worker List</h4>
+<div id="workerList"></div>
+</div>
+
+<!-- TEST -->
+<div class="card">
+<h3>Alcohol Test Input</h3>
+
+<select id="workerSelect"></select>
+<input id="bac" placeholder="BAC Value">
+
+<button onclick="submitTest()">Submit Test</button>
+</div>
+
+</div>
+
+<!-- HISTORY -->
+<div class="card" style="margin-top:15px;">
+<h3>History</h3>
+<button onclick="loadData()">Refresh</button>
+<div id="history"></div>
+</div>
+
+<script>
+
+const API = "YOUR_GAS_URL";
+
+let workers = [];
+let editIndex = null;
+
+/* ================= WORKERS ================= */
+
+function saveWorker() {
+  const payload = {
+    type:"worker",
+    name:document.getElementById("name").value,
+    phone:document.getElementById("phone").value,
+    dept:document.getElementById("dept").value,
+    index:editIndex
+  };
+
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify(payload)
+  }).then(()=> {
+    editIndex=null;
     loadData();
-  </script>
+  });
+}
+
+/* ================= TEST ================= */
+
+function submitTest() {
+  const payload = {
+    type:"test",
+    workerIndex:document.getElementById("workerSelect").value,
+    bac:document.getElementById("bac").value
+  };
+
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify(payload)
+  }).then(loadData);
+}
+
+/* ================= LOAD ================= */
+
+function loadData() {
+  fetch(API)
+  .then(r=>r.json())
+  .then(data=>{
+
+    workers = data.workers || [];
+
+    // worker dropdown
+    let opt = "";
+    workers.forEach((w,i)=>{
+      opt += `<option value="${i}">${w.name}</option>`;
+    });
+    document.getElementById("workerSelect").innerHTML = opt;
+
+    // worker list
+    let whtml = "<table><tr><th>Name</th><th>HP</th></tr>";
+    workers.forEach(w=>{
+      whtml += `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`;
+    });
+    whtml += "</table>";
+    document.getElementById("workerList").innerHTML = whtml;
+
+    // history
+    let h = "<table><tr><th>Name</th><th>BAC</th><th>Status</th><th>Action</th></tr>";
+
+    (data.tests || []).forEach((t,i)=>{
+
+      const cls = t.bac > 0 ? "fail" : "pass";
+
+      h += `
+      <tr class="${cls}">
+        <td>${t.name}</td>
+        <td>${t.bac}</td>
+        <td>${t.bac > 0 ? "FAIL":"PASS"}</td>
+        <td>
+          <button onclick="printPDF()">PDF</button>
+          <button onclick="shareWA(${i})">WA</button>
+        </td>
+      </tr>`;
+    });
+
+    h += "</table>";
+    document.getElementById("history").innerHTML = h;
+  });
+}
+
+/* ================= PDF ================= */
+
+function printPDF() {
+  window.print();
+}
+
+/* ================= WA SHARE ================= */
+
+function shareWA(i) {
+  fetch(API)
+  .then(r=>r.json())
+  .then(data=>{
+    const t = data.tests[i];
+
+    const msg =
+`HSE Alcohol Test Result
+Name: ${t.name}
+BAC: ${t.bac}
+Status: ${t.bac > 0 ? "FAIL":"PASS"}`;
+
+    const url = `https://wa.me/${t.phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url,"_blank");
+  });
+}
+
+loadData();
+
+</script>
+
 </body>
 </html>
