@@ -3,14 +3,11 @@
 <head>
 
 <meta charset="UTF-8">
-
-<title>🧪 HSE BAC Test</title>
+<title>🧪 HSE Alcohol Test System</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b1220">
 <link rel="manifest" href="manifest.json">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
 body {
@@ -74,37 +71,44 @@ td,th {
 
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 <div id="loginBox" class="card">
   <h2>🔐 HSE Login</h2>
+
   <input id="user" placeholder="Username">
   <input id="pass" type="password" placeholder="Password">
+
   <button onclick="login()">Login</button>
 </div>
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 <div id="app" style="display:none;">
 
 <div class="card">
-  <h2>🧪 HSE BAC Test</h2>
+  <h2>🧪 HSE Alcohol Test System</h2>
 </div>
 
 <div class="grid">
 
   <div class="card">
     <h3>👷 Worker</h3>
+
     <input id="name" placeholder="Nama">
     <input id="phone" placeholder="No HP">
     <input id="dept" placeholder="Department">
-    <button onclick="saveWorker()">Save</button>
+
+    <button onclick="saveWorker()">Save Worker</button>
+
     <div id="workerList"></div>
   </div>
 
   <div class="card">
     <h3>🧪 Test</h3>
+
     <select id="workerSelect"></select>
-    <input id="bac" placeholder="Value">
-    <button onclick="submitTest()">Submit</button>
+    <input id="bac" placeholder="Value (0 = PASS, >0 = FAIL)">
+
+    <button onclick="submitTest()">Submit Test</button>
   </div>
 
 </div>
@@ -116,139 +120,157 @@ td,th {
   <div id="history"></div>
 </div>
 
-<!-- KPI + INTELLIGENCE -->
+<!-- KPI -->
 <div class="card">
-  <h3>📈 Intelligence Dashboard</h3>
-
+  <h3>📈 KPI Dashboard</h3>
   <div id="kpiBox"></div>
-
-  <canvas id="chart" width="400" height="200"></canvas>
-</div>
-
 </div>
 
 <div class="footer">
 Powered by Pausbiru7
 </div>
 
+</div>
+
 <script>
 
-const API = "YOUR_GAS_URL";
+const API = "https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec";
+
 const API_KEY = "HSE-ALCOHOL-2026";
 
 let workers = [];
-let currentRole = null;
 let isLoading = false;
 
 /* ================= LOGIN ================= */
 function login(){
 
-  const u=user.value;
-  const p=pass.value;
+  const u = user.value;
+  const p = pass.value;
 
-  if(u==="admin" && p==="admin123") currentRole="ADMIN";
-  else if(u==="operator" && p==="op123") currentRole="OPERATOR";
-  else if(u==="viewer" && p==="view123") currentRole="VIEWER";
-  else return alert("Login gagal");
-
-  loginBox.style.display="none";
-  app.style.display="block";
-
-  loadData();
+  if(u==="admin" && p==="admin123"){
+    loginBox.style.display="none";
+    app.style.display="block";
+    loadData();
+  } else {
+    alert("Login gagal");
+  }
 }
-
-/* ================= AUTO REFRESH ================= */
-setInterval(()=>loadData(),5000);
 
 /* ================= LOAD DATA ================= */
 function loadData(){
 
   if(isLoading) return;
-  isLoading=true;
+  isLoading = true;
 
   fetch(`${API}?key=${API_KEY}`)
-  .then(r=>r.json())
-  .then(data=>{
+  .then(r => r.json())
+  .then(data => {
 
-    workers=data.workers||[];
+    workers = data.workers || [];
 
     renderWorkers();
     renderDropdown();
-    renderHistory(data.tests||[]);
-    renderKPI(data.tests||[]);
+    renderHistory(data.tests || []);
+    renderKPI(data.tests || []);
 
-    isLoading=false;
+    isLoading = false;
+  })
+  .catch(err => {
+    console.log("LOAD ERROR:", err);
+    isLoading = false;
   });
 }
 
-/* ================= RULE ENGINE ================= */
-function getStatus(val){
-  return parseFloat(val) === 0 ? "PASS" : "FAIL";
-}
-
-/* ================= WORKER ================= */
+/* ================= SAVE WORKER (FIXED) ================= */
 function saveWorker(){
 
-  fetch(API,{
-    method:"POST",
-    body:JSON.stringify({
-      key:API_KEY,
-      action:"worker_save",
-      name:name.value,
-      phone:phone.value,
-      department:dept.value
-    })
-  }).then(()=>loadData());
+  const payload = {
+    key: API_KEY,
+    action: "worker_save",
+    name: name.value,
+    phone: phone.value,
+    department: dept.value
+  };
+
+  console.log("SEND WORKER:", payload);
+
+  fetch(API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.text())
+  .then(res => {
+    console.log("WORKER RESPONSE:", res);
+    loadData();
+  })
+  .catch(err => console.log("WORKER ERROR:", err));
 }
 
-/* ================= TEST ================= */
+/* ================= SAVE TEST (FIXED) ================= */
 function submitTest(){
 
-  fetch(API,{
-    method:"POST",
-    body:JSON.stringify({
-      key:API_KEY,
-      action:"test_insert",
-      worker_id:workers[workerSelect.value].worker_id,
-      bac:bac.value
-    })
-  }).then(()=>loadData());
+  const payload = {
+    key: API_KEY,
+    action: "test_insert",
+    worker_id: workers[workerSelect.value]?.name,
+    bac: bac.value
+  };
+
+  console.log("SEND TEST:", payload);
+
+  fetch(API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.text())
+  .then(res => {
+    console.log("TEST RESPONSE:", res);
+    loadData();
+  })
+  .catch(err => console.log("TEST ERROR:", err));
 }
 
-/* ================= ALERT ENGINE ================= */
-function triggerAlert(t){
+/* ================= RENDER WORKERS ================= */
+function renderWorkers(){
 
-  if(getStatus(t.bac)==="PASS") return;
-
-  const msg =
-`🚨 HSE ALERT
-Name: ${t.name}
-Dept: ${t.department}
-Value: ${t.bac}
-Status: FAIL`;
-
-  const url=`https://wa.me/${t.phone||""}?text=${encodeURIComponent(msg)}`;
-  window.open(url,"_blank");
+  workerList.innerHTML =
+  "<table><tr><th>Name</th><th>Phone</th></tr>" +
+  workers.map(w =>
+    `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`
+  ).join("") +
+  "</table>";
 }
 
-/* ================= HISTORY ================= */
+/* ================= DROPDOWN ================= */
+function renderDropdown(){
+
+  workerSelect.innerHTML =
+  workers.map((w,i)=>
+    `<option value="${i}">${w.name}</option>`
+  ).join("");
+}
+
+/* ================= HISTORY (PASS/FAIL RULE) ================= */
 function renderHistory(data){
 
   history.innerHTML =
-  "<table><tr><th>Name</th><th>Value</th><th>Status</th><th>Alert</th></tr>" +
+  "<table><tr><th>Name</th><th>Value</th><th>Status</th></tr>" +
 
-  data.map(t=>{
+  data.map(t => {
 
-    const status=getStatus(t.bac);
-
-    if(status==="FAIL") triggerAlert(t);
+    const status = (parseFloat(t.bac) === 0) ? "PASS" : "FAIL";
 
     return `
       <tr class="${status==='FAIL'?'fail':'pass'}">
         <td>${t.name}</td>
         <td>${t.bac}</td>
         <td>${status}</td>
-        <td>${status==="FAIL"?"🚨 AUTO":""}</td>
       </tr>
     `;
   }).join("") +
@@ -256,123 +278,41 @@ function renderHistory(data){
   "</table>";
 }
 
-/* ================= KPI + INTELLIGENCE ENGINE ================= */
+/* ================= KPI ENGINE ================= */
 function renderKPI(data){
 
-  let pass=0, fail=0;
+  let pass = 0;
+  let fail = 0;
 
-  let deptMap={};
-  let userMap={};
-  let hourlyMap={};
+  data.forEach(t => {
 
-  data.forEach(t=>{
+    const status = (parseFloat(t.bac) === 0) ? "PASS" : "FAIL";
 
-    let status=getStatus(t.bac);
-
-    if(status==="PASS") pass++;
+    if(status === "PASS") pass++;
     else fail++;
-
-    /* DEPT RISK */
-    let d=t.department||"UNKNOWN";
-    deptMap[d]=deptMap[d]||{pass:0,fail:0};
-    deptMap[d][status.toLowerCase()]++;
-
-    /* USER BEHAVIOR */
-    userMap[t.name]=userMap[t.name]||{pass:0,fail:0};
-    userMap[t.name][status.toLowerCase()]++;
-
-    /* ANOMALY DETECTION */
-    let h=t.timestamp?new Date(t.timestamp).getHours():null;
-    if(h!==null){
-      hourlyMap[h]=(hourlyMap[h]||0)+1;
-    }
   });
 
-  let total=data.length;
-  let compliance=total?((pass/total)*100).toFixed(2):0;
+  const total = data.length;
+  const compliance = total ? ((pass/total)*100).toFixed(2) : 0;
 
-  /* KPI CORE */
-  let html=`
-  <table>
-    <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
-    <tr>
-      <td>${total}</td>
-      <td>${pass}</td>
-      <td>${fail}</td>
-      <td>${compliance}%</td>
-    </tr>
-  </table>
-  `;
-
-  /* RISK ENGINE */
-  html+=`
-  <br><table>
-    <tr><th>Department</th><th>FAIL</th></tr>
-    ${Object.keys(deptMap).map(d=>`
+  kpiBox.innerHTML = `
+    <table>
+      <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
       <tr>
-        <td>${d}</td>
-        <td>${deptMap[d].fail||0}</td>
+        <td>${total}</td>
+        <td>${pass}</td>
+        <td>${fail}</td>
+        <td>${compliance}%</td>
       </tr>
-    `).join("")}
-  </table>
+    </table>
   `;
-
-  /* USER ANALYTICS */
-  html+=`
-  <br><table>
-    <tr><th>User</th><th>FAIL</th></tr>
-    ${Object.keys(userMap).map(u=>`
-      <tr>
-        <td>${u}</td>
-        <td>${userMap[u].fail||0}</td>
-      </tr>
-    `).join("")}
-  </table>
-  `;
-
-  /* ANOMALY */
-  html+=`
-  <br><table>
-    <tr><th>Hour</th><th>Activity</th></tr>
-    ${Object.keys(hourlyMap).map(h=>`
-      <tr>
-        <td>${h}:00</td>
-        <td>${hourlyMap[h]}</td>
-      </tr>
-    `).join("")}
-  </table>
-  `;
-
-  kpiBox.innerHTML=html;
-
-  drawChart(hourlyMap);
 }
 
-/* ================= CHART ================= */
-function drawChart(daily){
-
-  const c=chart.getContext("2d");
-  c.clearRect(0,0,400,200);
-
-  let keys=Object.keys(daily).slice(-7);
-  let vals=keys.map(k=>daily[k]);
-  let max=vals.length?Math.max(...vals):1;
-
-  keys.forEach((k,i)=>{
-
-    let h=(daily[k]/max)*150;
-
-    c.fillStyle="#2563eb";
-    c.fillRect(i*50,150-h,30,h);
-
-    c.fillStyle="#fff";
-    c.fillText(daily[k],i*50,140-h);
-  });
-}
-
-/* ================= PWA ================= */
+/* ================= PWA (OPTIONAL) ================= */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js');
+  navigator.serviceWorker.register('sw.js')
+  .then(() => console.log("SW OK"))
+  .catch(err => console.log("SW ERROR", err));
 }
 
 </script>
