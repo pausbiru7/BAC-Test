@@ -1,321 +1,740 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring Pemeriksaan Pekerja</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #dbe3ef;
+      --primary: #0f62fe;
+      --primary-dark: #0b4fd1;
+      --danger: #dc2626;
+      --success: #15803d;
+      --warning: #b45309;
+      --info-bg: #eff6ff;
+      --danger-bg: #fef2f2;
+      --success-bg: #f0fdf4;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
 
-<meta charset="UTF-8">
-<title>🧪 HSE Alcohol Test System</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0b1220">
-<link rel="manifest" href="manifest.json">
-
-<style>
-body {
-  font-family: Arial;
-  background:#0b1220;
-  color:#fff;
-  margin:0;
-  padding:20px;
-}
-
-.card {
-  background:#1e293b;
-  padding:15px;
-  border-radius:10px;
-  margin-top:15px;
-}
-
-.grid {
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:15px;
-}
-
-input, select, button {
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  border:none;
-  border-radius:5px;
-}
-
-button {
-  background:#2563eb;
-  color:white;
-  cursor:pointer;
-}
-
-table {
-  width:100%;
-  border-collapse:collapse;
-}
-
-td,th {
-  border:1px solid #334155;
-  padding:6px;
-  font-size:12px;
-}
-
-.pass { background:green; }
-.fail { background:red; }
-
-.footer {
-  text-align:center;
-  font-size:12px;
-  opacity:0.6;
-  margin-top:20px;
-}
-</style>
-
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar, .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .topbar { margin-bottom: 20px; }
+    h1, h2, h3, p { margin-top: 0; }
+    .subtitle, .hint { color: var(--muted); }
+    .grid {
+      display: grid;
+      gap: 20px;
+    }
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .top-sections { margin-bottom: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+    .inline-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .period-form {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    .summary-inline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    input, select, button, textarea {
+      font: inherit;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 12px;
+      background: #fff;
+      color: var(--text);
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: var(--primary-dark); }
+    button.secondary {
+      background: #eef2ff;
+      color: #1e3a8a;
+    }
+    button.secondary:hover { background: #dbeafe; }
+    .status {
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      border: 1px solid transparent;
+    }
+    .status.info { background: var(--info-bg); color: #1d4ed8; border-color: #bfdbfe; }
+    .status.success { background: var(--success-bg); color: var(--success); border-color: #bbf7d0; }
+    .status.error { background: var(--danger-bg); color: var(--danger); border-color: #fecaca; }
+    .debug {
+      margin: 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #e5e7eb;
+      min-height: 180px;
+      overflow: auto;
+      font-size: 12px;
+    }
+    .hidden { display: none; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: #f8fbff;
+    }
+    .stat-card .label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      background: #f8fafc;
+      color: var(--muted);
+      position: sticky;
+      top: 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge.pass { background: #dcfce7; color: #166534; }
+    .badge.fail { background: #fee2e2; color: #991b1b; }
+    .badge.pending { background: #fef3c7; color: #92400e; }
+    .report-box {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--muted);
+      min-height: 220px;
+      background: #fcfdff;
+    }
+    @media (max-width: 900px) {
+      .grid.two, .stats-grid { grid-template-columns: 1fr; }
+      .topbar, .section-head { flex-direction: column; align-items: stretch; }
+      .container { padding: 14px; }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="container">
+    <header class="topbar">
+      <div>
+        <h1>Monitoring Pemeriksaan Pekerja</h1>
+        <p class="subtitle">Frontend sederhana untuk GAS Web App</p>
+      </div>
+      <button id="logoutBtn" class="secondary">Logout</button>
+    </header>
 
-<!-- ================= LOGIN ================= -->
-<div id="loginBox" class="card">
-  <h2>🔐 HSE Login</h2>
+    <section class="card config-card">
+      <h2>Konfigurasi API</h2>
+      <div class="grid two">
+        <label>
+          <span>WEB_APP_URL</span>
+          <input id="webAppUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
+        </label>
+        <label>
+          <span>Token Aktif</span>
+          <input id="tokenField" type="text" placeholder="Token akan muncul setelah login" readonly />
+        </label>
+      </div>
+      <p class="hint">Paste URL deploy Web App GAS kamu di sini, lalu login.</p>
+    </section>
 
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
+    <section class="grid two top-sections">
+      <section class="card">
+        <h2>Login</h2>
+        <form id="loginForm" class="stack">
+          <label><span>Username</span><input name="username" type="text" value="admin" required /></label>
+          <label><span>Password</span><input name="password" type="password" value="admin123" required /></label>
+          <button type="submit">Login</button>
+        </form>
+      </section>
 
-  <button onclick="login()">Login</button>
-</div>
+      <section class="card">
+        <h2>Status</h2>
+        <div id="statusBox" class="status info">Siap digunakan.</div>
+        <pre id="debugBox" class="debug">Belum ada response.</pre>
+      </section>
+    </section>
 
-<!-- ================= APP ================= -->
-<div id="app" style="display:none;">
+    <main id="appSection" class="app hidden">
+      <section class="card">
+        <h2>Filter Periode</h2>
+        <form id="periodForm" class="period-form">
+          <label>
+            <span>Bulan</span>
+            <select id="periodMonth" name="bulan">
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+          </label>
+          <label>
+            <span>Tahun</span>
+            <input id="periodYear" name="tahun" type="number" min="2020" max="2100" />
+          </label>
+          <div></div>
+          <button type="submit">Terapkan Periode</button>
+        </form>
+      </section>
 
-<div class="card">
-  <h2>🧪 HSE Alcohol Test System</h2>
-</div>
+      <section class="card">
+        <div class="section-head">
+          <h2>Dashboard</h2>
+          <button id="refreshDashboardBtn">Refresh Dashboard</button>
+        </div>
+        <div id="dashboardCards" class="stats-grid"></div>
+        <div id="recentChecks" class="table-wrap"></div>
+      </section>
 
-<div class="grid">
+      <section class="card">
+        <div class="section-head">
+          <h2>Progress Pekerja</h2>
+          <button id="loadProgressBtn" class="secondary">Muat Progress</button>
+        </div>
+        <div id="progressSummary" class="summary-inline"></div>
+        <div id="progressTable" class="table-wrap"></div>
+      </section>
 
-  <div class="card">
-    <h3>👷 Worker</h3>
+      <section class="grid two">
+        <section class="card">
+          <div class="section-head">
+            <h2>Data Pekerja</h2>
+            <button id="loadWorkersBtn" class="secondary">Muat Pekerja</button>
+          </div>
+          <form id="workerFilterForm" class="inline-form">
+            <input name="q" type="text" placeholder="Cari nama / NIK / divisi" />
+            <button type="submit">Cari</button>
+          </form>
+          <div id="workersTable" class="table-wrap"></div>
+        </section>
 
-    <input id="name" placeholder="Nama">
-    <input id="phone" placeholder="No HP">
-    <input id="dept" placeholder="Department">
+        <section class="card">
+          <h2>Tambah Pekerja</h2>
+          <form id="addWorkerForm" class="stack">
+            <label><span>NIK</span><input name="nik" type="text" required /></label>
+            <label><span>Nama</span><input name="nama" type="text" required /></label>
+            <label><span>Divisi</span><input name="divisi" type="text" /></label>
+            <label><span>Jabatan</span><input name="jabatan" type="text" /></label>
+            <label><span>Perusahaan</span><input name="perusahaan" type="text" /></label>
+            <label><span>Lokasi</span><input name="lokasi" type="text" /></label>
+            <label>
+              <span>Status Aktif</span>
+              <select name="status_aktif">
+                <option value="Aktif">Aktif</option>
+                <option value="Nonaktif">Nonaktif</option>
+              </select>
+            </label>
+            <button type="submit">Simpan Pekerja</button>
+          </form>
+        </section>
+      </section>
 
-    <button onclick="saveWorker()">Save Worker</button>
+      <section class="grid two">
+        <section class="card">
+          <h2>Input Pemeriksaan</h2>
+          <form id="checkForm" class="stack">
+            <label>
+              <span>Pilih Pekerja</span>
+              <select id="checkWorkerId" name="worker_id" required>
+                <option value="">-- Pilih Pekerja --</option>
+              </select>
+            </label>
+            <label><span>Tanggal</span><input name="tanggal" type="date" required /></label>
+            <label><span>Jenis Pemeriksaan</span><input name="jenis_pemeriksaan" type="text" value="MCU" required /></label>
+            <label><span>Nilai</span><input name="nilai" type="number" step="0.01" value="0.00" required /></label>
+            <label><span>Catatan</span><textarea name="catatan" placeholder="Catatan pemeriksaan"></textarea></label>
+            <button type="submit">Simpan Pemeriksaan</button>
+          </form>
+        </section>
 
-    <div id="workerList"></div>
+        <section class="card">
+          <div class="section-head">
+            <h2>Laporan Bulanan</h2>
+            <button id="loadReportBtn" class="secondary">Muat Laporan</button>
+          </div>
+          <div id="reportBox" class="report-box">Belum ada laporan.</div>
+        </section>
+      </section>
+    </main>
   </div>
 
-  <div class="card">
-    <h3>🧪 Test</h3>
+  <script>
+    const state = {
+      webAppUrl: '',
+      token: '',
+      workers: []
+    };
 
-    <select id="workerSelect"></select>
-    <input id="bac" placeholder="Value (0 = PASS, >0 = FAIL)">
+    const els = {
+      webAppUrl: document.getElementById('webAppUrl'),
+      tokenField: document.getElementById('tokenField'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      loginForm: document.getElementById('loginForm'),
+      statusBox: document.getElementById('statusBox'),
+      debugBox: document.getElementById('debugBox'),
+      appSection: document.getElementById('appSection'),
+      periodForm: document.getElementById('periodForm'),
+      periodMonth: document.getElementById('periodMonth'),
+      periodYear: document.getElementById('periodYear'),
+      dashboardCards: document.getElementById('dashboardCards'),
+      recentChecks: document.getElementById('recentChecks'),
+      progressSummary: document.getElementById('progressSummary'),
+      progressTable: document.getElementById('progressTable'),
+      loadProgressBtn: document.getElementById('loadProgressBtn'),
+      workerFilterForm: document.getElementById('workerFilterForm'),
+      workersTable: document.getElementById('workersTable'),
+      addWorkerForm: document.getElementById('addWorkerForm'),
+      loadWorkersBtn: document.getElementById('loadWorkersBtn'),
+      checkForm: document.getElementById('checkForm'),
+      checkWorkerId: document.getElementById('checkWorkerId'),
+      refreshDashboardBtn: document.getElementById('refreshDashboardBtn'),
+      loadReportBtn: document.getElementById('loadReportBtn'),
+      reportBox: document.getElementById('reportBox')
+    };
 
-    <button onclick="submitTest()">Submit Test</button>
-  </div>
+    function init() {
+      const savedUrl = localStorage.getItem('gas_web_app_url') || '';
+      const savedToken = localStorage.getItem('gas_token') || '';
+      els.webAppUrl.value = savedUrl;
+      els.tokenField.value = savedToken;
+      state.webAppUrl = savedUrl;
+      state.token = savedToken;
+      setTodayDefault();
+      setDefaultPeriod();
+      bindEvents();
+      if (savedToken && savedUrl) {
+        verifyToken();
+      }
+    }
 
-</div>
+    function bindEvents() {
+      els.webAppUrl.addEventListener('change', () => {
+        state.webAppUrl = els.webAppUrl.value.trim();
+        localStorage.setItem('gas_web_app_url', state.webAppUrl);
+      });
 
-<!-- HISTORY -->
-<div class="card">
-  <h3>📊 History</h3>
-  <button onclick="loadData()">Refresh</button>
-  <div id="history"></div>
-</div>
+      els.loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = new FormData(els.loginForm);
+        await login(form.get('username'), form.get('password'));
+      });
 
-<!-- KPI -->
-<div class="card">
-  <h3>📈 KPI Dashboard</h3>
-  <div id="kpiBox"></div>
-</div>
+      els.logoutBtn.addEventListener('click', async () => {
+        if (!state.token) return;
+        try {
+          await postJson({ action: 'logout', token: state.token });
+        } catch (err) {}
+        clearSession();
+        setStatus('Logout berhasil.', 'success');
+      });
 
-<div class="footer">
-Powered by Pausbiru7
-</div>
+      els.periodForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await Promise.all([loadDashboard(), loadProgress(), loadReport()]);
+      });
 
-</div>
+      els.refreshDashboardBtn.addEventListener('click', loadDashboard);
+      els.loadWorkersBtn.addEventListener('click', loadWorkers);
+      els.loadReportBtn.addEventListener('click', loadReport);
+      els.loadProgressBtn.addEventListener('click', loadProgress);
 
-<script>
+      els.workerFilterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await loadWorkers();
+      });
 
-const API = "https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec";
+      els.addWorkerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = formToObject(els.addWorkerForm);
+        payload.action = 'addWorker';
+        payload.token = state.token;
+        const res = await postJson(payload);
+        handleApiResponse(res, 'Pekerja berhasil ditambahkan.');
+        els.addWorkerForm.reset();
+        await loadWorkers();
+      });
 
-const API_KEY = "HSE-ALCOHOL-2026";
+      els.checkForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = formToObject(els.checkForm);
+        payload.action = 'saveCheck';
+        payload.token = state.token;
+        const res = await postJson(payload);
+        handleApiResponse(res, 'Pemeriksaan berhasil disimpan.');
+        await Promise.all([loadDashboard(), loadWorkers(), loadProgress(), loadReport()]);
+      });
+    }
 
-let workers = [];
-let isLoading = false;
+    async function login(username, password) {
+      const res = await postJson({ action: 'login', username, password });
+      if (!res.ok) {
+        handleApiResponse(res);
+        return;
+      }
+      state.token = res.data.token;
+      els.tokenField.value = state.token;
+      localStorage.setItem('gas_token', state.token);
+      setStatus(`Login berhasil sebagai ${res.data.user.nama}.`, 'success');
+      showDebug(res);
+      els.appSection.classList.remove('hidden');
+      await Promise.all([loadDashboard(), loadWorkers(), loadProgress(), loadReport()]);
+    }
 
-/* ================= LOGIN ================= */
-function login(){
+    async function verifyToken() {
+      try {
+        const res = await postJson({ action: 'verifyToken', token: state.token });
+        if (!res.ok) {
+          clearSession();
+          setStatus('Token sudah tidak valid. Silakan login lagi.', 'error');
+          return;
+        }
+        els.appSection.classList.remove('hidden');
+        setStatus(`Sesi aktif untuk ${res.data.user.nama}.`, 'success');
+        showDebug(res);
+        await Promise.all([loadDashboard(), loadWorkers(), loadProgress(), loadReport()]);
+      } catch (err) {
+        setStatus(err.message, 'error');
+      }
+    }
 
-  const u = user.value;
-  const p = pass.value;
+    async function loadDashboard() {
+      const period = getSelectedPeriod();
+      const res = await postJson({ action: 'getDashboard', token: state.token, ...period });
+      handleApiResponse(res);
+      renderDashboard(res.data || {});
+    }
 
-  if(u==="admin" && p==="admin123"){
-    loginBox.style.display="none";
-    app.style.display="block";
-    loadData();
-  } else {
-    alert("Login gagal");
-  }
-}
+    async function loadWorkers() {
+      const filters = formToObject(els.workerFilterForm);
+      const res = await postJson({ action: 'listWorkers', token: state.token, ...filters });
+      handleApiResponse(res);
+      state.workers = res.data || [];
+      renderWorkers(state.workers);
+      renderWorkerSelect(state.workers);
+    }
 
-/* ================= LOAD DATA ================= */
-function loadData(){
+    async function loadProgress() {
+      const period = getSelectedPeriod();
+      const res = await postJson({ action: 'getWorkerProgress', token: state.token, ...period });
+      handleApiResponse(res);
+      renderProgress(res.data || {});
+    }
 
-  if(isLoading) return;
-  isLoading = true;
+    async function loadReport() {
+      const period = getSelectedPeriod();
+      const res = await postJson({
+        action: 'getMonthlyReport',
+        token: state.token,
+        ...period
+      });
+      handleApiResponse(res);
+      renderReport(res.data || {});
+    }
 
-  fetch(`${API}?key=${API_KEY}`)
-  .then(r => r.json())
-  .then(data => {
+    async function postJson(body) {
+      const url = els.webAppUrl.value.trim();
+      if (!url) throw new Error('WEB_APP_URL belum diisi.');
+      state.webAppUrl = url;
+      localStorage.setItem('gas_web_app_url', url);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body)
+      });
+      const json = await response.json();
+      showDebug(json);
+      return json;
+    }
 
-    workers = data.workers || [];
+    function renderDashboard(data) {
+      const summary = data.summary || {};
+      const cards = [
+        ['Total Pekerja', summary.totalWorkers || 0],
+        ['Sudah Dicek', summary.checkedWorkers || 0],
+        ['Belum Dicek', summary.pendingWorkers || 0],
+        ['FAIL', summary.failChecks || 0]
+      ];
+      els.dashboardCards.innerHTML = cards.map(item => `
+        <div class="stat-card">
+          <div class="label">${item[0]}</div>
+          <div class="value">${item[1]}</div>
+        </div>
+      `).join('');
 
-    renderWorkers();
-    renderDropdown();
-    renderHistory(data.tests || []);
-    renderKPI(data.tests || []);
+      const rows = data.recentChecks || [];
+      if (!rows.length) {
+        els.recentChecks.innerHTML = '<div class="report-box">Belum ada data pemeriksaan terbaru.</div>';
+        return;
+      }
+      els.recentChecks.innerHTML = tableHtml([
+        'Tanggal', 'Worker ID', 'Jenis', 'Nilai', 'Hasil', 'Input By'
+      ], rows.map(r => [
+        escapeHtml(r.tanggal || ''),
+        escapeHtml(r.worker_id || ''),
+        escapeHtml(r.jenis_pemeriksaan || ''),
+        escapeHtml(String(r.nilai ?? '')),
+        badgeHtml(r.hasil),
+        escapeHtml(r.input_by || '')
+      ]));
+    }
 
-    isLoading = false;
-  })
-  .catch(err => {
-    console.log("LOAD ERROR:", err);
-    isLoading = false;
-  });
-}
+    function renderWorkers(rows) {
+      if (!rows.length) {
+        els.workersTable.innerHTML = '<div class="report-box">Belum ada data pekerja.</div>';
+        return;
+      }
+      els.workersTable.innerHTML = tableHtml([
+        'NIK', 'Nama', 'Divisi', 'Jabatan', 'Lokasi', 'Status', 'Hasil Terakhir'
+      ], rows.map(r => [
+        escapeHtml(r.nik || ''),
+        escapeHtml(r.nama || ''),
+        escapeHtml(r.divisi || ''),
+        escapeHtml(r.jabatan || ''),
+        escapeHtml(r.lokasi || ''),
+        escapeHtml(r.status_aktif || ''),
+        r.latest_check ? badgeHtml(r.latest_check.hasil) : '<span class="badge pending">BELUM</span>'
+      ]));
+    }
 
-/* ================= SAVE WORKER (FIXED) ================= */
-function saveWorker(){
+    function renderWorkerSelect(rows) {
+      const current = els.checkWorkerId.value;
+      const options = ['<option value="">-- Pilih Pekerja --</option>'].concat(
+        rows.map(r => `<option value="${escapeAttr(r.id)}">${escapeHtml(r.nama)} (${escapeHtml(r.nik || '-')})</option>`)
+      );
+      els.checkWorkerId.innerHTML = options.join('');
+      if (current) els.checkWorkerId.value = current;
+    }
 
-  const payload = {
-    key: API_KEY,
-    action: "worker_save",
-    name: name.value,
-    phone: phone.value,
-    department: dept.value
-  };
+    function renderReport(data) {
+      const overall = data.overall || {};
+      const divisi = data.byDivisi || [];
+      const lokasi = data.byLokasi || [];
+      let html = '';
+      html += `<h3>Ringkasan</h3>`;
+      html += `<p>Total Checks: <strong>${overall.totalChecks || 0}</strong><br>PASS: <strong>${overall.passChecks || 0}</strong><br>FAIL: <strong>${overall.failChecks || 0}</strong></p>`;
+      html += `<h3>Per Divisi</h3>`;
+      html += divisi.length ? tableHtml(['Divisi', 'Total', 'PASS', 'FAIL'], divisi.map(r => [escapeHtml(r.name), r.total, r.pass, r.fail])) : '<p>Belum ada data.</p>';
+      html += `<h3>Per Lokasi</h3>`;
+      html += lokasi.length ? tableHtml(['Lokasi', 'Total', 'PASS', 'FAIL'], lokasi.map(r => [escapeHtml(r.name), r.total, r.pass, r.fail])) : '<p>Belum ada data.</p>';
+      els.reportBox.innerHTML = html;
+    }
 
-  console.log("SEND WORKER:", payload);
+    function renderProgress(data) {
+      const summary = data.summary || {};
+      const rows = data.rows || data.workers || [];
+      const cards = [
+        ['Total Pekerja', summary.totalWorkers || rows.length || 0],
+        ['Sudah Dicek', summary.checkedWorkers || 0],
+        ['Belum Dicek', summary.pendingWorkers || 0],
+        ['Persentase', `${summary.progressPercent || 0}%`]
+      ];
+      els.progressSummary.innerHTML = cards.map(item => `
+        <div class="stat-card">
+          <div class="label">${item[0]}</div>
+          <div class="value">${item[1]}</div>
+        </div>
+      `).join('');
 
-  fetch(API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.text())
-  .then(res => {
-    console.log("WORKER RESPONSE:", res);
-    loadData();
-  })
-  .catch(err => console.log("WORKER ERROR:", err));
-}
+      if (!rows.length) {
+        els.progressTable.innerHTML = '<div class="report-box">Belum ada data progress pekerja untuk periode ini.</div>';
+        return;
+      }
 
-/* ================= SAVE TEST (FIXED) ================= */
-function submitTest(){
+      els.progressTable.innerHTML = tableHtml(
+        ['NIK', 'Nama', 'Divisi', 'Lokasi', 'Status Progress', 'Hasil Terakhir', 'Tanggal Terakhir'],
+        rows.map(r => [
+          escapeHtml(r.nik || ''),
+          escapeHtml(r.nama || ''),
+          escapeHtml(r.divisi || ''),
+          escapeHtml(r.lokasi || ''),
+          r.checked ? '<span class="badge pass">SUDAH</span>' : '<span class="badge pending">BELUM</span>',
+          badgeHtml(r.hasil_terakhir || r.hasil || 'BELUM'),
+          escapeHtml(r.tanggal_terakhir || r.tanggal || '-')
+        ])
+      );
+    }
 
-  const payload = {
-    key: API_KEY,
-    action: "test_insert",
-    worker_id: workers[workerSelect.value]?.name,
-    bac: bac.value
-  };
+    function tableHtml(headers, rows) {
+      const head = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+      const body = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+      return `<table>${head}${body}</table>`;
+    }
 
-  console.log("SEND TEST:", payload);
+    function badgeHtml(value) {
+      const v = String(value || '').toUpperCase();
+      const cls = v === 'PASS' ? 'pass' : v === 'FAIL' ? 'fail' : 'pending';
+      return `<span class="badge ${cls}">${escapeHtml(v || 'BELUM')}</span>`;
+    }
 
-  fetch(API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.text())
-  .then(res => {
-    console.log("TEST RESPONSE:", res);
-    loadData();
-  })
-  .catch(err => console.log("TEST ERROR:", err));
-}
+    function formToObject(form) {
+      const fd = new FormData(form);
+      const obj = {};
+      for (const [key, value] of fd.entries()) {
+        obj[key] = String(value).trim();
+      }
+      return obj;
+    }
 
-/* ================= RENDER WORKERS ================= */
-function renderWorkers(){
+    function handleApiResponse(res, successMessage) {
+      if (!res.ok) {
+        setStatus(res.message || 'Request gagal.', 'error');
+        throw new Error(res.message || 'Request gagal.');
+      }
+      setStatus(successMessage || res.message || 'Request berhasil.', 'success');
+      showDebug(res);
+    }
 
-  workerList.innerHTML =
-  "<table><tr><th>Name</th><th>Phone</th></tr>" +
-  workers.map(w =>
-    `<tr><td>${w.name}</td><td>${w.phone}</td></tr>`
-  ).join("") +
-  "</table>";
-}
+    function setStatus(message, type) {
+      els.statusBox.className = `status ${type || 'info'}`;
+      els.statusBox.textContent = message;
+    }
 
-/* ================= DROPDOWN ================= */
-function renderDropdown(){
+    function showDebug(data) {
+      els.debugBox.textContent = JSON.stringify(data, null, 2);
+    }
 
-  workerSelect.innerHTML =
-  workers.map((w,i)=>
-    `<option value="${i}">${w.name}</option>`
-  ).join("");
-}
+    function clearSession() {
+      state.token = '';
+      localStorage.removeItem('gas_token');
+      els.tokenField.value = '';
+      els.appSection.classList.add('hidden');
+      els.progressSummary.innerHTML = '';
+      els.progressTable.innerHTML = '';
+    }
 
-/* ================= HISTORY (PASS/FAIL RULE) ================= */
-function renderHistory(data){
+    function setTodayDefault() {
+      const today = new Date().toISOString().slice(0, 10);
+      const dateInput = els.checkForm.querySelector('input[name="tanggal"]');
+      if (dateInput) dateInput.value = today;
+    }
 
-  history.innerHTML =
-  "<table><tr><th>Name</th><th>Value</th><th>Status</th></tr>" +
+    function setDefaultPeriod() {
+      const now = new Date();
+      els.periodMonth.value = String(now.getMonth() + 1);
+      els.periodYear.value = String(now.getFullYear());
+    }
 
-  data.map(t => {
+    function getSelectedPeriod() {
+      return {
+        bulan: Number(els.periodMonth.value || new Date().getMonth() + 1),
+        tahun: Number(els.periodYear.value || new Date().getFullYear())
+      };
+    }
 
-    const status = (parseFloat(t.bac) === 0) ? "PASS" : "FAIL";
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-    return `
-      <tr class="${status==='FAIL'?'fail':'pass'}">
-        <td>${t.name}</td>
-        <td>${t.bac}</td>
-        <td>${status}</td>
-      </tr>
-    `;
-  }).join("") +
+    function escapeAttr(value) {
+      return escapeHtml(value);
+    }
 
-  "</table>";
-}
-
-/* ================= KPI ENGINE ================= */
-function renderKPI(data){
-
-  let pass = 0;
-  let fail = 0;
-
-  data.forEach(t => {
-
-    const status = (parseFloat(t.bac) === 0) ? "PASS" : "FAIL";
-
-    if(status === "PASS") pass++;
-    else fail++;
-  });
-
-  const total = data.length;
-  const compliance = total ? ((pass/total)*100).toFixed(2) : 0;
-
-  kpiBox.innerHTML = `
-    <table>
-      <tr><th>Total</th><th>PASS</th><th>FAIL</th><th>Compliance</th></tr>
-      <tr>
-        <td>${total}</td>
-        <td>${pass}</td>
-        <td>${fail}</td>
-        <td>${compliance}%</td>
-      </tr>
-    </table>
-  `;
-}
-
-/* ================= PWA (OPTIONAL) ================= */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js')
-  .then(() => console.log("SW OK"))
-  .catch(err => console.log("SW ERROR", err));
-}
-
-</script>
-
+    init();
+  </script>
 </body>
 </html>
