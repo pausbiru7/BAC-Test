@@ -1150,20 +1150,56 @@ function updateAgeFromBirthDate() {
     }
 
     async function handleShareProgress() {
-      if (!state.selectedWorker) return alert('Pilih pekerja terlebih dahulu.');
-      try {
-        await apiRequest('logShare', {
-          worker_id: state.selectedWorker.id,
-          jenis: 'progress',
-          target: 'print/share',
-          status: 'REQUESTED',
-          catatan: `Share progress pekerja ${state.selectedWorker.nama || ''}`
-        });
-        alert('Log share progress berhasil disimpan.');
-      } catch (err) {
-        alert(err.message || 'Gagal menyimpan log share progress.');
-      }
+  if (!state.selectedWorker) {
+    return alert('Pilih pekerja terlebih dahulu.');
+  }
+
+  try {
+    const rawPhone = state.selectedWorker.no_hp || state.selectedWorker.whatsapp || '';
+    let phone = String(rawPhone).replace(/\D/g, '');
+
+    if (!phone) {
+      return alert('Nomor WhatsApp pekerja belum tersedia.');
     }
+
+    if (phone.startsWith('0')) {
+      phone = '62' + phone.slice(1);
+    }
+
+    const message = [
+      'Halo, berikut progress pemeriksaan Anda.',
+      '',
+      `Nama: ${state.selectedWorker.nama || '-'}`,
+      `No ID: ${state.selectedWorker.nik || '-'}`,
+      `Tanggal Lahir: ${state.selectedWorker.tanggal_lahir || '-'}`,
+      `Usia: ${state.selectedWorker.usia || '-'}`,
+      `Jenis Kelamin: ${state.selectedWorker.jenis_kelamin || '-'}`,
+      '',
+      'Silakan hubungi petugas jika ada pertanyaan.'
+    ].join('\n');
+
+    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    const popup = window.open('', '_blank');
+
+    await apiRequest('logShare', {
+      worker_id: state.selectedWorker.id,
+      jenis: 'progress',
+      target: phone,
+      status: 'REQUESTED',
+      catatan: `Share progress pekerja ${state.selectedWorker.nama || ''}`
+    });
+
+    if (popup) {
+      popup.location.href = waUrl;
+      popup.focus();
+    } else {
+      window.location.href = waUrl;
+    }
+  } catch (err) {
+    alert(err.message || 'Gagal menyimpan log share progress.');
+  }
+}
 
     async function handleExportCsv() {
       const byJenis = state.reports?.byJenis || [];
