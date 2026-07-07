@@ -677,6 +677,11 @@
       </label>
 
       <label>
+  Usia *
+  <input type="text" id="workerUsia" name="usia" placeholder="Usia otomatis terisi" readonly required />
+</label>
+      
+      <label>
         Jenis Kelamin *
         <select id="workerJenisKelamin" name="jenis_kelamin" required>
           <option value="">-- Pilih jenis kelamin --</option>
@@ -753,6 +758,7 @@
       workerNoId: document.getElementById('workerNoId'),
       workerNama: document.getElementById('workerNama'),
       workerTanggalLahir: document.getElementById('workerTanggalLahir'),
+      workerUsia: document.getElementById('workerUsia'),
       workerJenisKelamin: document.getElementById('workerJenisKelamin'),
       workerWhatsapp: document.getElementById('workerWhatsapp'),
       reportPeriodForm: document.getElementById('reportPeriodForm'),
@@ -800,43 +806,46 @@
     }
 
     function bindEvents() {
-      els.navButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const target = btn.dataset.target;
-          switchScreen(target);
-          handleScreenEnter(target);
-        });
-      });
+  els.navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      switchScreen(target);
+      handleScreenEnter(target);
+    });
+  });
 
-      els.dashboardPeriodForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        syncPeriodFromDashboardForm();
-        await loadDashboard();
-      });
+  els.dashboardPeriodForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    syncPeriodFromDashboardForm();
+    await loadDashboard();
+  });
 
-      els.reportPeriodForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        syncPeriodFromReportForm();
-        await loadReports();
-      });
+  els.reportPeriodForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    syncPeriodFromReportForm();
+    await loadReports();
+  });
 
-      els.checkFormNew?.addEventListener('submit', handleSubmitCheck);
-      els.workerFormNew?.addEventListener('submit', handleSubmitWorker);
-      els.progressSearchInput?.addEventListener('input', handleProgressSearch);
-      els.workerSearchInput?.addEventListener('input', handleWorkerSearch);
-      els.openWorkerModalBtn?.addEventListener('click', () => openWorkerModal('add'));
-      els.closeWorkerModalBtn?.addEventListener('click', closeWorkerModal);
-      els.cancelWorkerModalBtn?.addEventListener('click', closeWorkerModal);
-      els.workerModal?.addEventListener('click', (e) => { if (e.target === els.workerModal) closeWorkerModal(); });
-      els.workerWhatsapp?.addEventListener('blur', normalizeWhatsappNumber);
-      els.inputNilai?.addEventListener('input', updateCheckResultFromValue);
-      els.printDashboardBtn?.addEventListener('click', () => window.print());
-      els.printProgressBtn?.addEventListener('click', () => window.print());
-      els.printReportBtn?.addEventListener('click', () => window.print());
-      els.shareDashboardBtn?.addEventListener('click', handleShareDashboard);
-      els.shareProgressBtn?.addEventListener('click', handleShareProgress);
-      els.exportCsvBtn?.addEventListener('click', handleExportCsv);
-    }
+  els.checkFormNew?.addEventListener('submit', handleSubmitCheck);
+  els.workerFormNew?.addEventListener('submit', handleSubmitWorker);
+  els.progressSearchInput?.addEventListener('input', handleProgressSearch);
+  els.workerSearchInput?.addEventListener('input', handleWorkerSearch);
+  els.openWorkerModalBtn?.addEventListener('click', () => openWorkerModal('add'));
+  els.closeWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+  els.cancelWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+  els.workerModal?.addEventListener('click', (e) => { if (e.target === els.workerModal) closeWorkerModal(); });
+
+  els.workerTanggalLahir?.addEventListener('change', updateAgeFromBirthDate);
+
+  els.workerWhatsapp?.addEventListener('blur', normalizeWhatsappNumber);
+  els.inputNilai?.addEventListener('input', updateCheckResultFromValue);
+  els.printDashboardBtn?.addEventListener('click', () => window.print());
+  els.printProgressBtn?.addEventListener('click', () => window.print());
+  els.printReportBtn?.addEventListener('click', () => window.print());
+  els.shareDashboardBtn?.addEventListener('click', handleShareDashboard);
+  els.shareProgressBtn?.addEventListener('click', handleShareProgress);
+  els.exportCsvBtn?.addEventListener('click', handleExportCsv);
+}
 
     function switchScreen(name) {
       state.activeScreen = name;
@@ -924,12 +933,36 @@
       els.workerModal?.setAttribute('aria-hidden', 'true');
     }
 
-   function resetWorkerForm() {
+function updateAgeFromBirthDate() {
+  const dob = els.workerTanggalLahir?.value || '';
+
+  if (!dob) {
+    if (els.workerUsia) els.workerUsia.value = '';
+    return;
+  }
+
+  const birthDate = new Date(dob);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  if (els.workerUsia) {
+    els.workerUsia.value = age >= 0 ? String(age) : '';
+  }
+}
+    
+ function resetWorkerForm() {
   els.workerFormNew?.reset();
   els.workerFormMode.value = 'add';
   els.workerIdEdit.value = '';
   els.workerNoId.value = '';
   els.workerNama.value = '';
+  if (els.workerUsia) els.workerUsia.value = '';
 }
 
    function fillWorkerForm(worker) {
@@ -939,6 +972,10 @@
 
   if (els.workerTanggalLahir) {
     els.workerTanggalLahir.value = worker.tanggal_lahir || '';
+  }
+
+  if (els.workerUsia) {
+    els.workerUsia.value = worker.usia || '';
   }
 
   if (els.workerJenisKelamin) {
@@ -1040,19 +1077,21 @@
       }
     }
 
-  async function handleSubmitWorker(e) {
+ async function handleSubmitWorker(e) {
   e.preventDefault();
 
   const mode = els.workerFormMode.value;
   const nik = (els.workerNoId.value || '').trim();
   const nama = (els.workerNama.value || '').trim();
   const tanggalLahir = els.workerTanggalLahir?.value || '';
+  const usia = (els.workerUsia?.value || '').trim();
   const jenisKelamin = els.workerJenisKelamin?.value || '';
   const noHp = (els.workerWhatsapp?.value || '').trim();
 
   if (!nik) return alert('No ID wajib diisi.');
   if (!nama) return alert('Nama lengkap wajib diisi.');
   if (!tanggalLahir) return alert('Tanggal lahir wajib diisi.');
+  if (!usia) return alert('Usia wajib terisi.');
   if (!jenisKelamin) return alert('Jenis kelamin wajib dipilih.');
   if (!noHp) return alert('No HP / WhatsApp wajib diisi.');
 
@@ -1060,6 +1099,7 @@
     nik,
     nama,
     tanggal_lahir: tanggalLahir,
+    usia,
     jenis_kelamin: jenisKelamin,
     no_hp: noHp
   };
@@ -1072,6 +1112,7 @@
       nik,
       nama,
       tanggal_lahir: tanggalLahir,
+      usia,
       jenis_kelamin: jenisKelamin,
       no_hp: noHp
     };
