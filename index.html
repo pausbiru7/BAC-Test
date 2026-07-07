@@ -706,29 +706,47 @@
         <input type="hidden" id="workerFormMode" value="add" />
         <input type="hidden" id="workerIdEdit" name="id" />
 
-        <label>
-          Nama Lengkap *
-          <input type="text" id="workerNama" name="nama" placeholder="Masukkan nama lengkap" />
-        </label>
+     <label>
+  No ID *
+  <input
+    type="text"
+    id="workerNoId"
+    name="nik"
+    placeholder="Masukkan No ID pekerja"
+    autocomplete="off"
+    required
+  />
+</label>
 
-        <label>
-          Tanggal Lahir *
-          <input type="date" id="workerTanggalLahir" name="tanggal_lahir" />
-        </label>
+<label>
+  Nama Lengkap *
+  <input
+    type="text"
+    id="workerNama"
+    name="nama"
+    placeholder="Masukkan nama lengkap"
+    required
+  />
+</label>
 
-        <label>
-          Usia
-          <input type="text" id="workerUsia" name="usia" placeholder="Otomatis" readonly />
-        </label>
+<label>
+  Tanggal Lahir *
+  <input
+    type="date"
+    id="workerTanggalLahir"
+    name="tanggal_lahir"
+    required
+  />
+</label>
 
-        <label>
-          Jenis Kelamin *
-          <select id="workerJenisKelamin" name="jenis_kelamin">
-            <option value="">-- Pilih jenis kelamin --</option>
-            <option value="Laki-laki">Laki-laki</option>
-            <option value="Perempuan">Perempuan</option>
-          </select>
-        </label>
+<label>
+  Jenis Kelamin *
+  <select id="workerJenisKelamin" name="jenis_kelamin" required>
+    <option value="">-- Pilih jenis kelamin --</option>
+    <option value="Laki-laki">Laki-laki</option>
+    <option value="Perempuan">Perempuan</option>
+  </select>
+</label>
 
         <label>
           No HP / WhatsApp *
@@ -744,101 +762,722 @@
       </form>
     </div>
   </div>
+<script>
+  const state = {
+    activeScreen: 'dashboard',
+    auth: {
+      token: '',
+      user: null
+    },
+    period: {
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear()
+    },
+    workers: [],
+    selectedWorker: null,
+    dashboard: null,
+    progressHistory: [],
+    reports: null,
+    isLoading: false
+  };
 
-  <script>
-    const APP_META = {
-      dashboard: {
-        title: 'Dashboard',
-        subtitle: 'Ringkasan hasil pemeriksaan pekerja'
-      },
-      input: {
-        title: 'Input Pemeriksaan',
-        subtitle: 'Input cepat BAC test / alcohol test'
-      },
-      progress: {
-        title: 'Progress Pekerja',
-        subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan'
-      },
-      workers: {
-        title: 'Data Pekerja',
-        subtitle: 'Kelola data pekerja'
-      },
-      reports: {
-        title: 'Laporan Bulanan',
-        subtitle: 'Rekap hasil per periode'
-      }
+  const els = {
+    pageTitle: document.getElementById('pageTitle'),
+    pageSubtitle: document.getElementById('pageSubtitle'),
+
+    screens: document.querySelectorAll('.screen'),
+    navButtons: document.querySelectorAll('.nav-btn'),
+
+    dashboardPeriodForm: document.getElementById('dashboardPeriodForm'),
+    dashboardMonth: document.getElementById('dashboardMonth'),
+    dashboardYear: document.getElementById('dashboardYear'),
+    dashboardKpi: document.getElementById('dashboardKpi'),
+    dashboardChartBox: document.getElementById('dashboardChartBox'),
+    dashboardRecentChecks: document.getElementById('dashboardRecentChecks'),
+    printDashboardBtn: document.getElementById('printDashboardBtn'),
+    shareDashboardBtn: document.getElementById('shareDashboardBtn'),
+
+    checkFormNew: document.getElementById('checkFormNew'),
+    inputWorkerId: document.getElementById('inputWorkerId'),
+    inputTanggal: document.getElementById('inputTanggal'),
+    inputJenis: document.getElementById('inputJenis'),
+    inputNilai: document.getElementById('inputNilai'),
+    inputHasil: document.getElementById('inputHasil'),
+    inputCatatan: document.getElementById('inputCatatan'),
+
+    progressSearchInput: document.getElementById('progressSearchInput'),
+    progressSearchResults: document.getElementById('progressSearchResults'),
+    progressWorkerSummary: document.getElementById('progressWorkerSummary'),
+    progressHistoryList: document.getElementById('progressHistoryList'),
+    viewAllHistoryBtn: document.getElementById('viewAllHistoryBtn'),
+    printProgressBtn: document.getElementById('printProgressBtn'),
+    shareProgressBtn: document.getElementById('shareProgressBtn'),
+
+    workerSearchInput: document.getElementById('workerSearchInput'),
+    workersList: document.getElementById('workersList'),
+    openWorkerModalBtn: document.getElementById('openWorkerModalBtn'),
+
+    workerModal: document.getElementById('workerModal'),
+    closeWorkerModalBtn: document.getElementById('closeWorkerModalBtn'),
+    cancelWorkerModalBtn: document.getElementById('cancelWorkerModalBtn'),
+   workerFormNew: document.getElementById('workerFormNew'),
+workerFormMode: document.getElementById('workerFormMode'),
+workerIdEdit: document.getElementById('workerIdEdit'),
+workerNoId: document.getElementById('workerNoId'),
+workerNama: document.getElementById('workerNama'),
+workerTanggalLahir: document.getElementById('workerTanggalLahir'),
+workerUsia: document.getElementById('workerUsia'),
+workerJenisKelamin: document.getElementById('workerJenisKelamin'),
+workerWhatsapp: document.getElementById('workerWhatsapp'),
+
+    reportPeriodForm: document.getElementById('reportPeriodForm'),
+    reportMonth: document.getElementById('reportMonth'),
+    reportYear: document.getElementById('reportYear'),
+    reportSummaryKpi: document.getElementById('reportSummaryKpi'),
+    reportChartBox: document.getElementById('reportChartBox'),
+    reportDivisiList: document.getElementById('reportDivisiList'),
+    reportLokasiList: document.getElementById('reportLokasiList'),
+    printReportBtn: document.getElementById('printReportBtn'),
+    exportCsvBtn: document.getElementById('exportCsvBtn')
+  };
+
+  const APP_META = {
+    dashboard: {
+      title: 'Dashboard',
+      subtitle: 'Ringkasan hasil pemeriksaan pekerja'
+    },
+    input: {
+      title: 'Input Pemeriksaan',
+      subtitle: 'Input cepat BAC test / alcohol test'
+    },
+    progress: {
+      title: 'Progress Pekerja',
+      subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan'
+    },
+    workers: {
+      title: 'Data Pekerja',
+      subtitle: 'Kelola data pekerja'
+    },
+    reports: {
+      title: 'Laporan Bulanan',
+      subtitle: 'Rekap hasil per periode'
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  async function init() {
+    fillMonthOptions(els.dashboardMonth);
+    fillMonthOptions(els.reportMonth);
+    fillYearOptions(els.dashboardYear);
+    fillYearOptions(els.reportYear);
+
+    setDefaultPeriod();
+    bindEvents();
+    switchScreen('dashboard');
+
+    await bootstrapApp();
+  }
+
+  async function bootstrapApp() {
+    try {
+      await loadWorkersForSelect();
+      await loadWorkers();
+      await loadDashboard();
+      await loadReports();
+    } catch (err) {
+      console.error('Bootstrap gagal:', err);
+    }
+  }
+
+  function bindEvents() {
+    els.navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        switchScreen(target);
+        handleScreenEnter(target);
+      });
+    });
+
+    els.dashboardPeriodForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      syncPeriodFromDashboardForm();
+      await loadDashboard();
+    });
+
+    els.reportPeriodForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      syncPeriodFromReportForm();
+      await loadReports();
+    });
+
+    els.checkFormNew?.addEventListener('submit', handleSubmitCheck);
+    els.workerFormNew?.addEventListener('submit', handleSubmitWorker);
+
+    els.progressSearchInput?.addEventListener('input', handleProgressSearch);
+    els.workerSearchInput?.addEventListener('input', handleWorkerSearch);
+
+    els.openWorkerModalBtn?.addEventListener('click', () => openWorkerModal('add'));
+    els.closeWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+    els.cancelWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+
+    els.workerModal?.addEventListener('click', (e) => {
+      if (e.target === els.workerModal) closeWorkerModal();
+    });
+
+    els.workerTanggalLahir?.addEventListener('change', updateAgeFromBirthDate);
+    els.workerWhatsapp?.addEventListener('blur', normalizeWhatsappNumber);
+    els.inputNilai?.addEventListener('input', updateCheckResultFromValue);
+
+    els.printDashboardBtn?.addEventListener('click', () => window.print());
+    els.printProgressBtn?.addEventListener('click', () => window.print());
+    els.printReportBtn?.addEventListener('click', () => window.print());
+
+    els.shareDashboardBtn?.addEventListener('click', handleShareDashboard);
+    els.shareProgressBtn?.addEventListener('click', handleShareProgress);
+    els.exportCsvBtn?.addEventListener('click', handleExportCsv);
+  }
+
+  function switchScreen(name) {
+    state.activeScreen = name;
+
+    els.screens.forEach(el => {
+      el.classList.toggle('active', el.dataset.screen === name);
+    });
+
+    els.navButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.target === name);
+    });
+
+    const meta = APP_META[name] || APP_META.dashboard;
+    els.pageTitle.textContent = meta.title;
+    els.pageSubtitle.textContent = meta.subtitle;
+  }
+
+  function handleScreenEnter(name) {
+    if (name === 'dashboard') loadDashboard();
+    if (name === 'workers') loadWorkers();
+    if (name === 'reports') loadReports();
+  }
+
+  function fillMonthOptions(selectEl) {
+    if (!selectEl) return;
+
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    selectEl.innerHTML = months.map((label, i) => {
+      const value = i + 1;
+      return `<option value="${value}">${label}</option>`;
+    }).join('');
+  }
+
+  function fillYearOptions(selectEl, totalBack = 5) {
+    if (!selectEl) return;
+
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i <= totalBack; i++) {
+      years.push(currentYear - i);
+    }
+
+    selectEl.innerHTML = years.map(year => {
+      return `<option value="${year}">${year}</option>`;
+    }).join('');
+  }
+
+  function setDefaultPeriod() {
+    els.dashboardMonth.value = String(state.period.month);
+    els.dashboardYear.value = String(state.period.year);
+    els.reportMonth.value = String(state.period.month);
+    els.reportYear.value = String(state.period.year);
+
+    if (els.inputTanggal && !els.inputTanggal.value) {
+      els.inputTanggal.value = new Date().toISOString().slice(0, 10);
+    }
+  }
+
+  function syncPeriodFromDashboardForm() {
+    state.period.month = Number(els.dashboardMonth.value);
+    state.period.year = Number(els.dashboardYear.value);
+
+    els.reportMonth.value = String(state.period.month);
+    els.reportYear.value = String(state.period.year);
+  }
+
+  function syncPeriodFromReportForm() {
+    state.period.month = Number(els.reportMonth.value);
+    state.period.year = Number(els.reportYear.value);
+
+    els.dashboardMonth.value = String(state.period.month);
+    els.dashboardYear.value = String(state.period.year);
+  }
+
+  function getSelectedPeriod() {
+    return {
+      month: state.period.month,
+      year: state.period.year
+    };
+  }
+
+  function updateAgeFromBirthDate() {
+    const dob = els.workerTanggalLahir?.value;
+    if (!dob) {
+      els.workerUsia.value = '';
+      return;
+    }
+
+    const birth = new Date(dob);
+    const today = new Date();
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    els.workerUsia.value = age >= 0 ? `${age} tahun` : '';
+  }
+
+  function normalizeWhatsappNumber() {
+    let val = (els.workerWhatsapp?.value || '').replace(/\D/g, '');
+
+    if (val.startsWith('0')) val = '62' + val.slice(1);
+    if (val.startsWith('620')) val = '62' + val.slice(3);
+
+    if (els.workerWhatsapp) {
+      els.workerWhatsapp.value = val;
+    }
+  }
+
+  function updateCheckResultFromValue() {
+    const n = Number(els.inputNilai?.value || 0);
+    if (els.inputHasil) {
+      els.inputHasil.value = n > 0 ? 'FAIL' : 'PASS';
+    }
+  }
+
+  function openWorkerModal(mode = 'add', worker = null) {
+    els.workerModal?.classList.add('show');
+    els.workerModal?.setAttribute('aria-hidden', 'false');
+    els.workerFormMode.value = mode;
+
+    const title = document.getElementById('workerModalTitle');
+    if (title) {
+      title.textContent = mode === 'edit' ? 'Edit Data Pekerja' : 'Daftarkan Pekerja Baru';
+    }
+
+    if (mode === 'add') {
+      resetWorkerForm();
+    }
+
+    if (mode === 'edit' && worker) {
+      fillWorkerForm(worker);
+    }
+  }
+
+  function closeWorkerModal() {
+    els.workerModal?.classList.remove('show');
+    els.workerModal?.setAttribute('aria-hidden', 'true');
+  }
+
+function resetWorkerForm() {
+  els.workerFormNew?.reset();
+  els.workerFormMode.value = 'add';
+  els.workerIdEdit.value = '';
+  els.workerNoId.value = '';
+  els.workerUsia.value = '';
+}
+
+function fillWorkerForm(worker) {
+  els.workerIdEdit.value = worker.id || '';
+  els.workerNoId.value = worker.nik || worker.no_id || '';
+  els.workerNama.value = worker.nama || '';
+  els.workerTanggalLahir.value = worker.tanggal_lahir || '';
+  els.workerJenisKelamin.value = worker.jenis_kelamin || '';
+  els.workerWhatsapp.value = worker.no_hp || worker.whatsapp || '';
+  updateAgeFromBirthDate();
+}
+
+  function renderWorkerOptions(workers = []) {
+    const options = workers.map(w => {
+      const nik = w.nik ? ` - ${w.nik}` : '';
+      return `<option value="${w.id}">${w.nama || '-'}${nik}</option>`;
+    }).join('');
+
+    els.inputWorkerId.innerHTML = `
+      <option value="">-- Pilih pekerja --</option>
+      ${options}
+    `;
+  }
+
+  async function loadWorkersForSelect() {
+    if (!state.workers.length) {
+      state.workers = await fetchWorkers();
+    }
+    renderWorkerOptions(state.workers);
+  }
+
+  async function loadWorkers() {
+    state.workers = await fetchWorkers();
+    renderWorkerOptions(state.workers);
+    renderWorkersList(state.workers);
+  }
+
+  async function loadDashboard() {
+    const period = getSelectedPeriod();
+    state.dashboard = await fetchDashboard(period);
+    renderDashboard(state.dashboard);
+  }
+
+  async function loadReports() {
+    const period = getSelectedPeriod();
+    state.reports = await fetchReports(period);
+    renderReports(state.reports);
+  }
+
+  async function handleProgressSearch() {
+    const q = (els.progressSearchInput?.value || '').trim().toLowerCase();
+
+    if (!q) {
+      els.progressSearchResults.innerHTML = `<div class="empty-box">Hasil pencarian pekerja akan tampil di sini.</div>`;
+      return;
+    }
+
+    const filtered = state.workers.filter(w => {
+      const nama = (w.nama || '').toLowerCase();
+      const nik = (w.nik || '').toLowerCase();
+      return nama.includes(q) || nik.includes(q);
+    });
+
+    renderProgressSearchResults(filtered);
+  }
+
+  async function handleWorkerSearch() {
+    const q = (els.workerSearchInput?.value || '').trim().toLowerCase();
+
+    if (!q) {
+      renderWorkersList(state.workers);
+      return;
+    }
+
+    const filtered = state.workers.filter(w => {
+      const nama = (w.nama || '').toLowerCase();
+      const nik = (w.nik || '').toLowerCase();
+      return nama.includes(q) || nik.includes(q);
+    });
+
+    renderWorkersList(filtered);
+  }
+
+  async function handleSubmitCheck(e) {
+    e.preventDefault();
+    console.log('Submit pemeriksaan baru');
+  }
+
+ async function handleSubmitWorker(e) {
+  e.preventDefault();
+
+  const mode = els.workerFormMode.value;
+
+  const payload = {
+    id: els.workerIdEdit.value,
+    nik: (els.workerNoId.value || '').trim(),
+    nama: (els.workerNama.value || '').trim(),
+    tanggal_lahir: els.workerTanggalLahir.value || '',
+    usia: (els.workerUsia.value || '').replace(' tahun', '').trim(),
+    jenis_kelamin: els.workerJenisKelamin.value || '',
+    no_hp: (els.workerWhatsapp.value || '').trim(),
+    status_aktif: 'Aktif'
+  };
+
+  if (!payload.nik) {
+    alert('No ID wajib diisi.');
+    return;
+  }
+
+  if (!payload.nama) {
+    alert('Nama lengkap wajib diisi.');
+    return;
+  }
+
+  try {
+    if (mode === 'edit') {
+      await apiRequest('updateWorker', payload);
+    } else {
+      await apiRequest('addWorker', payload);
+    }
+
+    closeWorkerModal();
+    resetWorkerForm();
+    await loadWorkers();
+    await loadWorkersForSelect();
+  } catch (err) {
+    alert(err.message || 'Gagal menyimpan data pekerja.');
+  }
+}
+
+  async function handleShareDashboard() {
+    console.log('Share dashboard');
+  }
+
+  async function handleShareProgress() {
+    console.log('Share progress pekerja');
+  }
+
+  async function handleExportCsv() {
+    console.log('Export CSV laporan');
+  }
+
+  function renderDashboard(data) {
+    console.log('renderDashboard', data);
+  }
+
+  function renderWorkersList(workers) {
+  if (!workers.length) {
+    els.workersList.innerHTML = `<div class="empty-box">Belum ada data pekerja.</div>`;
+    return;
+  }
+
+  els.workersList.innerHTML = workers.map(worker => `
+    <article class="worker-item">
+      <div class="worker-item-head">
+        <div>
+          <h3 class="worker-name">${worker.nama || '-'}</h3>
+          <p class="meta">No ID: ${worker.nik || worker.no_id || '-'}</p>
+          <p class="meta">Jenis kelamin: ${worker.jenis_kelamin || '-'}</p>
+          <p class="meta">No HP: ${worker.no_hp || worker.whatsapp || '-'}</p>
+        </div>
+        <div class="icon-actions">
+          <button type="button" class="icon-btn" onclick='editWorkerById("${worker.id}")' aria-label="Edit pekerja">✏️</button>
+          <button type="button" class="icon-btn" onclick='deleteWorkerById("${worker.id}")' aria-label="Hapus pekerja">🗑️</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+ function renderProgressSearchResults(workers) {
+  if (!workers.length) {
+    els.progressSearchResults.innerHTML = `<div class="empty-box">Pekerja tidak ditemukan.</div>`;
+    return;
+  }
+
+  els.progressSearchResults.innerHTML = workers.map(worker => `
+    <article class="worker-item">
+      <div class="worker-item-head">
+        <div>
+          <h3 class="worker-name">${worker.nama || '-'}</h3>
+          <p class="meta">No ID: ${worker.nik || worker.no_id || '-'}</p>
+        </div>
+        <button type="button" class="btn-secondary" onclick='selectWorkerForProgress("${worker.id}")'>Pilih</button>
+      </div>
+    </article>
+  `).join('');
+}
+  function renderReports(data) {
+    console.log('renderReports', data);
+  }
+
+function selectWorkerForProgress(workerId) {
+  const worker = state.workers.find(w => String(w.id) === String(workerId));
+  if (!worker) return;
+
+  state.selectedWorker = worker;
+  els.progressWorkerSummary.innerHTML = `
+    <article class="worker-item">
+      <h3 class="worker-name">${worker.nama || '-'}</h3>
+      <p class="meta">No ID: ${worker.nik || worker.no_id || '-'}</p>
+      <p class="meta">Jenis kelamin: ${worker.jenis_kelamin || '-'}</p>
+      <p class="meta">No HP: ${worker.no_hp || worker.whatsapp || '-'}</p>
+    </article>
+  `;
+
+  loadWorkerProgress(worker.id);
+}
+
+  async function loadWorkerProgress(workerId) {
+    const history = await fetchWorkerHistory(workerId);
+    state.progressHistory = history;
+    renderWorkerHistory(history);
+  }
+
+  function renderWorkerHistory(items) {
+    if (!items.length) {
+      els.progressHistoryList.innerHTML = `<div class="empty-box">Belum ada riwayat pemeriksaan.</div>`;
+      els.viewAllHistoryBtn.classList.add('hidden');
+      return;
+    }
+
+    const latestFive = items.slice(0, 5);
+
+    els.progressHistoryList.innerHTML = latestFive.map(item => `
+      <article class="history-item">
+        <div class="worker-item-head">
+          <div>
+            <p class="meta">${item.tanggal || '-'}</p>
+            <h3 class="worker-name">${item.jenis_pemeriksaan || 'Pemeriksaan'}</h3>
+            <p class="meta">Nilai: ${item.nilai ?? '-'}</p>
+            <p class="meta">Catatan: ${item.catatan || '-'}</p>
+          </div>
+          <span class="badge ${(item.hasil || '').toLowerCase() === 'pass' ? 'pass' : 'fail'}">
+            ${item.hasil || '-'}
+          </span>
+        </div>
+      </article>
+    `).join('');
+
+    els.viewAllHistoryBtn.classList.toggle('hidden', items.length <= 5);
+  }
+
+  function editWorkerById(workerId) {
+    const worker = state.workers.find(w => String(w.id) === String(workerId));
+    if (!worker) return;
+    openWorkerModal('edit', worker);
+  }
+
+  async function deleteWorkerById(workerId) {
+    console.log('hapus worker', workerId);
+  }
+
+ const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec';
+
+  async function apiRequest(action, payload = {}) {
+    const body = {
+      action,
+      token: state.auth.token || '',
+      ...payload
     };
 
-    function switchScreen(name) {
-      document.querySelectorAll('.screen').forEach(el => {
-        el.classList.toggle('active', el.dataset.screen === name);
-      });
-
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.target === name);
-      });
-
-      const meta = APP_META[name] || APP_META.dashboard;
-      document.getElementById('pageTitle').textContent = meta.title;
-      document.getElementById('pageSubtitle').textContent = meta.subtitle;
-    }
-
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchScreen(btn.dataset.target));
+    const res = await fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(body)
     });
 
-    const workerModal = document.getElementById('workerModal');
-    const openWorkerModalBtn = document.getElementById('openWorkerModalBtn');
-    const closeWorkerModalBtn = document.getElementById('closeWorkerModalBtn');
-    const cancelWorkerModalBtn = document.getElementById('cancelWorkerModalBtn');
+    const text = await res.text();
+    let json = null;
 
-    function openWorkerModal(mode = 'add') {
-      workerModal.classList.add('show');
-      workerModal.setAttribute('aria-hidden', 'false');
-      document.getElementById('workerFormMode').value = mode;
-      document.getElementById('workerModalTitle').textContent =
-        mode === 'edit' ? 'Edit Data Pekerja' : 'Daftarkan Pekerja Baru';
+    try {
+      json = JSON.parse(text);
+    } catch (err) {
+      throw new Error('Respons server bukan JSON yang valid.');
     }
 
-    function closeWorkerModal() {
-      workerModal.classList.remove('show');
-      workerModal.setAttribute('aria-hidden', 'true');
+    if (!json.ok) {
+      throw new Error(json.message || 'Permintaan gagal.');
     }
 
-    openWorkerModalBtn?.addEventListener('click', () => openWorkerModal('add'));
-    closeWorkerModalBtn?.addEventListener('click', closeWorkerModal);
-    cancelWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+    return json.data ?? json;
+  }
 
-    document.getElementById('workerTanggalLahir')?.addEventListener('change', function () {
-      const dob = this.value;
-      const usiaField = document.getElementById('workerUsia');
-      if (!dob) {
-        usiaField.value = '';
-        return;
+  async function fetchWorkers() {
+    const data = await apiRequest('listWorkers', {});
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function fetchDashboard(period) {
+    const data = await apiRequest('getDashboard', {
+      bulan: period.month,
+      tahun: period.year
+    });
+
+    return data || {
+      summary: {},
+      recentChecks: []
+    };
+  }
+
+  async function fetchReports(period) {
+    const data = await apiRequest('getMonthlyReport', {
+      bulan: period.month,
+      tahun: period.year
+    });
+
+    return data || {
+      overall: {},
+      byDivisi: [],
+      byLokasi: []
+    };
+  }
+
+  async function fetchWorkerHistory(workerId) {
+    const data = await apiRequest('listChecks', {
+      worker_id: workerId,
+      bulan: state.period.month,
+      tahun: state.period.year
+    });
+
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function handleSubmitWorker(e) {
+    e.preventDefault();
+
+    const mode = els.workerFormMode.value;
+    const payload = {
+      id: els.workerIdEdit.value,
+      nik: '',
+      nama: els.workerNama.value,
+      divisi: '',
+      jabatan: '',
+      perusahaan: '',
+      lokasi: '',
+      status_aktif: 'Aktif'
+    };
+
+    try {
+      if (mode === 'edit') {
+        await apiRequest('updateWorker', payload);
+      } else {
+        await apiRequest('addWorker', payload);
       }
-      const birth = new Date(dob);
-      const today = new Date();
-      let age = today.getFullYear() - birth.getFullYear();
-      const monthDiff = today.getMonth() - birth.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-        age--;
+
+      closeWorkerModal();
+      await loadWorkers();
+      await loadWorkersForSelect();
+    } catch (err) {
+      alert(err.message || 'Gagal menyimpan data pekerja.');
+    }
+  }
+
+  async function handleSubmitCheck(e) {
+    e.preventDefault();
+
+    const payload = {
+      worker_id: els.inputWorkerId.value,
+      tanggal: els.inputTanggal.value,
+      jenis_pemeriksaan: els.inputJenis.value,
+      nilai: els.inputNilai.value,
+      catatan: els.inputCatatan.value
+    };
+
+    try {
+      await apiRequest('saveCheck', payload);
+
+      els.checkFormNew.reset();
+      els.inputJenis.value = 'BAC Test / Alcohol Test';
+      els.inputTanggal.value = new Date().toISOString().slice(0, 10);
+      els.inputHasil.value = '';
+
+      await loadDashboard();
+      await loadReports();
+      await loadWorkers();
+
+      if (state.selectedWorker?.id) {
+        await loadWorkerProgress(state.selectedWorker.id);
       }
-      usiaField.value = age >= 0 ? age + ' tahun' : '';
-    });
 
-    document.getElementById('workerWhatsapp')?.addEventListener('blur', function () {
-      let val = (this.value || '').replace(/\D/g, '');
-      if (val.startsWith('0')) val = '62' + val.slice(1);
-      if (val.startsWith('620')) val = '62' + val.slice(3);
-      this.value = val;
-    });
-
-    document.getElementById('inputNilai')?.addEventListener('input', function () {
-      const n = Number(this.value || 0);
-      document.getElementById('inputHasil').value = n > 0 ? 'FAIL' : 'PASS';
-    });
-
-    document.getElementById('inputTanggal').value = new Date().toISOString().slice(0, 10);
-  </script>
+      alert('Pemeriksaan berhasil disimpan.');
+    } catch (err) {
+      alert(err.message || 'Gagal menyimpan pemeriksaan.');
+    }
+  }
+</script>
 </body>
 </html>
