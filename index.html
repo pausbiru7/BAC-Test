@@ -651,54 +651,54 @@
   </nav>
 
   <div id="workerModal" class="modal" aria-hidden="true">
-    <div class="modal-sheet">
-      <div class="modal-head">
-        <h3 id="workerModalTitle">Daftarkan Pekerja Baru</h3>
-        <button id="closeWorkerModalBtn" type="button" class="icon-btn" aria-label="Tutup modal">✕</button>
-      </div>
-
-      <form id="workerFormNew" class="stack">
-        <input type="hidden" id="workerFormMode" value="add" />
-        <input type="hidden" id="workerIdEdit" name="id" />
-
-        <label>
-          No ID *
-          <input type="text" id="workerNoId" name="nik" placeholder="Masukkan No ID pekerja" autocomplete="off" required />
-        </label>
-
-        <label>
-          Nama Lengkap *
-          <input type="text" id="workerNama" name="nama" placeholder="Masukkan nama lengkap" required />
-        </label>
-
-        <label>
-          Tanggal Lahir
-          <input type="date" id="workerTanggalLahir" name="tanggal_lahir" />
-        </label>
-
-        <label>
-          Jenis Kelamin
-          <select id="workerJenisKelamin" name="jenis_kelamin">
-            <option value="">-- Pilih jenis kelamin --</option>
-            <option value="Laki-laki">Laki-laki</option>
-            <option value="Perempuan">Perempuan</option>
-          </select>
-        </label>
-
-        <label>
-          No HP / WhatsApp
-          <input type="tel" id="workerWhatsapp" name="no_hp" inputmode="numeric" placeholder="Contoh: 081234567890" />
-        </label>
-
-        <p class="hint">Field tambahan di atas saat ini tidak ikut tersimpan ke backend versi sekarang.</p>
-
-        <div class="actions-row">
-          <button id="cancelWorkerModalBtn" type="button" class="btn-ghost">Batal</button>
-          <button type="submit" class="btn-primary">Simpan Pekerja</button>
-        </div>
-      </form>
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3 id="workerModalTitle">Daftarkan Pekerja Baru</h3>
+      <button id="closeWorkerModalBtn" type="button" class="icon-btn" aria-label="Tutup modal">✕</button>
     </div>
+
+    <form id="workerFormNew" class="stack">
+      <input type="hidden" id="workerFormMode" value="add" />
+      <input type="hidden" id="workerIdEdit" name="id" />
+
+      <label>
+        No ID *
+        <input type="text" id="workerNoId" name="nik" placeholder="Masukkan No ID pekerja" autocomplete="off" required />
+      </label>
+
+      <label>
+        Nama Lengkap *
+        <input type="text" id="workerNama" name="nama" placeholder="Masukkan nama lengkap" required />
+      </label>
+
+      <label>
+        Tanggal Lahir *
+        <input type="date" id="workerTanggalLahir" name="tanggal_lahir" required />
+      </label>
+
+      <label>
+        Jenis Kelamin *
+        <select id="workerJenisKelamin" name="jenis_kelamin" required>
+          <option value="">-- Pilih jenis kelamin --</option>
+          <option value="Laki-laki">Laki-laki</option>
+          <option value="Perempuan">Perempuan</option>
+        </select>
+      </label>
+
+      <label>
+        No HP / WhatsApp *
+        <input type="tel" id="workerWhatsapp" name="no_hp" inputmode="numeric" placeholder="Contoh: 081234567890" required />
+      </label>
+
+      <p class="hint">Semua field pada formulir ini wajib diisi.</p>
+
+      <div class="actions-row">
+        <button id="cancelWorkerModalBtn" type="button" class="btn-ghost">Batal</button>
+        <button type="submit" class="btn-primary">Simpan Pekerja</button>
+      </div>
+    </form>
   </div>
+</div>
 
   <script>
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec';
@@ -1046,16 +1046,22 @@
   const mode = els.workerFormMode.value;
   const nik = (els.workerNoId.value || '').trim();
   const nama = (els.workerNama.value || '').trim();
+  const tanggalLahir = els.workerTanggalLahir?.value || '';
+  const jenisKelamin = els.workerJenisKelamin?.value || '';
+  const noHp = (els.workerWhatsapp?.value || '').trim();
 
   if (!nik) return alert('No ID wajib diisi.');
   if (!nama) return alert('Nama lengkap wajib diisi.');
+  if (!tanggalLahir) return alert('Tanggal lahir wajib diisi.');
+  if (!jenisKelamin) return alert('Jenis kelamin wajib dipilih.');
+  if (!noHp) return alert('No HP / WhatsApp wajib diisi.');
 
   let payload = {
     nik,
     nama,
-    tanggal_lahir: els.workerTanggalLahir?.value || '',
-    jenis_kelamin: els.workerJenisKelamin?.value || '',
-    no_hp: (els.workerWhatsapp?.value || '').trim()
+    tanggal_lahir: tanggalLahir,
+    jenis_kelamin: jenisKelamin,
+    no_hp: noHp
   };
 
   if (mode === 'edit') {
@@ -1065,9 +1071,9 @@
       id,
       nik,
       nama,
-      tanggal_lahir: els.workerTanggalLahir?.value || '',
-      jenis_kelamin: els.workerJenisKelamin?.value || '',
-      no_hp: (els.workerWhatsapp?.value || '').trim()
+      tanggal_lahir: tanggalLahir,
+      jenis_kelamin: jenisKelamin,
+      no_hp: noHp
     };
   }
 
