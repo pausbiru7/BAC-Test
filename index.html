@@ -1344,10 +1344,10 @@ function fillWorkerForm(worker) {
     </article>
   `).join('');
 }
- function renderReports(data) {
+function renderReports(data) {
   const overall = data?.overall || {};
-  const byDivisi = data?.byDivisi || [];
-  const byLokasi = data?.byLokasi || [];
+  const byJenis = data?.byJenis || [];
+  const recentChecks = data?.recentChecks || [];
 
   els.reportSummaryKpi.innerHTML = `
     <div class="kpi-card total">
@@ -1370,14 +1370,13 @@ function fillWorkerForm(worker) {
       <p class="meta">Total: ${overall.totalChecks ?? 0}</p>
       <p class="meta">PASS: ${overall.passChecks ?? 0}</p>
       <p class="meta">FAIL: ${overall.failChecks ?? 0}</p>
-      <p class="meta">Bar chart bisa kita pasang setelah tampilan data sudah final.</p>
     </div>
   `;
 
-  if (!byDivisi.length) {
-    els.reportDivisiList.innerHTML = `<div class="empty-box">Belum ada data divisi.</div>`;
+  if (!byJenis.length) {
+    els.reportDivisiList.innerHTML = `<div class="empty-box">Belum ada data jenis pemeriksaan.</div>`;
   } else {
-    els.reportDivisiList.innerHTML = byDivisi.map(item => `
+    els.reportDivisiList.innerHTML = byJenis.map(item => `
       <article class="report-item">
         <h3 class="worker-name">${item.name || '-'}</h3>
         <p class="meta">Total: ${item.total ?? 0}</p>
@@ -1387,21 +1386,38 @@ function fillWorkerForm(worker) {
     `).join('');
   }
 
-  if (!byLokasi.length) {
-    els.reportLokasiList.innerHTML = `<div class="empty-box">Belum ada data lokasi.</div>`;
+  if (!recentChecks.length) {
+    els.reportLokasiList.innerHTML = `<div class="empty-box">Belum ada pemeriksaan terbaru.</div>`;
   } else {
-    els.reportLokasiList.innerHTML = byLokasi.map(item => `
-      <article class="report-item">
-        <h3 class="worker-name">${item.name || '-'}</h3>
-        <p class="meta">Total: ${item.total ?? 0}</p>
-        <p class="meta">PASS: ${item.pass ?? 0}</p>
-        <p class="meta">FAIL: ${item.fail ?? 0}</p>
-      </article>
-    `).join('');
+    const workerMap = {};
+    state.workers.forEach(worker => {
+      workerMap[String(worker.id)] = worker;
+    });
+
+    els.reportLokasiList.innerHTML = recentChecks.map(item => {
+      const worker = workerMap[String(item.worker_id)] || {};
+      const hasil = String(item.hasil || '').toUpperCase();
+      const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
+
+      return `
+        <article class="history-item">
+          <div class="worker-item-head">
+            <div>
+              <p class="meta">${item.tanggal || '-'}</p>
+              <h3 class="worker-name">${worker.nama || 'Pekerja tidak ditemukan'}</h3>
+              <p class="meta">No ID: ${worker.nik || '-'}</p>
+              <p class="meta">Jenis: ${item.jenis_pemeriksaan || '-'}</p>
+              <p class="meta">Nilai: ${item.nilai ?? '-'}</p>
+            </div>
+            <span class="badge ${badgeClass}">${hasil || '-'}</span>
+          </div>
+        </article>
+      `;
+    }).join('');
   }
 }
 
-function selectWorkerForProgress(workerId) {
+async function selectWorkerForProgress(workerId) {
   const worker = state.workers.find(w => String(w.id) === String(workerId));
   if (!worker) return;
 
@@ -1415,7 +1431,7 @@ function selectWorkerForProgress(workerId) {
     </article>
   `;
 
-  loadWorkerProgress(worker.id);
+  await loadWorkerProgress(worker.id);
 }
 
   async function loadWorkerProgress(workerId) {
@@ -1495,76 +1511,112 @@ function selectWorkerForProgress(workerId) {
     return json.data ?? json;
   }
 
-  async function fetchWorkers() {
-    const data = await apiRequest('listWorkers', {});
-    return Array.isArray(data) ? data : [];
-  }
+ async function fetchWorkers() {
+  const data = await apiRequest('listWorkers', {});
+  return Array.isArray(data) ? data : [];
+}
 
-  async function fetchDashboard(period) {
-    const data = await apiRequest('getDashboard', {
-      bulan: period.month,
-      tahun: period.year
-    });
+ async function fetchDashboard(period) {
+  const data = await apiRequest('getDashboard', {
+    bulan: period.month,
+    tahun: period.year
+  });
 
-    return data || {
-      summary: {},
-      recentChecks: []
-    };
-  }
+  return {
+    summary: data?.summary || {
+      totalWorkers: 0,
+      activeWorkers: 0,
+      checkedWorkers: 0,
+      pendingWorkers: 0,
+      totalChecks: 0,
+      passChecks: 0,
+      failChecks: 0
+    },
+    recentChecks: Array.isArray(data?.recentChecks) ? data.recentChecks : []
+  };
+}
 
-  async function fetchReports(period) {
-    const data = await apiRequest('getMonthlyReport', {
-      bulan: period.month,
-      tahun: period.year
-    });
+ async function fetchReports(period) {
+  const data = await apiRequest('getMonthlyReport', {
+    bulan: period.month,
+    tahun: period.year
+  });
 
-    return data || {
-      overall: {},
-      byDivisi: [],
-      byLokasi: []
-    };
-  }
+  return {
+    overall: data?.overall || {
+      totalChecks: 0,
+      passChecks: 0,
+      failChecks: 0
+    },
+    byJenis: Array.isArray(data?.byJenis) ? data.byJenis : [],
+    recentChecks: Array.isArray(data?.recentChecks) ? data.recentChecks : []
+  };
+}
 
   async function fetchWorkerHistory(workerId) {
-    const data = await apiRequest('listChecks', {
-      worker_id: workerId,
-      bulan: state.period.month,
-      tahun: state.period.year
-    });
+  const data = await apiRequest('listChecks', {
+    worker_id: workerId,
+    bulan: state.period.month,
+    tahun: state.period.year
+  });
 
-    return Array.isArray(data) ? data : [];
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.rows)) return data.rows;
+  return [];
+}
+
+ async function handleSubmitWorker(e) {
+  e.preventDefault();
+
+  const mode = els.workerFormMode.value;
+  const nik = (els.workerNoId?.value || '').trim();
+  const nama = (els.workerNama?.value || '').trim();
+
+  if (!nik) {
+    alert('No ID wajib diisi.');
+    return;
   }
 
-  async function handleSubmitWorker(e) {
-    e.preventDefault();
+  if (!nama) {
+    alert('Nama lengkap wajib diisi.');
+    return;
+  }
 
-    const mode = els.workerFormMode.value;
-    const payload = {
-      id: els.workerIdEdit.value,
-      nik: '',
-      nama: els.workerNama.value,
-      divisi: '',
-      jabatan: '',
-      perusahaan: '',
-      lokasi: '',
-      status_aktif: 'Aktif'
-    };
+  let payload = {
+    nik,
+    nama
+  };
 
-    try {
-      if (mode === 'edit') {
-        await apiRequest('updateWorker', payload);
-      } else {
-        await apiRequest('addWorker', payload);
-      }
+  if (mode === 'edit') {
+    const id = (els.workerIdEdit?.value || '').trim();
 
-      closeWorkerModal();
-      await loadWorkers();
-      await loadWorkersForSelect();
-    } catch (err) {
-      alert(err.message || 'Gagal menyimpan data pekerja.');
+    if (!id) {
+      alert('ID data pekerja tidak ditemukan.');
+      return;
     }
+
+    payload = {
+      id,
+      nik,
+      nama
+    };
   }
 
+  try {
+    if (mode === 'edit') {
+      await apiRequest('updateWorker', payload);
+    } else {
+      await apiRequest('addWorker', payload);
+    }
+
+    closeWorkerModal();
+    resetWorkerForm();
+    await loadWorkers();
+    await loadWorkersForSelect();
+  } catch (err) {
+    alert(err.message || 'Gagal menyimpan data pekerja.');
+  }
+}
   async function handleSubmitCheck(e) {
     e.preventDefault();
 
