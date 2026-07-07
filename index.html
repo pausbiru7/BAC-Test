@@ -708,16 +708,17 @@
   <script>
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec';
 
-    const state = {
-      activeScreen: 'dashboard',
-      auth: { token: '', user: null },
-      period: { month: new Date().getMonth() + 1, year: new Date().getFullYear() },
-      workers: [],
-      selectedWorker: null,
-      dashboard: null,
-      progressHistory: [],
-      reports: null
-    };
+   const state = {
+  activeScreen: 'dashboard',
+  auth: { token: '', user: null },
+  period: { month: new Date().getMonth() + 1, year: new Date().getFullYear() },
+  workers: [],
+  selectedWorker: null,
+  dashboard: null,
+  checks: [],
+  progressHistory: [],
+  reports: null
+};
 
     const els = {
       pageTitle: document.getElementById('pageTitle'),
@@ -906,17 +907,42 @@
       return { month: state.period.month, year: state.period.year };
     }
 
-    function normalizeWhatsappNumber() {
-      let val = (els.workerWhatsapp?.value || '').replace(/\D/g, '');
-      if (val.startsWith('0')) val = '62' + val.slice(1);
-      if (val.startsWith('620')) val = '62' + val.slice(3);
-      if (els.workerWhatsapp) els.workerWhatsapp.value = val;
-    }
+   function normalizeWhatsappNumber() {
+  let val = (els.workerWhatsapp?.value || '').replace(/\D/g, '');
+  if (val.startsWith('0')) val = '62' + val.slice(1);
+  if (val.startsWith('620')) val = '62' + val.slice(3);
+  if (els.workerWhatsapp) els.workerWhatsapp.value = val;
+}
 
-    function updateCheckResultFromValue() {
-      const n = Number(els.inputNilai?.value || 0);
-      if (els.inputHasil) els.inputHasil.value = n > 0 ? 'FAIL' : 'PASS';
-    }
+function formatDateId(value) {
+  if (!value) return '-';
+
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(date);
+}
+
+function normalizeWhatsAppForLink(value) {
+  let phone = String(value || '').replace(/\D/g, '');
+  if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+  if (phone.startsWith('620')) phone = '62' + phone.slice(3);
+  return phone;
+}
+
+function updateCheckResultFromValue() {
+  const n = Number(els.inputNilai?.value || 0);
+  if (els.inputHasil) els.inputHasil.value = n > 0 ? 'FAIL' : 'PASS';
+}
 
     function openWorkerModal(mode = 'add', worker = null) {
       els.workerModal?.classList.add('show');
@@ -1149,45 +1175,72 @@ function updateAgeFromBirthDate() {
       }
     }
 
-    async function handleShareProgress() {
+ async function handleShareProgress() {
   if (!state.selectedWorker) {
     return alert('Pilih pekerja terlebih dahulu.');
   }
 
   try {
-    const rawPhone = state.selectedWorker.no_hp || state.selectedWorker.whatsapp || '';
-    let phone = String(rawPhone).replace(/\D/g, '');
+    const worker = state.selectedWorker;
+    const phone = normalizeWhatsAppForLink(worker.no_hp || worker.whatsapp || '');
 
     if (!phone) {
       return alert('Nomor WhatsApp pekerja belum tersedia.');
     }
 
-    if (phone.startsWith('0')) {
-      phone = '62' + phone.slice(1);
-    }
+    const workerChecks = Array.isArray(state.progressHistory)
+      ? [...state.progressHistory].sort((a, b) => new Date(b.tanggal || b.created_at || 0) - new Date(a.tanggal || a.created_at || 0))
+      : [];
+
+    const latestCheck = workerChecks[0] || null;
+    const lastFiveChecks = workerChecks.slice(0, 5);
+
+    const historyLines = lastFiveChecks.length
+      ? lastFiveChecks.map((item, index) => {
+          const nilai = item.nilai !== undefined && item.nilai !== null && item.nilai !== ''
+            ? Number(item.nilai).toFixed(2)
+            : '-';
+
+          return `${index + 1}. ${formatDateId(item.tanggal)} - ${nilai} - ${item.hasil || '-'}`;
+        }).join('\n')
+      : '-';
+
+    const lastResult = String(latestCheck?.hasil || '').toUpperCase();
+
+    const recommendationText = lastResult === 'FAIL'
+      ? 'Pekerja disarankan untuk tidak melanjutkan aktivitas kerja sementara waktu dan perlu dilakukan evaluasi lanjutan sesuai ketentuan perusahaan, serta dianjurkan untuk menghindari konsumsi alkohol demi menjaga keselamatan, kesehatan, dan kesiapan kerja.'
+      : 'Dianjurkan untuk menjaga kesehatan agar tetap fit dalam bekerja serta menghindari konsumsi alkohol demi mendukung keselamatan dan produktivitas kerja.';
 
     const message = [
-      'Halo, berikut progress pemeriksaan Anda.',
+      '*Laporan BAC Test*',
+      '--------------------------------------------------',
       '',
-      `Nama: ${state.selectedWorker.nama || '-'}`,
-      `No ID: ${state.selectedWorker.nik || '-'}`,
-      `Tanggal Lahir: ${state.selectedWorker.tanggal_lahir || '-'}`,
-      `Usia: ${state.selectedWorker.usia || '-'}`,
-      `Jenis Kelamin: ${state.selectedWorker.jenis_kelamin || '-'}`,
+      `Nama: ${worker.nama || '-'}`,
+      `No. ID: ${worker.nik || '-'}`,
+      `Usia: ${worker.usia ? worker.usia + ' tahun' : '-'}`,
       '',
-      'Silakan hubungi petugas jika ada pertanyaan.'
+      `Tgl Pemeriksaan: ${formatDateId(latestCheck?.tanggal)}`,
+      `Hasil pemeriksaan terakhir: ${latestCheck?.hasil || '-'}`,
+      '',
+      'Riwayat 5 pemeriksaan terakhir:',
+      historyLines,
+      '',
+      'Rekomendasi:',
+      recommendationText,
+      '',
+      '--------------------------------------------------',
+      'Powered by Pausbiru7'
     ].join('\n');
 
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
     const popup = window.open('', '_blank');
 
     await apiRequest('logShare', {
-      worker_id: state.selectedWorker.id,
+      worker_id: worker.id,
       jenis: 'progress',
       target: phone,
       status: 'REQUESTED',
-      catatan: `Share progress pekerja ${state.selectedWorker.nama || ''}`
+      catatan: `Share progress pekerja ${worker.nama || ''} - hasil terakhir ${latestCheck?.hasil || '-'}`
     });
 
     if (popup) {
@@ -1197,7 +1250,7 @@ function updateAgeFromBirthDate() {
       window.location.href = waUrl;
     }
   } catch (err) {
-    alert(err.message || 'Gagal menyimpan log share progress.');
+    alert(err.message || 'Gagal membagikan progress.');
   }
 }
 
