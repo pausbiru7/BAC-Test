@@ -924,22 +924,31 @@
       els.workerModal?.setAttribute('aria-hidden', 'true');
     }
 
-    function resetWorkerForm() {
-      els.workerFormNew?.reset();
-      els.workerFormMode.value = 'add';
-      els.workerIdEdit.value = '';
-      els.workerNoId.value = '';
-      els.workerNama.value = '';
-    }
+   function resetWorkerForm() {
+  els.workerFormNew?.reset();
+  els.workerFormMode.value = 'add';
+  els.workerIdEdit.value = '';
+  els.workerNoId.value = '';
+  els.workerNama.value = '';
+}
 
-    function fillWorkerForm(worker) {
-      els.workerIdEdit.value = worker.id || '';
-      els.workerNoId.value = worker.nik || '';
-      els.workerNama.value = worker.nama || '';
-      if (els.workerTanggalLahir) els.workerTanggalLahir.value = worker.tanggal_lahir || '';
-      if (els.workerJenisKelamin) els.workerJenisKelamin.value = worker.jenis_kelamin || '';
-      if (els.workerWhatsapp) els.workerWhatsapp.value = worker.no_hp || worker.whatsapp || '';
-    }
+   function fillWorkerForm(worker) {
+  els.workerIdEdit.value = worker.id || '';
+  els.workerNoId.value = worker.nik || '';
+  els.workerNama.value = worker.nama || '';
+
+  if (els.workerTanggalLahir) {
+    els.workerTanggalLahir.value = worker.tanggal_lahir || '';
+  }
+
+  if (els.workerJenisKelamin) {
+    els.workerJenisKelamin.value = worker.jenis_kelamin || '';
+  }
+
+  if (els.workerWhatsapp) {
+    els.workerWhatsapp.value = worker.no_hp || worker.whatsapp || '';
+  }
+}
 
     function renderWorkerOptions(workers = []) {
       const options = workers.map(w => {
