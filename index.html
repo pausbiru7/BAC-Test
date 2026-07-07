@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Monitoring Pemeriksaan Pekerja</title>
-
   <style>
     :root{
       --bg:#f4f7fb;
@@ -385,7 +384,6 @@
     </header>
 
     <main>
-      <!-- DASHBOARD -->
       <section id="screen-dashboard" class="screen active" data-screen="dashboard">
         <section class="card stack">
           <div class="section-head">
@@ -419,24 +417,13 @@
           </div>
 
           <div id="dashboardKpi" class="kpi-grid">
-            <div class="kpi-card total">
-              <div class="kpi-label">Total</div>
-              <div class="kpi-value">0</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Pass</div>
-              <div class="kpi-value">0</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Fail</div>
-              <div class="kpi-value">0</div>
-            </div>
+            <div class="kpi-card total"><div class="kpi-label">Total</div><div class="kpi-value">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pass</div><div class="kpi-value">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Fail</div><div class="kpi-value">0</div></div>
           </div>
 
           <div class="chart-box">
-            <div class="section-head">
-              <h3>Grafik Hasil</h3>
-            </div>
+            <div class="section-head"><h3>Grafik Hasil</h3></div>
             <div id="dashboardChartBox">Chart donut pass/fail akan tampil di sini.</div>
           </div>
 
@@ -459,7 +446,6 @@
         </section>
       </section>
 
-      <!-- INPUT -->
       <section id="screen-input" class="screen" data-screen="input">
         <section class="card stack">
           <div class="section-head">
@@ -507,7 +493,6 @@
         </section>
       </section>
 
-      <!-- PROGRESS -->
       <section id="screen-progress" class="screen" data-screen="progress">
         <section class="card stack">
           <div class="section-head">
@@ -559,13 +544,12 @@
         </section>
       </section>
 
-      <!-- PEKERJA -->
       <section id="screen-workers" class="screen" data-screen="workers">
         <section class="card stack">
           <div class="section-head">
             <div>
               <h2>Data Pekerja</h2>
-              <p class="hint">Cari, tambah, edit, dan hapus data pekerja.</p>
+              <p class="hint">Cari, tambah, dan edit data pekerja.</p>
             </div>
           </div>
 
@@ -582,7 +566,6 @@
         </section>
       </section>
 
-      <!-- LAPORAN -->
       <section id="screen-reports" class="screen" data-screen="reports">
         <section class="card stack">
           <div class="section-head">
@@ -616,49 +599,38 @@
           </div>
 
           <div id="reportSummaryKpi" class="kpi-grid">
-            <div class="kpi-card total">
-              <div class="kpi-label">Total</div>
-              <div class="kpi-value">0</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Pass</div>
-              <div class="kpi-value">0</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Fail</div>
-              <div class="kpi-value">0</div>
-            </div>
+            <div class="kpi-card total"><div class="kpi-label">Total</div><div class="kpi-value">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pass</div><div class="kpi-value">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Fail</div><div class="kpi-value">0</div></div>
           </div>
 
           <div class="chart-box">
-            <div class="section-head">
-              <h3>Grafik Laporan</h3>
-            </div>
-            <div id="reportChartBox">Chart bar per divisi/lokasi akan tampil di sini.</div>
+            <div class="section-head"><h3>Grafik Laporan</h3></div>
+            <div id="reportChartBox">Chart laporan akan tampil di sini.</div>
           </div>
         </section>
 
         <section class="card stack">
           <div class="section-head">
             <div>
-              <h2>Per Divisi</h2>
-              <p class="hint">Ringkasan pemeriksaan berdasarkan divisi.</p>
+              <h2>Per Jenis Pemeriksaan</h2>
+              <p class="hint">Ringkasan pemeriksaan berdasarkan jenis.</p>
             </div>
           </div>
           <div id="reportDivisiList" class="report-list">
-            <div class="empty-box">Belum ada data divisi.</div>
+            <div class="empty-box">Belum ada data jenis pemeriksaan.</div>
           </div>
         </section>
 
         <section class="card stack">
           <div class="section-head">
             <div>
-              <h2>Per Lokasi</h2>
-              <p class="hint">Ringkasan pemeriksaan berdasarkan lokasi.</p>
+              <h2>Pemeriksaan Terbaru</h2>
+              <p class="hint">Menampilkan pemeriksaan terbaru pada periode ini.</p>
             </div>
           </div>
           <div id="reportLokasiList" class="report-list">
-            <div class="empty-box">Belum ada data lokasi.</div>
+            <div class="empty-box">Belum ada pemeriksaan terbaru.</div>
           </div>
 
           <div class="actions-row">
@@ -670,31 +642,14 @@
     </main>
   </div>
 
-  <!-- BOTTOM NAV -->
   <nav class="mobile-nav" aria-label="Navigasi utama aplikasi">
-    <button class="nav-btn active" data-target="dashboard" type="button">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-label">Dashboard</span>
-    </button>
-    <button class="nav-btn" data-target="input" type="button">
-      <span class="nav-icon">🧪</span>
-      <span class="nav-label">Input</span>
-    </button>
-    <button class="nav-btn" data-target="progress" type="button">
-      <span class="nav-icon">📈</span>
-      <span class="nav-label">Progress</span>
-    </button>
-    <button class="nav-btn" data-target="workers" type="button">
-      <span class="nav-icon">👷</span>
-      <span class="nav-label">Pekerja</span>
-    </button>
-    <button class="nav-btn" data-target="reports" type="button">
-      <span class="nav-icon">📄</span>
-      <span class="nav-label">Laporan</span>
-    </button>
+    <button class="nav-btn active" data-target="dashboard" type="button"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></button>
+    <button class="nav-btn" data-target="input" type="button"><span class="nav-icon">🧪</span><span class="nav-label">Input</span></button>
+    <button class="nav-btn" data-target="progress" type="button"><span class="nav-icon">📈</span><span class="nav-label">Progress</span></button>
+    <button class="nav-btn" data-target="workers" type="button"><span class="nav-icon">👷</span><span class="nav-label">Pekerja</span></button>
+    <button class="nav-btn" data-target="reports" type="button"><span class="nav-icon">📄</span><span class="nav-label">Laporan</span></button>
   </nav>
 
-  <!-- MODAL PEKERJA -->
   <div id="workerModal" class="modal" aria-hidden="true">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -706,54 +661,36 @@
         <input type="hidden" id="workerFormMode" value="add" />
         <input type="hidden" id="workerIdEdit" name="id" />
 
-     <label>
-  No ID *
-  <input
-    type="text"
-    id="workerNoId"
-    name="nik"
-    placeholder="Masukkan No ID pekerja"
-    autocomplete="off"
-    required
-  />
-</label>
-
-<label>
-  Nama Lengkap *
-  <input
-    type="text"
-    id="workerNama"
-    name="nama"
-    placeholder="Masukkan nama lengkap"
-    required
-  />
-</label>
-
-<label>
-  Tanggal Lahir *
-  <input
-    type="date"
-    id="workerTanggalLahir"
-    name="tanggal_lahir"
-    required
-  />
-</label>
-
-<label>
-  Jenis Kelamin *
-  <select id="workerJenisKelamin" name="jenis_kelamin" required>
-    <option value="">-- Pilih jenis kelamin --</option>
-    <option value="Laki-laki">Laki-laki</option>
-    <option value="Perempuan">Perempuan</option>
-  </select>
-</label>
+        <label>
+          No ID *
+          <input type="text" id="workerNoId" name="nik" placeholder="Masukkan No ID pekerja" autocomplete="off" required />
+        </label>
 
         <label>
-          No HP / WhatsApp *
+          Nama Lengkap *
+          <input type="text" id="workerNama" name="nama" placeholder="Masukkan nama lengkap" required />
+        </label>
+
+        <label>
+          Tanggal Lahir
+          <input type="date" id="workerTanggalLahir" name="tanggal_lahir" />
+        </label>
+
+        <label>
+          Jenis Kelamin
+          <select id="workerJenisKelamin" name="jenis_kelamin">
+            <option value="">-- Pilih jenis kelamin --</option>
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </select>
+        </label>
+
+        <label>
+          No HP / WhatsApp
           <input type="tel" id="workerWhatsapp" name="no_hp" inputmode="numeric" placeholder="Contoh: 081234567890" />
         </label>
 
-        <p class="hint">Nomor akan otomatis disesuaikan ke format WhatsApp.</p>
+        <p class="hint">Field tambahan di atas saat ini tidak ikut tersimpan ke backend versi sekarang.</p>
 
         <div class="actions-row">
           <button id="cancelWorkerModalBtn" type="button" class="btn-ghost">Batal</button>
@@ -762,889 +699,701 @@
       </form>
     </div>
   </div>
-<script>
-  const state = {
-    activeScreen: 'dashboard',
-    auth: {
-      token: '',
-      user: null
-    },
-    period: {
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear()
-    },
-    workers: [],
-    selectedWorker: null,
-    dashboard: null,
-    progressHistory: [],
-    reports: null,
-    isLoading: false
-  };
 
-  const els = {
-    pageTitle: document.getElementById('pageTitle'),
-    pageSubtitle: document.getElementById('pageSubtitle'),
+  <script>
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec';
 
-    screens: document.querySelectorAll('.screen'),
-    navButtons: document.querySelectorAll('.nav-btn'),
+    const state = {
+      activeScreen: 'dashboard',
+      auth: { token: '', user: null },
+      period: { month: new Date().getMonth() + 1, year: new Date().getFullYear() },
+      workers: [],
+      selectedWorker: null,
+      dashboard: null,
+      progressHistory: [],
+      reports: null
+    };
 
-    dashboardPeriodForm: document.getElementById('dashboardPeriodForm'),
-    dashboardMonth: document.getElementById('dashboardMonth'),
-    dashboardYear: document.getElementById('dashboardYear'),
-    dashboardKpi: document.getElementById('dashboardKpi'),
-    dashboardChartBox: document.getElementById('dashboardChartBox'),
-    dashboardRecentChecks: document.getElementById('dashboardRecentChecks'),
-    printDashboardBtn: document.getElementById('printDashboardBtn'),
-    shareDashboardBtn: document.getElementById('shareDashboardBtn'),
+    const els = {
+      pageTitle: document.getElementById('pageTitle'),
+      pageSubtitle: document.getElementById('pageSubtitle'),
+      screens: document.querySelectorAll('.screen'),
+      navButtons: document.querySelectorAll('.nav-btn'),
+      dashboardPeriodForm: document.getElementById('dashboardPeriodForm'),
+      dashboardMonth: document.getElementById('dashboardMonth'),
+      dashboardYear: document.getElementById('dashboardYear'),
+      dashboardKpi: document.getElementById('dashboardKpi'),
+      dashboardChartBox: document.getElementById('dashboardChartBox'),
+      dashboardRecentChecks: document.getElementById('dashboardRecentChecks'),
+      printDashboardBtn: document.getElementById('printDashboardBtn'),
+      shareDashboardBtn: document.getElementById('shareDashboardBtn'),
+      checkFormNew: document.getElementById('checkFormNew'),
+      inputWorkerId: document.getElementById('inputWorkerId'),
+      inputTanggal: document.getElementById('inputTanggal'),
+      inputJenis: document.getElementById('inputJenis'),
+      inputNilai: document.getElementById('inputNilai'),
+      inputHasil: document.getElementById('inputHasil'),
+      inputCatatan: document.getElementById('inputCatatan'),
+      progressSearchInput: document.getElementById('progressSearchInput'),
+      progressSearchResults: document.getElementById('progressSearchResults'),
+      progressWorkerSummary: document.getElementById('progressWorkerSummary'),
+      progressHistoryList: document.getElementById('progressHistoryList'),
+      viewAllHistoryBtn: document.getElementById('viewAllHistoryBtn'),
+      printProgressBtn: document.getElementById('printProgressBtn'),
+      shareProgressBtn: document.getElementById('shareProgressBtn'),
+      workerSearchInput: document.getElementById('workerSearchInput'),
+      workersList: document.getElementById('workersList'),
+      openWorkerModalBtn: document.getElementById('openWorkerModalBtn'),
+      workerModal: document.getElementById('workerModal'),
+      closeWorkerModalBtn: document.getElementById('closeWorkerModalBtn'),
+      cancelWorkerModalBtn: document.getElementById('cancelWorkerModalBtn'),
+      workerFormNew: document.getElementById('workerFormNew'),
+      workerFormMode: document.getElementById('workerFormMode'),
+      workerIdEdit: document.getElementById('workerIdEdit'),
+      workerNoId: document.getElementById('workerNoId'),
+      workerNama: document.getElementById('workerNama'),
+      workerTanggalLahir: document.getElementById('workerTanggalLahir'),
+      workerJenisKelamin: document.getElementById('workerJenisKelamin'),
+      workerWhatsapp: document.getElementById('workerWhatsapp'),
+      reportPeriodForm: document.getElementById('reportPeriodForm'),
+      reportMonth: document.getElementById('reportMonth'),
+      reportYear: document.getElementById('reportYear'),
+      reportSummaryKpi: document.getElementById('reportSummaryKpi'),
+      reportChartBox: document.getElementById('reportChartBox'),
+      reportDivisiList: document.getElementById('reportDivisiList'),
+      reportLokasiList: document.getElementById('reportLokasiList'),
+      printReportBtn: document.getElementById('printReportBtn'),
+      exportCsvBtn: document.getElementById('exportCsvBtn')
+    };
 
-    checkFormNew: document.getElementById('checkFormNew'),
-    inputWorkerId: document.getElementById('inputWorkerId'),
-    inputTanggal: document.getElementById('inputTanggal'),
-    inputJenis: document.getElementById('inputJenis'),
-    inputNilai: document.getElementById('inputNilai'),
-    inputHasil: document.getElementById('inputHasil'),
-    inputCatatan: document.getElementById('inputCatatan'),
+    const APP_META = {
+      dashboard: { title: 'Dashboard', subtitle: 'Ringkasan hasil pemeriksaan pekerja' },
+      input: { title: 'Input Pemeriksaan', subtitle: 'Input cepat BAC test / alcohol test' },
+      progress: { title: 'Progress Pekerja', subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan' },
+      workers: { title: 'Data Pekerja', subtitle: 'Kelola data pekerja' },
+      reports: { title: 'Laporan Bulanan', subtitle: 'Rekap hasil per periode' }
+    };
 
-    progressSearchInput: document.getElementById('progressSearchInput'),
-    progressSearchResults: document.getElementById('progressSearchResults'),
-    progressWorkerSummary: document.getElementById('progressWorkerSummary'),
-    progressHistoryList: document.getElementById('progressHistoryList'),
-    viewAllHistoryBtn: document.getElementById('viewAllHistoryBtn'),
-    printProgressBtn: document.getElementById('printProgressBtn'),
-    shareProgressBtn: document.getElementById('shareProgressBtn'),
+    document.addEventListener('DOMContentLoaded', init);
 
-    workerSearchInput: document.getElementById('workerSearchInput'),
-    workersList: document.getElementById('workersList'),
-    openWorkerModalBtn: document.getElementById('openWorkerModalBtn'),
-
-    workerModal: document.getElementById('workerModal'),
-    closeWorkerModalBtn: document.getElementById('closeWorkerModalBtn'),
-    cancelWorkerModalBtn: document.getElementById('cancelWorkerModalBtn'),
-   workerFormNew: document.getElementById('workerFormNew'),
-workerFormMode: document.getElementById('workerFormMode'),
-workerIdEdit: document.getElementById('workerIdEdit'),
-workerNoId: document.getElementById('workerNoId'),
-workerNama: document.getElementById('workerNama'),
-workerTanggalLahir: document.getElementById('workerTanggalLahir'),
-workerUsia: document.getElementById('workerUsia'),
-workerJenisKelamin: document.getElementById('workerJenisKelamin'),
-workerWhatsapp: document.getElementById('workerWhatsapp'),
-
-    reportPeriodForm: document.getElementById('reportPeriodForm'),
-    reportMonth: document.getElementById('reportMonth'),
-    reportYear: document.getElementById('reportYear'),
-    reportSummaryKpi: document.getElementById('reportSummaryKpi'),
-    reportChartBox: document.getElementById('reportChartBox'),
-    reportDivisiList: document.getElementById('reportDivisiList'),
-    reportLokasiList: document.getElementById('reportLokasiList'),
-    printReportBtn: document.getElementById('printReportBtn'),
-    exportCsvBtn: document.getElementById('exportCsvBtn')
-  };
-
-  const APP_META = {
-    dashboard: {
-      title: 'Dashboard',
-      subtitle: 'Ringkasan hasil pemeriksaan pekerja'
-    },
-    input: {
-      title: 'Input Pemeriksaan',
-      subtitle: 'Input cepat BAC test / alcohol test'
-    },
-    progress: {
-      title: 'Progress Pekerja',
-      subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan'
-    },
-    workers: {
-      title: 'Data Pekerja',
-      subtitle: 'Kelola data pekerja'
-    },
-    reports: {
-      title: 'Laporan Bulanan',
-      subtitle: 'Rekap hasil per periode'
+    async function init() {
+      fillMonthOptions(els.dashboardMonth);
+      fillMonthOptions(els.reportMonth);
+      fillYearOptions(els.dashboardYear);
+      fillYearOptions(els.reportYear);
+      setDefaultPeriod();
+      bindEvents();
+      switchScreen('dashboard');
+      await bootstrapApp();
     }
-  };
 
-  document.addEventListener('DOMContentLoaded', init);
-
-  async function init() {
-    fillMonthOptions(els.dashboardMonth);
-    fillMonthOptions(els.reportMonth);
-    fillYearOptions(els.dashboardYear);
-    fillYearOptions(els.reportYear);
-
-    setDefaultPeriod();
-    bindEvents();
-    switchScreen('dashboard');
-
-    await bootstrapApp();
-  }
-
-  async function bootstrapApp() {
-    try {
-      await loadWorkersForSelect();
-      await loadWorkers();
-      await loadDashboard();
-      await loadReports();
-    } catch (err) {
-      console.error('Bootstrap gagal:', err);
+    async function bootstrapApp() {
+      try {
+        await loadWorkersForSelect();
+        await loadWorkers();
+        await loadDashboard();
+        await loadReports();
+      } catch (err) {
+        console.error('Bootstrap gagal:', err);
+        alert(err.message || 'Gagal memuat aplikasi.');
+      }
     }
-  }
 
-  function bindEvents() {
-    els.navButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.dataset.target;
-        switchScreen(target);
-        handleScreenEnter(target);
+    function bindEvents() {
+      els.navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          switchScreen(target);
+          handleScreenEnter(target);
+        });
       });
-    });
 
-    els.dashboardPeriodForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      syncPeriodFromDashboardForm();
-      await loadDashboard();
-    });
+      els.dashboardPeriodForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        syncPeriodFromDashboardForm();
+        await loadDashboard();
+      });
 
-    els.reportPeriodForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      syncPeriodFromReportForm();
-      await loadReports();
-    });
+      els.reportPeriodForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        syncPeriodFromReportForm();
+        await loadReports();
+      });
 
-    els.checkFormNew?.addEventListener('submit', handleSubmitCheck);
-    els.workerFormNew?.addEventListener('submit', handleSubmitWorker);
-
-    els.progressSearchInput?.addEventListener('input', handleProgressSearch);
-    els.workerSearchInput?.addEventListener('input', handleWorkerSearch);
-
-    els.openWorkerModalBtn?.addEventListener('click', () => openWorkerModal('add'));
-    els.closeWorkerModalBtn?.addEventListener('click', closeWorkerModal);
-    els.cancelWorkerModalBtn?.addEventListener('click', closeWorkerModal);
-
-    els.workerModal?.addEventListener('click', (e) => {
-      if (e.target === els.workerModal) closeWorkerModal();
-    });
-
-    els.workerTanggalLahir?.addEventListener('change', updateAgeFromBirthDate);
-    els.workerWhatsapp?.addEventListener('blur', normalizeWhatsappNumber);
-    els.inputNilai?.addEventListener('input', updateCheckResultFromValue);
-
-    els.printDashboardBtn?.addEventListener('click', () => window.print());
-    els.printProgressBtn?.addEventListener('click', () => window.print());
-    els.printReportBtn?.addEventListener('click', () => window.print());
-
-    els.shareDashboardBtn?.addEventListener('click', handleShareDashboard);
-    els.shareProgressBtn?.addEventListener('click', handleShareProgress);
-    els.exportCsvBtn?.addEventListener('click', handleExportCsv);
-  }
-
-  function switchScreen(name) {
-    state.activeScreen = name;
-
-    els.screens.forEach(el => {
-      el.classList.toggle('active', el.dataset.screen === name);
-    });
-
-    els.navButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.target === name);
-    });
-
-    const meta = APP_META[name] || APP_META.dashboard;
-    els.pageTitle.textContent = meta.title;
-    els.pageSubtitle.textContent = meta.subtitle;
-  }
-
-  function handleScreenEnter(name) {
-    if (name === 'dashboard') loadDashboard();
-    if (name === 'workers') loadWorkers();
-    if (name === 'reports') loadReports();
-  }
-
-  function fillMonthOptions(selectEl) {
-    if (!selectEl) return;
-
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-
-    selectEl.innerHTML = months.map((label, i) => {
-      const value = i + 1;
-      return `<option value="${value}">${label}</option>`;
-    }).join('');
-  }
-
-  function fillYearOptions(selectEl, totalBack = 5) {
-    if (!selectEl) return;
-
-    const currentYear = new Date().getFullYear();
-    const years = [];
-    for (let i = 0; i <= totalBack; i++) {
-      years.push(currentYear - i);
+      els.checkFormNew?.addEventListener('submit', handleSubmitCheck);
+      els.workerFormNew?.addEventListener('submit', handleSubmitWorker);
+      els.progressSearchInput?.addEventListener('input', handleProgressSearch);
+      els.workerSearchInput?.addEventListener('input', handleWorkerSearch);
+      els.openWorkerModalBtn?.addEventListener('click', () => openWorkerModal('add'));
+      els.closeWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+      els.cancelWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+      els.workerModal?.addEventListener('click', (e) => { if (e.target === els.workerModal) closeWorkerModal(); });
+      els.workerWhatsapp?.addEventListener('blur', normalizeWhatsappNumber);
+      els.inputNilai?.addEventListener('input', updateCheckResultFromValue);
+      els.printDashboardBtn?.addEventListener('click', () => window.print());
+      els.printProgressBtn?.addEventListener('click', () => window.print());
+      els.printReportBtn?.addEventListener('click', () => window.print());
+      els.shareDashboardBtn?.addEventListener('click', handleShareDashboard);
+      els.shareProgressBtn?.addEventListener('click', handleShareProgress);
+      els.exportCsvBtn?.addEventListener('click', handleExportCsv);
     }
 
-    selectEl.innerHTML = years.map(year => {
-      return `<option value="${year}">${year}</option>`;
-    }).join('');
-  }
-
-  function setDefaultPeriod() {
-    els.dashboardMonth.value = String(state.period.month);
-    els.dashboardYear.value = String(state.period.year);
-    els.reportMonth.value = String(state.period.month);
-    els.reportYear.value = String(state.period.year);
-
-    if (els.inputTanggal && !els.inputTanggal.value) {
-      els.inputTanggal.value = new Date().toISOString().slice(0, 10);
-    }
-  }
-
-  function syncPeriodFromDashboardForm() {
-    state.period.month = Number(els.dashboardMonth.value);
-    state.period.year = Number(els.dashboardYear.value);
-
-    els.reportMonth.value = String(state.period.month);
-    els.reportYear.value = String(state.period.year);
-  }
-
-  function syncPeriodFromReportForm() {
-    state.period.month = Number(els.reportMonth.value);
-    state.period.year = Number(els.reportYear.value);
-
-    els.dashboardMonth.value = String(state.period.month);
-    els.dashboardYear.value = String(state.period.year);
-  }
-
-  function getSelectedPeriod() {
-    return {
-      month: state.period.month,
-      year: state.period.year
-    };
-  }
-
-  function updateAgeFromBirthDate() {
-    const dob = els.workerTanggalLahir?.value;
-    if (!dob) {
-      els.workerUsia.value = '';
-      return;
+    function switchScreen(name) {
+      state.activeScreen = name;
+      els.screens.forEach(el => el.classList.toggle('active', el.dataset.screen === name));
+      els.navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.target === name));
+      const meta = APP_META[name] || APP_META.dashboard;
+      els.pageTitle.textContent = meta.title;
+      els.pageSubtitle.textContent = meta.subtitle;
     }
 
-    const birth = new Date(dob);
-    const today = new Date();
-
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
+    function handleScreenEnter(name) {
+      if (name === 'dashboard') loadDashboard();
+      if (name === 'workers') loadWorkers();
+      if (name === 'reports') loadReports();
     }
 
-    els.workerUsia.value = age >= 0 ? `${age} tahun` : '';
-  }
-
-  function normalizeWhatsappNumber() {
-    let val = (els.workerWhatsapp?.value || '').replace(/\D/g, '');
-
-    if (val.startsWith('0')) val = '62' + val.slice(1);
-    if (val.startsWith('620')) val = '62' + val.slice(3);
-
-    if (els.workerWhatsapp) {
-      els.workerWhatsapp.value = val;
-    }
-  }
-
-  function updateCheckResultFromValue() {
-    const n = Number(els.inputNilai?.value || 0);
-    if (els.inputHasil) {
-      els.inputHasil.value = n > 0 ? 'FAIL' : 'PASS';
-    }
-  }
-
-  function openWorkerModal(mode = 'add', worker = null) {
-    els.workerModal?.classList.add('show');
-    els.workerModal?.setAttribute('aria-hidden', 'false');
-    els.workerFormMode.value = mode;
-
-    const title = document.getElementById('workerModalTitle');
-    if (title) {
-      title.textContent = mode === 'edit' ? 'Edit Data Pekerja' : 'Daftarkan Pekerja Baru';
+    function fillMonthOptions(selectEl) {
+      if (!selectEl) return;
+      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+      selectEl.innerHTML = months.map((label, i) => `<option value="${i + 1}">${label}</option>`).join('');
     }
 
-    if (mode === 'add') {
-      resetWorkerForm();
+    function fillYearOptions(selectEl, totalBack = 5) {
+      if (!selectEl) return;
+      const currentYear = new Date().getFullYear();
+      const years = [];
+      for (let i = 0; i <= totalBack; i++) years.push(currentYear - i);
+      selectEl.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
     }
 
-    if (mode === 'edit' && worker) {
-      fillWorkerForm(worker);
+    function setDefaultPeriod() {
+      els.dashboardMonth.value = String(state.period.month);
+      els.dashboardYear.value = String(state.period.year);
+      els.reportMonth.value = String(state.period.month);
+      els.reportYear.value = String(state.period.year);
+      if (els.inputTanggal && !els.inputTanggal.value) {
+        const now = new Date();
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        els.inputTanggal.value = local;
+      }
     }
-  }
 
-  function closeWorkerModal() {
-    els.workerModal?.classList.remove('show');
-    els.workerModal?.setAttribute('aria-hidden', 'true');
-  }
+    function syncPeriodFromDashboardForm() {
+      state.period.month = Number(els.dashboardMonth.value);
+      state.period.year = Number(els.dashboardYear.value);
+      els.reportMonth.value = String(state.period.month);
+      els.reportYear.value = String(state.period.year);
+    }
 
-function resetWorkerForm() {
-  els.workerFormNew?.reset();
-  els.workerFormMode.value = 'add';
-  els.workerIdEdit.value = '';
-  els.workerNoId.value = '';
-  els.workerUsia.value = '';
-}
+    function syncPeriodFromReportForm() {
+      state.period.month = Number(els.reportMonth.value);
+      state.period.year = Number(els.reportYear.value);
+      els.dashboardMonth.value = String(state.period.month);
+      els.dashboardYear.value = String(state.period.year);
+    }
 
-function fillWorkerForm(worker) {
-  els.workerIdEdit.value = worker.id || '';
-  els.workerNoId.value = worker.nik || worker.no_id || '';
-  els.workerNama.value = worker.nama || '';
-  els.workerTanggalLahir.value = worker.tanggal_lahir || '';
-  els.workerJenisKelamin.value = worker.jenis_kelamin || '';
-  els.workerWhatsapp.value = worker.no_hp || worker.whatsapp || '';
-  updateAgeFromBirthDate();
-}
+    function getSelectedPeriod() {
+      return { month: state.period.month, year: state.period.year };
+    }
 
-  function renderWorkerOptions(workers = []) {
-    const options = workers.map(w => {
-      const nik = w.nik ? ` - ${w.nik}` : '';
-      return `<option value="${w.id}">${w.nama || '-'}${nik}</option>`;
-    }).join('');
+    function normalizeWhatsappNumber() {
+      let val = (els.workerWhatsapp?.value || '').replace(/\D/g, '');
+      if (val.startsWith('0')) val = '62' + val.slice(1);
+      if (val.startsWith('620')) val = '62' + val.slice(3);
+      if (els.workerWhatsapp) els.workerWhatsapp.value = val;
+    }
 
-    els.inputWorkerId.innerHTML = `
-      <option value="">-- Pilih pekerja --</option>
-      ${options}
-    `;
-  }
+    function updateCheckResultFromValue() {
+      const n = Number(els.inputNilai?.value || 0);
+      if (els.inputHasil) els.inputHasil.value = n > 0 ? 'FAIL' : 'PASS';
+    }
 
-  async function loadWorkersForSelect() {
-    if (!state.workers.length) {
+    function openWorkerModal(mode = 'add', worker = null) {
+      els.workerModal?.classList.add('show');
+      els.workerModal?.setAttribute('aria-hidden', 'false');
+      els.workerFormMode.value = mode;
+      const title = document.getElementById('workerModalTitle');
+      if (title) title.textContent = mode === 'edit' ? 'Edit Data Pekerja' : 'Daftarkan Pekerja Baru';
+      if (mode === 'add') resetWorkerForm();
+      if (mode === 'edit' && worker) fillWorkerForm(worker);
+    }
+
+    function closeWorkerModal() {
+      els.workerModal?.classList.remove('show');
+      els.workerModal?.setAttribute('aria-hidden', 'true');
+    }
+
+    function resetWorkerForm() {
+      els.workerFormNew?.reset();
+      els.workerFormMode.value = 'add';
+      els.workerIdEdit.value = '';
+      els.workerNoId.value = '';
+      els.workerNama.value = '';
+    }
+
+    function fillWorkerForm(worker) {
+      els.workerIdEdit.value = worker.id || '';
+      els.workerNoId.value = worker.nik || '';
+      els.workerNama.value = worker.nama || '';
+      if (els.workerTanggalLahir) els.workerTanggalLahir.value = worker.tanggal_lahir || '';
+      if (els.workerJenisKelamin) els.workerJenisKelamin.value = worker.jenis_kelamin || '';
+      if (els.workerWhatsapp) els.workerWhatsapp.value = worker.no_hp || worker.whatsapp || '';
+    }
+
+    function renderWorkerOptions(workers = []) {
+      const options = workers.map(w => {
+        const nik = w.nik ? ` - ${w.nik}` : '';
+        return `<option value="${w.id}">${escapeHtml(w.nama || '-')}${escapeHtml(nik)}</option>`;
+      }).join('');
+      els.inputWorkerId.innerHTML = `<option value="">-- Pilih pekerja --</option>${options}`;
+    }
+
+    async function loadWorkersForSelect() {
+      if (!state.workers.length) state.workers = await fetchWorkers();
+      renderWorkerOptions(state.workers);
+    }
+
+    async function loadWorkers() {
       state.workers = await fetchWorkers();
-    }
-    renderWorkerOptions(state.workers);
-  }
-
-  async function loadWorkers() {
-    state.workers = await fetchWorkers();
-    renderWorkerOptions(state.workers);
-    renderWorkersList(state.workers);
-  }
-
-  async function loadDashboard() {
-    const period = getSelectedPeriod();
-    state.dashboard = await fetchDashboard(period);
-    renderDashboard(state.dashboard);
-  }
-
-  async function loadReports() {
-    const period = getSelectedPeriod();
-    state.reports = await fetchReports(period);
-    renderReports(state.reports);
-  }
-
-  async function handleProgressSearch() {
-    const q = (els.progressSearchInput?.value || '').trim().toLowerCase();
-
-    if (!q) {
-      els.progressSearchResults.innerHTML = `<div class="empty-box">Hasil pencarian pekerja akan tampil di sini.</div>`;
-      return;
-    }
-
-    const filtered = state.workers.filter(w => {
-      const nama = (w.nama || '').toLowerCase();
-      const nik = (w.nik || '').toLowerCase();
-      return nama.includes(q) || nik.includes(q);
-    });
-
-    renderProgressSearchResults(filtered);
-  }
-
-  async function handleWorkerSearch() {
-    const q = (els.workerSearchInput?.value || '').trim().toLowerCase();
-
-    if (!q) {
+      renderWorkerOptions(state.workers);
       renderWorkersList(state.workers);
-      return;
     }
 
-    const filtered = state.workers.filter(w => {
-      const nama = (w.nama || '').toLowerCase();
-      const nik = (w.nik || '').toLowerCase();
-      return nama.includes(q) || nik.includes(q);
-    });
-
-    renderWorkersList(filtered);
-  }
-
-  async function handleSubmitCheck(e) {
-    e.preventDefault();
-    console.log('Submit pemeriksaan baru');
-  }
-
- async function handleSubmitWorker(e) {
-  e.preventDefault();
-
-  const mode = els.workerFormMode.value;
-
-  const payload = {
-    id: els.workerIdEdit.value,
-    nik: (els.workerNoId.value || '').trim(),
-    nama: (els.workerNama.value || '').trim(),
-    tanggal_lahir: els.workerTanggalLahir.value || '',
-    usia: (els.workerUsia.value || '').replace(' tahun', '').trim(),
-    jenis_kelamin: els.workerJenisKelamin.value || '',
-    no_hp: (els.workerWhatsapp.value || '').trim(),
-    status_aktif: 'Aktif'
-  };
-
-  if (!payload.nik) {
-    alert('No ID wajib diisi.');
-    return;
-  }
-
-  if (!payload.nama) {
-    alert('Nama lengkap wajib diisi.');
-    return;
-  }
-
-  try {
-    if (mode === 'edit') {
-      await apiRequest('updateWorker', payload);
-    } else {
-      await apiRequest('addWorker', payload);
+    async function loadDashboard() {
+      const period = getSelectedPeriod();
+      state.dashboard = await fetchDashboard(period);
+      renderDashboard(state.dashboard);
     }
 
-    closeWorkerModal();
-    resetWorkerForm();
-    await loadWorkers();
-    await loadWorkersForSelect();
-  } catch (err) {
-    alert(err.message || 'Gagal menyimpan data pekerja.');
-  }
-}
-
-  async function handleShareDashboard() {
-    console.log('Share dashboard');
-  }
-
-  async function handleShareProgress() {
-    console.log('Share progress pekerja');
-  }
-
-  async function handleExportCsv() {
-    console.log('Export CSV laporan');
-  }
-
- function renderDashboard(data) {
-  const summary = data?.summary || {};
-  const recentChecks = data?.recentChecks || [];
-
-  els.dashboardKpi.innerHTML = `
-    <div class="kpi-card total">
-      <div class="kpi-label">Total Pekerja</div>
-      <div class="kpi-value">${summary.totalWorkers ?? 0}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Sudah Diperiksa</div>
-      <div class="kpi-value">${summary.checkedWorkers ?? 0}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Belum Diperiksa</div>
-      <div class="kpi-value">${summary.pendingWorkers ?? 0}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">PASS</div>
-      <div class="kpi-value">${summary.passChecks ?? 0}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">FAIL</div>
-      <div class="kpi-value">${summary.failChecks ?? 0}</div>
-    </div>
-  `;
-
-  els.dashboardChartBox.innerHTML = `
-    <div class="stack">
-      <p class="meta">Total pemeriksaan: ${summary.totalChecks ?? 0}</p>
-      <p class="meta">PASS: ${summary.passChecks ?? 0}</p>
-      <p class="meta">FAIL: ${summary.failChecks ?? 0}</p>
-      <p class="meta">Chart donut bisa kita pasang setelah data utama stabil.</p>
-    </div>
-  `;
-
-  if (!recentChecks.length) {
-    els.dashboardRecentChecks.innerHTML = `
-      <div class="empty-box">Belum ada data pemeriksaan terbaru.</div>
-    `;
-    return;
-  }
-
-  const workerMap = {};
-  state.workers.forEach(worker => {
-    workerMap[String(worker.id)] = worker;
-  });
-
-  els.dashboardRecentChecks.innerHTML = recentChecks.map(item => {
-    const worker = workerMap[String(item.worker_id)] || {};
-    const hasil = String(item.hasil || '').toUpperCase();
-    const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
-
-    return `
-      <article class="history-item">
-        <div class="worker-item-head">
-          <div>
-            <p class="meta">${item.tanggal || '-'}</p>
-            <h3 class="worker-name">${worker.nama || 'Pekerja tidak ditemukan'}</h3>
-            <p class="meta">No ID: ${worker.nik || '-'}</p>
-            <p class="meta">Jenis: ${item.jenis_pemeriksaan || '-'}</p>
-            <p class="meta">Nilai: ${item.nilai ?? '-'}</p>
-          </div>
-          <span class="badge ${badgeClass}">${hasil || '-'}</span>
-        </div>
-      </article>
-    `;
-  }).join('');
-}
-
-  function renderWorkersList(workers) {
-  if (!workers.length) {
-    els.workersList.innerHTML = `<div class="empty-box">Belum ada data pekerja.</div>`;
-    return;
-  }
-
-  els.workersList.innerHTML = workers.map(worker => `
-    <article class="worker-item">
-      <div class="worker-item-head">
-        <div>
-          <h3 class="worker-name">${worker.nama || '-'}</h3>
-          <p class="meta">No ID: ${worker.nik || worker.no_id || '-'}</p>
-          <p class="meta">Jenis kelamin: ${worker.jenis_kelamin || '-'}</p>
-          <p class="meta">No HP: ${worker.no_hp || worker.whatsapp || '-'}</p>
-        </div>
-        <div class="icon-actions">
-          <button type="button" class="icon-btn" onclick='editWorkerById("${worker.id}")' aria-label="Edit pekerja">✏️</button>
-          <button type="button" class="icon-btn" onclick='deleteWorkerById("${worker.id}")' aria-label="Hapus pekerja">🗑️</button>
-        </div>
-      </div>
-    </article>
-  `).join('');
-}
-
- function renderProgressSearchResults(workers) {
-  if (!workers.length) {
-    els.progressSearchResults.innerHTML = `<div class="empty-box">Pekerja tidak ditemukan.</div>`;
-    return;
-  }
-
-  els.progressSearchResults.innerHTML = workers.map(worker => `
-    <article class="worker-item">
-      <div class="worker-item-head">
-        <div>
-          <h3 class="worker-name">${worker.nama || '-'}</h3>
-          <p class="meta">No ID: ${worker.nik || worker.no_id || '-'}</p>
-        </div>
-        <button type="button" class="btn-secondary" onclick='selectWorkerForProgress("${worker.id}")'>Pilih</button>
-      </div>
-    </article>
-  `).join('');
-}
-function renderReports(data) {
-  const overall = data?.overall || {};
-  const byJenis = data?.byJenis || [];
-  const recentChecks = data?.recentChecks || [];
-
-  els.reportSummaryKpi.innerHTML = `
-    <div class="kpi-card total">
-      <div class="kpi-label">Total Pemeriksaan</div>
-      <div class="kpi-value">${overall.totalChecks ?? 0}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">PASS</div>
-      <div class="kpi-value">${overall.passChecks ?? 0}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">FAIL</div>
-      <div class="kpi-value">${overall.failChecks ?? 0}</div>
-    </div>
-  `;
-
-  els.reportChartBox.innerHTML = `
-    <div class="stack">
-      <p class="meta">Periode laporan: ${state.period.month}/${state.period.year}</p>
-      <p class="meta">Total: ${overall.totalChecks ?? 0}</p>
-      <p class="meta">PASS: ${overall.passChecks ?? 0}</p>
-      <p class="meta">FAIL: ${overall.failChecks ?? 0}</p>
-    </div>
-  `;
-
-  if (!byJenis.length) {
-    els.reportDivisiList.innerHTML = `<div class="empty-box">Belum ada data jenis pemeriksaan.</div>`;
-  } else {
-    els.reportDivisiList.innerHTML = byJenis.map(item => `
-      <article class="report-item">
-        <h3 class="worker-name">${item.name || '-'}</h3>
-        <p class="meta">Total: ${item.total ?? 0}</p>
-        <p class="meta">PASS: ${item.pass ?? 0}</p>
-        <p class="meta">FAIL: ${item.fail ?? 0}</p>
-      </article>
-    `).join('');
-  }
-
-  if (!recentChecks.length) {
-    els.reportLokasiList.innerHTML = `<div class="empty-box">Belum ada pemeriksaan terbaru.</div>`;
-  } else {
-    const workerMap = {};
-    state.workers.forEach(worker => {
-      workerMap[String(worker.id)] = worker;
-    });
-
-    els.reportLokasiList.innerHTML = recentChecks.map(item => {
-      const worker = workerMap[String(item.worker_id)] || {};
-      const hasil = String(item.hasil || '').toUpperCase();
-      const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
-
-      return `
-        <article class="history-item">
-          <div class="worker-item-head">
-            <div>
-              <p class="meta">${item.tanggal || '-'}</p>
-              <h3 class="worker-name">${worker.nama || 'Pekerja tidak ditemukan'}</h3>
-              <p class="meta">No ID: ${worker.nik || '-'}</p>
-              <p class="meta">Jenis: ${item.jenis_pemeriksaan || '-'}</p>
-              <p class="meta">Nilai: ${item.nilai ?? '-'}</p>
-            </div>
-            <span class="badge ${badgeClass}">${hasil || '-'}</span>
-          </div>
-        </article>
-      `;
-    }).join('');
-  }
-}
-
-async function selectWorkerForProgress(workerId) {
-  const worker = state.workers.find(w => String(w.id) === String(workerId));
-  if (!worker) return;
-
-  state.selectedWorker = worker;
-  els.progressWorkerSummary.innerHTML = `
-    <article class="worker-item">
-      <h3 class="worker-name">${worker.nama || '-'}</h3>
-      <p class="meta">No ID: ${worker.nik || worker.no_id || '-'}</p>
-      <p class="meta">Jenis kelamin: ${worker.jenis_kelamin || '-'}</p>
-      <p class="meta">No HP: ${worker.no_hp || worker.whatsapp || '-'}</p>
-    </article>
-  `;
-
-  await loadWorkerProgress(worker.id);
-}
-
-  async function loadWorkerProgress(workerId) {
-    const history = await fetchWorkerHistory(workerId);
-    state.progressHistory = history;
-    renderWorkerHistory(history);
-  }
-
-  function renderWorkerHistory(items) {
-    if (!items.length) {
-      els.progressHistoryList.innerHTML = `<div class="empty-box">Belum ada riwayat pemeriksaan.</div>`;
-      els.viewAllHistoryBtn.classList.add('hidden');
-      return;
+    async function loadReports() {
+      const period = getSelectedPeriod();
+      state.reports = await fetchReports(period);
+      renderReports(state.reports);
     }
 
-    const latestFive = items.slice(0, 5);
-
-    els.progressHistoryList.innerHTML = latestFive.map(item => `
-      <article class="history-item">
-        <div class="worker-item-head">
-          <div>
-            <p class="meta">${item.tanggal || '-'}</p>
-            <h3 class="worker-name">${item.jenis_pemeriksaan || 'Pemeriksaan'}</h3>
-            <p class="meta">Nilai: ${item.nilai ?? '-'}</p>
-            <p class="meta">Catatan: ${item.catatan || '-'}</p>
-          </div>
-          <span class="badge ${(item.hasil || '').toLowerCase() === 'pass' ? 'pass' : 'fail'}">
-            ${item.hasil || '-'}
-          </span>
-        </div>
-      </article>
-    `).join('');
-
-    els.viewAllHistoryBtn.classList.toggle('hidden', items.length <= 5);
-  }
-
-  function editWorkerById(workerId) {
-    const worker = state.workers.find(w => String(w.id) === String(workerId));
-    if (!worker) return;
-    openWorkerModal('edit', worker);
-  }
-
-  async function deleteWorkerById(workerId) {
-    console.log('hapus worker', workerId);
-  }
-
- const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/dev';
-  
-  async function apiRequest(action, payload = {}) {
-  const body = {
-    action,
-    ...payload
-  };
-
-  if (state.auth.token) {
-    body.token = state.auth.token;
-  }
-
-  const res = await fetch(GAS_WEB_APP_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8'
-    },
-    body: JSON.stringify(body)
-  });
-
-  const text = await res.text();
-  let json = null;
-
-  try {
-    json = JSON.parse(text);
-  } catch (err) {
-    throw new Error('Respons server bukan JSON yang valid.');
-  }
-
-  if (!json.ok) {
-    throw new Error(json.message || 'Permintaan gagal.');
-  }
-
-  return json.data ?? json;
-}
- async function fetchWorkers() {
-  const data = await apiRequest('listWorkers', {});
-  return Array.isArray(data) ? data : [];
-}
-
- async function fetchDashboard(period) {
-  const data = await apiRequest('getDashboard', {
-    bulan: period.month,
-    tahun: period.year
-  });
-
-  return {
-    summary: data?.summary || {
-      totalWorkers: 0,
-      activeWorkers: 0,
-      checkedWorkers: 0,
-      pendingWorkers: 0,
-      totalChecks: 0,
-      passChecks: 0,
-      failChecks: 0
-    },
-    recentChecks: Array.isArray(data?.recentChecks) ? data.recentChecks : []
-  };
-}
-
- async function fetchReports(period) {
-  const data = await apiRequest('getMonthlyReport', {
-    bulan: period.month,
-    tahun: period.year
-  });
-
-  return {
-    overall: data?.overall || {
-      totalChecks: 0,
-      passChecks: 0,
-      failChecks: 0
-    },
-    byJenis: Array.isArray(data?.byJenis) ? data.byJenis : [],
-    recentChecks: Array.isArray(data?.recentChecks) ? data.recentChecks : []
-  };
-}
-
-  async function fetchWorkerHistory(workerId) {
-  const data = await apiRequest('listChecks', {
-    worker_id: workerId,
-    bulan: state.period.month,
-    tahun: state.period.year
-  });
-
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.rows)) return data.rows;
-  return [];
-}
-
- async function handleSubmitWorker(e) {
-  e.preventDefault();
-
-  const mode = els.workerFormMode.value;
-  const nik = (els.workerNoId?.value || '').trim();
-  const nama = (els.workerNama?.value || '').trim();
-
-  if (!nik) {
-    alert('No ID wajib diisi.');
-    return;
-  }
-
-  if (!nama) {
-    alert('Nama lengkap wajib diisi.');
-    return;
-  }
-
-  let payload = { nik, nama };
-
-  if (mode === 'edit') {
-    const id = (els.workerIdEdit?.value || '').trim();
-
-    if (!id) {
-      alert('ID data pekerja tidak ditemukan.');
-      return;
+    async function handleProgressSearch() {
+      const q = (els.progressSearchInput?.value || '').trim().toLowerCase();
+      if (!q) {
+        els.progressSearchResults.innerHTML = `<div class="empty-box">Hasil pencarian pekerja akan tampil di sini.</div>`;
+        return;
+      }
+      const filtered = state.workers.filter(w => {
+        const nama = (w.nama || '').toLowerCase();
+        const nik = (w.nik || '').toLowerCase();
+        return nama.includes(q) || nik.includes(q);
+      });
+      renderProgressSearchResults(filtered);
     }
 
-    payload = { id, nik, nama };
-  }
-
-  try {
-    if (mode === 'edit') {
-      await apiRequest('updateWorker', payload);
-    } else {
-      await apiRequest('addWorker', payload);
+    async function handleWorkerSearch() {
+      const q = (els.workerSearchInput?.value || '').trim().toLowerCase();
+      if (!q) {
+        renderWorkersList(state.workers);
+        return;
+      }
+      const filtered = state.workers.filter(w => {
+        const nama = (w.nama || '').toLowerCase();
+        const nik = (w.nik || '').toLowerCase();
+        return nama.includes(q) || nik.includes(q);
+      });
+      renderWorkersList(filtered);
     }
 
-    closeWorkerModal();
-    resetWorkerForm();
-    await loadWorkers();
-    await loadWorkersForSelect();
-  } catch (err) {
-    alert(err.message || 'Gagal menyimpan data pekerja.');
-  }
-}
-  
-  async function handleSubmitCheck(e) {
-    e.preventDefault();
+    async function handleSubmitCheck(e) {
+      e.preventDefault();
+      const payload = {
+        worker_id: (els.inputWorkerId.value || '').trim(),
+        tanggal: (els.inputTanggal.value || '').trim(),
+        jenis_pemeriksaan: (els.inputJenis.value || '').trim() || 'BAC Test / Alcohol Test',
+        nilai: (els.inputNilai.value || '').trim(),
+        catatan: (els.inputCatatan.value || '').trim()
+      };
 
-    const payload = {
-      worker_id: els.inputWorkerId.value,
-      tanggal: els.inputTanggal.value,
-      jenis_pemeriksaan: els.inputJenis.value,
-      nilai: els.inputNilai.value,
-      catatan: els.inputCatatan.value
-    };
+      if (!payload.worker_id) return alert('Pekerja wajib dipilih.');
+      if (!payload.tanggal) return alert('Tanggal wajib diisi.');
+      if (payload.nilai === '') return alert('Nilai wajib diisi.');
 
-    try {
-      await apiRequest('saveCheck', payload);
+      try {
+        const result = await apiRequest('saveCheck', payload);
+        if (result && result.hasil && els.inputHasil) els.inputHasil.value = result.hasil;
+        alert('Pemeriksaan berhasil disimpan.');
+        els.checkFormNew.reset();
+        setDefaultPeriod();
+        if (els.inputJenis) els.inputJenis.value = 'BAC Test / Alcohol Test';
+        if (els.inputHasil) els.inputHasil.value = '';
+        await loadDashboard();
+        await loadReports();
+        await loadWorkers();
+        if (state.selectedWorker?.id) await selectWorkerForProgress(state.selectedWorker.id);
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan pemeriksaan.');
+      }
+    }
 
-      els.checkFormNew.reset();
-      els.inputJenis.value = 'BAC Test / Alcohol Test';
-      els.inputTanggal.value = new Date().toISOString().slice(0, 10);
-      els.inputHasil.value = '';
+    async function handleSubmitWorker(e) {
+      e.preventDefault();
+      const mode = els.workerFormMode.value;
+      const nik = (els.workerNoId.value || '').trim();
+      const nama = (els.workerNama.value || '').trim();
+      if (!nik) return alert('No ID wajib diisi.');
+      if (!nama) return alert('Nama lengkap wajib diisi.');
 
-      await loadDashboard();
-      await loadReports();
-      await loadWorkers();
-
-      if (state.selectedWorker?.id) {
-        await loadWorkerProgress(state.selectedWorker.id);
+      let payload = { nik, nama };
+      if (mode === 'edit') {
+        const id = (els.workerIdEdit.value || '').trim();
+        if (!id) return alert('ID data pekerja tidak ditemukan.');
+        payload = { id, nik, nama };
       }
 
-      alert('Pemeriksaan berhasil disimpan.');
-    } catch (err) {
-      alert(err.message || 'Gagal menyimpan pemeriksaan.');
+      try {
+        if (mode === 'edit') {
+          await apiRequest('updateWorker', payload);
+        } else {
+          await apiRequest('addWorker', payload);
+        }
+        closeWorkerModal();
+        resetWorkerForm();
+        await loadWorkers();
+        await loadWorkersForSelect();
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan data pekerja.');
+      }
     }
-  }
-</script>
+
+    async function handleShareDashboard() {
+      try {
+        await apiRequest('logShare', {
+          worker_id: state.selectedWorker?.id || 'dashboard',
+          jenis: 'dashboard',
+          target: 'print/share',
+          status: 'REQUESTED',
+          catatan: `Share dashboard periode ${state.period.month}/${state.period.year}`
+        });
+        alert('Log share dashboard berhasil disimpan.');
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan log share dashboard.');
+      }
+    }
+
+    async function handleShareProgress() {
+      if (!state.selectedWorker) return alert('Pilih pekerja terlebih dahulu.');
+      try {
+        await apiRequest('logShare', {
+          worker_id: state.selectedWorker.id,
+          jenis: 'progress',
+          target: 'print/share',
+          status: 'REQUESTED',
+          catatan: `Share progress pekerja ${state.selectedWorker.nama || ''}`
+        });
+        alert('Log share progress berhasil disimpan.');
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan log share progress.');
+      }
+    }
+
+    async function handleExportCsv() {
+      const byJenis = state.reports?.byJenis || [];
+      if (!byJenis.length) return alert('Tidak ada data laporan untuk diexport.');
+      const rows = [
+        ['Jenis Pemeriksaan', 'Total', 'PASS', 'FAIL'],
+        ...byJenis.map(item => [item.name || '', item.total || 0, item.pass || 0, item.fail || 0])
+      ];
+      const csv = rows.map(row => row.map(csvEscape).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `laporan-${state.period.year}-${String(state.period.month).padStart(2, '0')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function renderDashboard(data) {
+      const summary = data?.summary || {};
+      const recentChecks = data?.recentChecks || [];
+      els.dashboardKpi.innerHTML = `
+        <div class="kpi-card total"><div class="kpi-label">Total Pekerja</div><div class="kpi-value">${summary.totalWorkers ?? 0}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Sudah Diperiksa</div><div class="kpi-value">${summary.checkedWorkers ?? 0}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Belum Diperiksa</div><div class="kpi-value">${summary.uncheckedWorkers ?? 0}</div></div>
+        <div class="kpi-card"><div class="kpi-label">PASS</div><div class="kpi-value">${summary.passChecks ?? 0}</div></div>
+        <div class="kpi-card"><div class="kpi-label">FAIL</div><div class="kpi-value">${summary.failChecks ?? 0}</div></div>
+      `;
+
+      els.dashboardChartBox.innerHTML = `
+        <div class="stack">
+          <p class="meta">Total pemeriksaan: ${summary.totalChecks ?? 0}</p>
+          <p class="meta">PASS: ${summary.passChecks ?? 0}</p>
+          <p class="meta">FAIL: ${summary.failChecks ?? 0}</p>
+        </div>
+      `;
+
+      if (!recentChecks.length) {
+        els.dashboardRecentChecks.innerHTML = `<div class="empty-box">Belum ada data pemeriksaan terbaru.</div>`;
+        return;
+      }
+
+      const workerMap = {};
+      state.workers.forEach(worker => { workerMap[String(worker.id)] = worker; });
+      els.dashboardRecentChecks.innerHTML = recentChecks.map(item => {
+        const worker = workerMap[String(item.worker_id)] || {};
+        const hasil = String(item.hasil || '').toUpperCase();
+        const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
+        return `
+          <article class="history-item">
+            <div class="worker-item-head">
+              <div>
+                <p class="meta">${escapeHtml(item.tanggal || '-')}</p>
+                <h3 class="worker-name">${escapeHtml(worker.nama || 'Pekerja tidak ditemukan')}</h3>
+                <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
+                <p class="meta">Jenis: ${escapeHtml(item.jenis_pemeriksaan || '-')}</p>
+                <p class="meta">Nilai: ${escapeHtml(String(item.nilai ?? '-'))}</p>
+              </div>
+              <span class="badge ${badgeClass}">${escapeHtml(hasil || '-')}</span>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderWorkersList(workers) {
+      if (!workers.length) {
+        els.workersList.innerHTML = `<div class="empty-box">Belum ada data pekerja.</div>`;
+        return;
+      }
+      els.workersList.innerHTML = workers.map(worker => `
+        <article class="worker-item">
+          <div class="worker-item-head">
+            <div>
+              <h3 class="worker-name">${escapeHtml(worker.nama || '-')}</h3>
+              <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
+              <p class="meta">Status: ${escapeHtml(worker.aktif || 'Aktif')}</p>
+            </div>
+            <div class="icon-actions">
+              <button type="button" class="icon-btn" onclick='editWorkerById("${escapeJs(worker.id)}")' aria-label="Edit pekerja">✏️</button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderProgressSearchResults(workers) {
+      if (!workers.length) {
+        els.progressSearchResults.innerHTML = `<div class="empty-box">Pekerja tidak ditemukan.</div>`;
+        return;
+      }
+      els.progressSearchResults.innerHTML = workers.map(worker => `
+        <article class="worker-item">
+          <div class="worker-item-head">
+            <div>
+              <h3 class="worker-name">${escapeHtml(worker.nama || '-')}</h3>
+              <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
+            </div>
+            <button type="button" class="btn-secondary" onclick='selectWorkerForProgress("${escapeJs(worker.id)}")'>Pilih</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderProgressSummary(worker, progressData) {
+      if (!worker) {
+        els.progressWorkerSummary.innerHTML = `<div class="empty-box">Pilih pekerja terlebih dahulu.</div>`;
+        return;
+      }
+      const byJenis = progressData?.byJenis || [];
+      const totalChecks = progressData?.totalChecks || 0;
+      els.progressWorkerSummary.innerHTML = `
+        <article class="worker-item">
+          <h3 class="worker-name">${escapeHtml(worker.nama || '-')}</h3>
+          <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
+          <p class="meta">Total pemeriksaan: ${totalChecks}</p>
+        </article>
+        ${byJenis.map(item => `
+          <article class="report-item">
+            <h3 class="worker-name">${escapeHtml(item.jenis || '-')}</h3>
+            <p class="meta">Total: ${item.total ?? 0}</p>
+            <p class="meta">PASS: ${item.pass ?? 0}</p>
+            <p class="meta">FAIL: ${item.fail ?? 0}</p>
+          </article>
+        `).join('')}
+      `;
+    }
+
+    function renderProgressHistory(history, showAll = false) {
+      if (!history.length) {
+        els.progressHistoryList.innerHTML = `<div class="empty-box">Belum ada riwayat pemeriksaan.</div>`;
+        els.viewAllHistoryBtn.classList.add('hidden');
+        return;
+      }
+
+      const rows = showAll ? history : history.slice(0, 5);
+      els.progressHistoryList.innerHTML = rows.map(item => {
+        const hasil = String(item.hasil || '').toUpperCase();
+        const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
+        return `
+          <article class="history-item">
+            <div class="worker-item-head">
+              <div>
+                <p class="meta">${escapeHtml(item.tanggal || '-')}</p>
+                <h3 class="worker-name">${escapeHtml(item.jenis_pemeriksaan || '-')}</h3>
+                <p class="meta">Nilai: ${escapeHtml(String(item.nilai ?? '-'))}</p>
+                <p class="meta">Catatan: ${escapeHtml(item.catatan || '-')}</p>
+              </div>
+              <span class="badge ${badgeClass}">${escapeHtml(hasil || '-')}</span>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      els.viewAllHistoryBtn.classList.toggle('hidden', history.length <= 5);
+    }
+
+    function renderReports(data) {
+      const overall = data?.overall || {};
+      const byJenis = data?.byJenis || [];
+      const recentChecks = data?.recentChecks || [];
+      els.reportSummaryKpi.innerHTML = `
+        <div class="kpi-card total"><div class="kpi-label">Total Pemeriksaan</div><div class="kpi-value">${overall.totalChecks ?? 0}</div></div>
+        <div class="kpi-card"><div class="kpi-label">PASS</div><div class="kpi-value">${overall.passChecks ?? 0}</div></div>
+        <div class="kpi-card"><div class="kpi-label">FAIL</div><div class="kpi-value">${overall.failChecks ?? 0}</div></div>
+      `;
+
+      els.reportChartBox.innerHTML = `
+        <div class="stack">
+          <p class="meta">Periode laporan: ${state.period.month}/${state.period.year}</p>
+          <p class="meta">Total: ${overall.totalChecks ?? 0}</p>
+          <p class="meta">PASS: ${overall.passChecks ?? 0}</p>
+          <p class="meta">FAIL: ${overall.failChecks ?? 0}</p>
+        </div>
+      `;
+
+      if (!byJenis.length) {
+        els.reportDivisiList.innerHTML = `<div class="empty-box">Belum ada data jenis pemeriksaan.</div>`;
+      } else {
+        els.reportDivisiList.innerHTML = byJenis.map(item => `
+          <article class="report-item">
+            <h3 class="worker-name">${escapeHtml(item.name || '-')}</h3>
+            <p class="meta">Total: ${item.total ?? 0}</p>
+            <p class="meta">PASS: ${item.pass ?? 0}</p>
+            <p class="meta">FAIL: ${item.fail ?? 0}</p>
+          </article>
+        `).join('');
+      }
+
+      if (!recentChecks.length) {
+        els.reportLokasiList.innerHTML = `<div class="empty-box">Belum ada pemeriksaan terbaru.</div>`;
+      } else {
+        const workerMap = {};
+        state.workers.forEach(worker => { workerMap[String(worker.id)] = worker; });
+        els.reportLokasiList.innerHTML = recentChecks.map(item => {
+          const worker = workerMap[String(item.worker_id)] || {};
+          const hasil = String(item.hasil || '').toUpperCase();
+          const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
+          return `
+            <article class="history-item">
+              <div class="worker-item-head">
+                <div>
+                  <p class="meta">${escapeHtml(item.tanggal || '-')}</p>
+                  <h3 class="worker-name">${escapeHtml(worker.nama || 'Pekerja tidak ditemukan')}</h3>
+                  <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
+                  <p class="meta">Jenis: ${escapeHtml(item.jenis_pemeriksaan || '-')}</p>
+                  <p class="meta">Nilai: ${escapeHtml(String(item.nilai ?? '-'))}</p>
+                </div>
+                <span class="badge ${badgeClass}">${escapeHtml(hasil || '-')}</span>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+    }
+
+    async function fetchWorkers() {
+      const data = await apiRequest('listWorkers');
+      return Array.isArray(data) ? data : [];
+    }
+
+    async function fetchDashboard(period) {
+      return await apiRequest('getDashboard', { bulan: period.month, tahun: period.year });
+    }
+
+    async function fetchReports(period) {
+      return await apiRequest('getMonthlyReport', { bulan: period.month, tahun: period.year });
+    }
+
+    async function fetchWorkerProgress(workerId) {
+      return await apiRequest('getWorkerProgress', { worker_id: workerId });
+    }
+
+    async function apiRequest(action, payload = {}) {
+      const body = { action, ...payload };
+      if (state.auth.token) body.token = state.auth.token;
+      const res = await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body)
+      });
+      const text = await res.text();
+      let json = null;
+      try {
+        json = JSON.parse(text);
+      } catch (err) {
+        throw new Error('Respons server bukan JSON yang valid.');
+      }
+      if (!json.ok) throw new Error(json.message || 'Permintaan gagal.');
+      return json.data ?? json;
+    }
+
+    async function editWorkerById(id) {
+      const worker = state.workers.find(w => String(w.id) === String(id));
+      if (!worker) return alert('Data pekerja tidak ditemukan.');
+      openWorkerModal('edit', worker);
+    }
+
+    async function selectWorkerForProgress(id) {
+      const worker = state.workers.find(w => String(w.id) === String(id));
+      if (!worker) return alert('Pekerja tidak ditemukan.');
+      state.selectedWorker = worker;
+      try {
+        const progress = await fetchWorkerProgress(id);
+        state.progressHistory = progress.history || [];
+        renderProgressSummary(worker, progress);
+        renderProgressHistory(state.progressHistory, false);
+        els.viewAllHistoryBtn.dataset.expanded = 'false';
+        els.viewAllHistoryBtn.textContent = 'Lihat semua';
+        els.viewAllHistoryBtn.onclick = () => {
+          const expanded = els.viewAllHistoryBtn.dataset.expanded === 'true';
+          els.viewAllHistoryBtn.dataset.expanded = expanded ? 'false' : 'true';
+          els.viewAllHistoryBtn.textContent = expanded ? 'Lihat semua' : 'Tampilkan ringkas';
+          renderProgressHistory(state.progressHistory, !expanded);
+        };
+      } catch (err) {
+        alert(err.message || 'Gagal memuat progress pekerja.');
+      }
+    }
+
+    function csvEscape(value) {
+      const s = String(value ?? '');
+      if (s.includes('"') || s.includes(',') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function escapeJs(str) {
+      return String(str ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    window.editWorkerById = editWorkerById;
+    window.selectWorkerForProgress = selectWorkerForProgress;
+  </script>
 </body>
 </html>
