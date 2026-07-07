@@ -1232,9 +1232,75 @@ function fillWorkerForm(worker) {
     console.log('Export CSV laporan');
   }
 
-  function renderDashboard(data) {
-    console.log('renderDashboard', data);
+ function renderDashboard(data) {
+  const summary = data?.summary || {};
+  const recentChecks = data?.recentChecks || [];
+
+  els.dashboardKpi.innerHTML = `
+    <div class="kpi-card total">
+      <div class="kpi-label">Total Pekerja</div>
+      <div class="kpi-value">${summary.totalWorkers ?? 0}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Sudah Diperiksa</div>
+      <div class="kpi-value">${summary.checkedWorkers ?? 0}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Belum Diperiksa</div>
+      <div class="kpi-value">${summary.pendingWorkers ?? 0}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">PASS</div>
+      <div class="kpi-value">${summary.passChecks ?? 0}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FAIL</div>
+      <div class="kpi-value">${summary.failChecks ?? 0}</div>
+    </div>
+  `;
+
+  els.dashboardChartBox.innerHTML = `
+    <div class="stack">
+      <p class="meta">Total pemeriksaan: ${summary.totalChecks ?? 0}</p>
+      <p class="meta">PASS: ${summary.passChecks ?? 0}</p>
+      <p class="meta">FAIL: ${summary.failChecks ?? 0}</p>
+      <p class="meta">Chart donut bisa kita pasang setelah data utama stabil.</p>
+    </div>
+  `;
+
+  if (!recentChecks.length) {
+    els.dashboardRecentChecks.innerHTML = `
+      <div class="empty-box">Belum ada data pemeriksaan terbaru.</div>
+    `;
+    return;
   }
+
+  const workerMap = {};
+  state.workers.forEach(worker => {
+    workerMap[String(worker.id)] = worker;
+  });
+
+  els.dashboardRecentChecks.innerHTML = recentChecks.map(item => {
+    const worker = workerMap[String(item.worker_id)] || {};
+    const hasil = String(item.hasil || '').toUpperCase();
+    const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
+
+    return `
+      <article class="history-item">
+        <div class="worker-item-head">
+          <div>
+            <p class="meta">${item.tanggal || '-'}</p>
+            <h3 class="worker-name">${worker.nama || 'Pekerja tidak ditemukan'}</h3>
+            <p class="meta">No ID: ${worker.nik || '-'}</p>
+            <p class="meta">Jenis: ${item.jenis_pemeriksaan || '-'}</p>
+            <p class="meta">Nilai: ${item.nilai ?? '-'}</p>
+          </div>
+          <span class="badge ${badgeClass}">${hasil || '-'}</span>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
 
   function renderWorkersList(workers) {
   if (!workers.length) {
@@ -1278,9 +1344,62 @@ function fillWorkerForm(worker) {
     </article>
   `).join('');
 }
-  function renderReports(data) {
-    console.log('renderReports', data);
+ function renderReports(data) {
+  const overall = data?.overall || {};
+  const byDivisi = data?.byDivisi || [];
+  const byLokasi = data?.byLokasi || [];
+
+  els.reportSummaryKpi.innerHTML = `
+    <div class="kpi-card total">
+      <div class="kpi-label">Total Pemeriksaan</div>
+      <div class="kpi-value">${overall.totalChecks ?? 0}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">PASS</div>
+      <div class="kpi-value">${overall.passChecks ?? 0}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FAIL</div>
+      <div class="kpi-value">${overall.failChecks ?? 0}</div>
+    </div>
+  `;
+
+  els.reportChartBox.innerHTML = `
+    <div class="stack">
+      <p class="meta">Periode laporan: ${state.period.month}/${state.period.year}</p>
+      <p class="meta">Total: ${overall.totalChecks ?? 0}</p>
+      <p class="meta">PASS: ${overall.passChecks ?? 0}</p>
+      <p class="meta">FAIL: ${overall.failChecks ?? 0}</p>
+      <p class="meta">Bar chart bisa kita pasang setelah tampilan data sudah final.</p>
+    </div>
+  `;
+
+  if (!byDivisi.length) {
+    els.reportDivisiList.innerHTML = `<div class="empty-box">Belum ada data divisi.</div>`;
+  } else {
+    els.reportDivisiList.innerHTML = byDivisi.map(item => `
+      <article class="report-item">
+        <h3 class="worker-name">${item.name || '-'}</h3>
+        <p class="meta">Total: ${item.total ?? 0}</p>
+        <p class="meta">PASS: ${item.pass ?? 0}</p>
+        <p class="meta">FAIL: ${item.fail ?? 0}</p>
+      </article>
+    `).join('');
   }
+
+  if (!byLokasi.length) {
+    els.reportLokasiList.innerHTML = `<div class="empty-box">Belum ada data lokasi.</div>`;
+  } else {
+    els.reportLokasiList.innerHTML = byLokasi.map(item => `
+      <article class="report-item">
+        <h3 class="worker-name">${item.name || '-'}</h3>
+        <p class="meta">Total: ${item.total ?? 0}</p>
+        <p class="meta">PASS: ${item.pass ?? 0}</p>
+        <p class="meta">FAIL: ${item.fail ?? 0}</p>
+      </article>
+    `).join('');
+  }
+}
 
 function selectWorkerForProgress(workerId) {
   const worker = state.workers.find(w => String(w.id) === String(workerId));
