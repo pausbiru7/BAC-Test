@@ -4,737 +4,841 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Monitoring Pemeriksaan Pekerja</title>
+
   <style>
-    :root {
-      --bg: #f3f6fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #dbe3ef;
-      --primary: #0f62fe;
-      --primary-dark: #0b4fd1;
-      --danger: #dc2626;
-      --success: #15803d;
-      --warning: #b45309;
-      --info-bg: #eff6ff;
-      --danger-bg: #fef2f2;
-      --success-bg: #f0fdf4;
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#d7e0ea;
+      --primary:#2563eb;
+      --success:#15803d;
+      --danger:#dc2626;
+      --warning:#b45309;
+      --shadow:0 10px 24px rgba(15,23,42,.08);
+      --radius:16px;
+      --nav-h:72px;
     }
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px;
+
+    .hidden{display:none!important}
+
+    .app{
+      min-height:100vh;
+      padding-bottom:calc(var(--nav-h) + 14px);
     }
-    .topbar, .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(244,247,251,.96);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--line);
+      padding:14px 16px;
     }
-    .topbar { margin-bottom: 20px; }
-    h1, h2, h3, p { margin-top: 0; }
-    .subtitle, .hint { color: var(--muted); }
-    .grid {
-      display: grid;
-      gap: 20px;
+
+    .topbar-title{
+      font-size:18px;
+      font-weight:700;
+      margin:0;
     }
-    .grid.two {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .topbar-subtitle{
+      margin:4px 0 0;
+      font-size:13px;
+      color:var(--muted);
     }
-    .top-sections { margin-bottom: 20px; }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
+
+    .screen{
+      display:none;
+      padding:16px;
+      gap:16px;
     }
-    .stack {
-      display: grid;
-      gap: 12px;
+
+    .screen.active{
+      display:grid;
     }
-    .inline-form {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
     }
-    .period-form {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      align-items: end;
+
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
     }
-    .summary-inline {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
+
+    .section-head h2,
+    .section-head h3{
+      margin:0;
+      font-size:16px;
     }
-    label {
-      display: grid;
-      gap: 6px;
-      font-size: 14px;
-      color: var(--muted);
+
+    .hint{
+      margin:4px 0 0;
+      font-size:13px;
+      color:var(--muted);
     }
-    input, select, button, textarea {
-      font: inherit;
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
-    input, select, textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 11px 12px;
-      background: #fff;
-      color: var(--text);
+
+    .stack{
+      display:grid;
+      gap:12px;
     }
-    textarea { min-height: 88px; resize: vertical; }
-    button {
-      border: 0;
-      border-radius: 10px;
-      padding: 11px 16px;
-      background: var(--primary);
-      color: #fff;
-      cursor: pointer;
-      font-weight: 600;
+
+    label{
+      display:grid;
+      gap:6px;
+      font-size:14px;
+      color:var(--muted);
     }
-    button:hover { background: var(--primary-dark); }
-    button.secondary {
-      background: #eef2ff;
-      color: #1e3a8a;
+
+    input, select, textarea, button{
+      font:inherit;
     }
-    button.secondary:hover { background: #dbeafe; }
-    .status {
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-size: 14px;
-      margin-bottom: 12px;
-      border: 1px solid transparent;
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 14px;
+      min-height:46px;
+      background:#fff;
+      color:var(--text);
     }
-    .status.info { background: var(--info-bg); color: #1d4ed8; border-color: #bfdbfe; }
-    .status.success { background: var(--success-bg); color: var(--success); border-color: #bbf7d0; }
-    .status.error { background: var(--danger-bg); color: var(--danger); border-color: #fecaca; }
-    .debug {
-      margin: 0;
-      padding: 12px;
-      border-radius: 12px;
-      background: #0f172a;
-      color: #e5e7eb;
-      min-height: 180px;
-      overflow: auto;
-      font-size: 12px;
+
+    textarea{
+      min-height:96px;
+      resize:vertical;
     }
-    .hidden { display: none; }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+
+    button{
+      border:0;
+      border-radius:12px;
+      min-height:44px;
+      padding:12px 14px;
+      cursor:pointer;
     }
-    .stat-card {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      background: #f8fbff;
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+      font-weight:600;
     }
-    .stat-card .label {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
+
+    .btn-secondary{
+      background:#eaf1ff;
+      color:#1d4ed8;
+      font-weight:600;
     }
-    .stat-card .value {
-      font-size: 28px;
-      font-weight: 700;
+
+    .btn-ghost{
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--text);
     }
-    .table-wrap {
-      overflow: auto;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: #fff;
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 720px;
+
+    .kpi-card{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
     }
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      vertical-align: top;
-      font-size: 14px;
+
+    .kpi-card.total{
+      grid-column:1 / -1;
     }
-    th {
-      background: #f8fafc;
-      color: var(--muted);
-      position: sticky;
-      top: 0;
+
+    .kpi-label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
     }
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
+
+    .kpi-value{
+      font-size:28px;
+      font-weight:700;
+      line-height:1.1;
     }
-    .badge.pass { background: #dcfce7; color: #166534; }
-    .badge.fail { background: #fee2e2; color: #991b1b; }
-    .badge.pending { background: #fef3c7; color: #92400e; }
-    .report-box {
-      border: 1px dashed var(--line);
-      border-radius: 12px;
-      padding: 16px;
-      color: var(--muted);
-      min-height: 220px;
-      background: #fcfdff;
+
+    .actions-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
     }
-    @media (max-width: 900px) {
-      .grid.two, .stats-grid { grid-template-columns: 1fr; }
-      .topbar, .section-head { flex-direction: column; align-items: stretch; }
-      .container { padding: 14px; }
+
+    .search-box{
+      display:grid;
+      gap:10px;
+    }
+
+    .worker-list,
+    .history-list,
+    .summary-list,
+    .report-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .worker-item,
+    .history-item,
+    .report-item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+    }
+
+    .worker-item-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .worker-name{
+      margin:0 0 6px;
+      font-size:15px;
+      font-weight:700;
+      color:var(--text);
+    }
+
+    .meta{
+      margin:2px 0;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .icon-actions{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-shrink:0;
+    }
+
+    .icon-btn{
+      width:34px;
+      height:34px;
+      min-height:34px;
+      padding:0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:10px;
+      color:var(--text);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .badge.pass{background:#dcfce7;color:#166534}
+    .badge.fail{background:#fee2e2;color:#991b1b}
+    .badge.pending{background:#fef3c7;color:#92400e}
+
+    .chart-box{
+      min-height:220px;
+      border:1px dashed var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#fcfdff;
+    }
+
+    .empty-box{
+      border:1px dashed var(--line);
+      border-radius:14px;
+      padding:16px;
+      color:var(--muted);
+      text-align:center;
+      background:#fcfdff;
+    }
+
+    .mobile-nav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:50;
+      height:var(--nav-h);
+      background:#fff;
+      border-top:1px solid var(--line);
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      box-shadow:0 -8px 20px rgba(15,23,42,.06);
+    }
+
+    .nav-btn{
+      border:0;
+      background:transparent;
+      display:grid;
+      place-items:center;
+      gap:4px;
+      padding:8px 4px;
+      color:var(--muted);
+      border-radius:0;
+      min-height:auto;
+    }
+
+    .nav-btn.active{
+      color:var(--primary);
+      font-weight:700;
+    }
+
+    .nav-icon{
+      font-size:18px;
+      line-height:1;
+    }
+
+    .nav-label{
+      font-size:11px;
+      line-height:1.1;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.45);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index:80;
+      padding:12px;
+    }
+
+    .modal.show{
+      display:flex;
+    }
+
+    .modal-sheet{
+      width:100%;
+      max-width:560px;
+      max-height:92vh;
+      overflow:auto;
+      background:#fff;
+      border-radius:20px 20px 12px 12px;
+      padding:16px;
+      box-shadow:0 20px 40px rgba(15,23,42,.2);
+    }
+
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .modal-head h3{
+      margin:0;
+      font-size:18px;
+    }
+
+    @media (min-width: 900px){
+      .app{
+        max-width:900px;
+        margin:0 auto;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="app">
     <header class="topbar">
-      <div>
-        <h1>Monitoring Pemeriksaan Pekerja</h1>
-        <p class="subtitle">Frontend sederhana untuk GAS Web App</p>
-      </div>
-      <button id="logoutBtn" class="secondary">Logout</button>
+      <h1 class="topbar-title" id="pageTitle">Dashboard</h1>
+      <p class="topbar-subtitle" id="pageSubtitle">Monitoring pemeriksaan pekerja</p>
     </header>
 
-    <section class="card config-card">
-      <h2>Konfigurasi API</h2>
-      <div class="grid two">
-        <label>
-          <span>WEB_APP_URL</span>
-          <input id="webAppUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
-        </label>
-        <label>
-          <span>Token Aktif</span>
-          <input id="tokenField" type="text" placeholder="Token akan muncul setelah login" readonly />
-        </label>
-      </div>
-      <p class="hint">Paste URL deploy Web App GAS kamu di sini, lalu login.</p>
-    </section>
-
-    <section class="grid two top-sections">
-      <section class="card">
-        <h2>Login</h2>
-        <form id="loginForm" class="stack">
-          <label><span>Username</span><input name="username" type="text" value="admin" required /></label>
-          <label><span>Password</span><input name="password" type="password" value="admin123" required /></label>
-          <button type="submit">Login</button>
-        </form>
-      </section>
-
-      <section class="card">
-        <h2>Status</h2>
-        <div id="statusBox" class="status info">Siap digunakan.</div>
-        <pre id="debugBox" class="debug">Belum ada response.</pre>
-      </section>
-    </section>
-
-    <main id="appSection" class="app hidden">
-      <section class="card">
-        <h2>Filter Periode</h2>
-        <form id="periodForm" class="period-form">
-          <label>
-            <span>Bulan</span>
-            <select id="periodMonth" name="bulan">
-              <option value="1">Januari</option>
-              <option value="2">Februari</option>
-              <option value="3">Maret</option>
-              <option value="4">April</option>
-              <option value="5">Mei</option>
-              <option value="6">Juni</option>
-              <option value="7">Juli</option>
-              <option value="8">Agustus</option>
-              <option value="9">September</option>
-              <option value="10">Oktober</option>
-              <option value="11">November</option>
-              <option value="12">Desember</option>
-            </select>
-          </label>
-          <label>
-            <span>Tahun</span>
-            <input id="periodYear" name="tahun" type="number" min="2020" max="2100" />
-          </label>
-          <div></div>
-          <button type="submit">Terapkan Periode</button>
-        </form>
-      </section>
-
-      <section class="card">
-        <div class="section-head">
-          <h2>Dashboard</h2>
-          <button id="refreshDashboardBtn">Refresh Dashboard</button>
-        </div>
-        <div id="dashboardCards" class="stats-grid"></div>
-        <div id="recentChecks" class="table-wrap"></div>
-      </section>
-
-      <section class="card">
-        <div class="section-head">
-          <h2>Progress Pekerja</h2>
-          <button id="loadProgressBtn" class="secondary">Muat Progress</button>
-        </div>
-        <div id="progressSummary" class="summary-inline"></div>
-        <div id="progressTable" class="table-wrap"></div>
-      </section>
-
-      <section class="grid two">
-        <section class="card">
+    <main>
+      <!-- DASHBOARD -->
+      <section id="screen-dashboard" class="screen active" data-screen="dashboard">
+        <section class="card stack">
           <div class="section-head">
-            <h2>Data Pekerja</h2>
-            <button id="loadWorkersBtn" class="secondary">Muat Pekerja</button>
+            <div>
+              <h2>Filter Periode</h2>
+              <p class="hint">Pilih bulan dan tahun untuk ringkasan dashboard.</p>
+            </div>
           </div>
-          <form id="workerFilterForm" class="inline-form">
-            <input name="q" type="text" placeholder="Cari nama / NIK / divisi" />
-            <button type="submit">Cari</button>
+
+          <form id="dashboardPeriodForm" class="stack">
+            <div class="grid-2">
+              <label>
+                Bulan
+                <select id="dashboardMonth" name="bulan"></select>
+              </label>
+              <label>
+                Tahun
+                <select id="dashboardYear" name="tahun"></select>
+              </label>
+            </div>
+            <button type="submit" class="btn-primary">Terapkan</button>
           </form>
-          <div id="workersTable" class="table-wrap"></div>
         </section>
 
-        <section class="card">
-          <h2>Tambah Pekerja</h2>
-          <form id="addWorkerForm" class="stack">
-            <label><span>NIK</span><input name="nik" type="text" required /></label>
-            <label><span>Nama</span><input name="nama" type="text" required /></label>
-            <label><span>Divisi</span><input name="divisi" type="text" /></label>
-            <label><span>Jabatan</span><input name="jabatan" type="text" /></label>
-            <label><span>Perusahaan</span><input name="perusahaan" type="text" /></label>
-            <label><span>Lokasi</span><input name="lokasi" type="text" /></label>
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Ringkasan</h2>
+              <p class="hint">Total, pass, dan fail pada periode terpilih.</p>
+            </div>
+          </div>
+
+          <div id="dashboardKpi" class="kpi-grid">
+            <div class="kpi-card total">
+              <div class="kpi-label">Total</div>
+              <div class="kpi-value">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Pass</div>
+              <div class="kpi-value">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Fail</div>
+              <div class="kpi-value">0</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="section-head">
+              <h3>Grafik Hasil</h3>
+            </div>
+            <div id="dashboardChartBox">Chart donut pass/fail akan tampil di sini.</div>
+          </div>
+
+          <div class="actions-row">
+            <button id="printDashboardBtn" type="button" class="btn-secondary">Print</button>
+            <button id="shareDashboardBtn" type="button" class="btn-ghost">Share</button>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Pemeriksaan Terbaru</h2>
+              <p class="hint">Ringkasan hasil pemeriksaan terbaru.</p>
+            </div>
+          </div>
+          <div id="dashboardRecentChecks" class="history-list">
+            <div class="empty-box">Belum ada data pemeriksaan terbaru.</div>
+          </div>
+        </section>
+      </section>
+
+      <!-- INPUT -->
+      <section id="screen-input" class="screen" data-screen="input">
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Input Pemeriksaan</h2>
+              <p class="hint">Form pemeriksaan BAC test / alcohol test lapangan.</p>
+            </div>
+          </div>
+
+          <form id="checkFormNew" class="stack">
             <label>
-              <span>Status Aktif</span>
-              <select name="status_aktif">
-                <option value="Aktif">Aktif</option>
-                <option value="Nonaktif">Nonaktif</option>
+              Pekerja *
+              <select id="inputWorkerId" name="worker_id">
+                <option value="">-- Pilih pekerja --</option>
               </select>
             </label>
-            <button type="submit">Simpan Pekerja</button>
+
+            <label>
+              Tanggal *
+              <input type="date" id="inputTanggal" name="tanggal" />
+            </label>
+
+            <label>
+              Jenis Pemeriksaan
+              <input type="text" id="inputJenis" name="jenis_pemeriksaan" value="BAC Test / Alcohol Test" readonly />
+            </label>
+
+            <label>
+              Nilai *
+              <input type="number" id="inputNilai" name="nilai" min="0" step="0.01" placeholder="Masukkan nilai BAC test" />
+            </label>
+
+            <label>
+              Hasil
+              <input type="text" id="inputHasil" name="hasil" placeholder="Otomatis" readonly />
+            </label>
+
+            <label>
+              Catatan (opsional)
+              <textarea id="inputCatatan" name="catatan" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+            </label>
+
+            <button type="submit" class="btn-primary">Simpan Pemeriksaan</button>
           </form>
         </section>
       </section>
 
-      <section class="grid two">
-        <section class="card">
-          <h2>Input Pemeriksaan</h2>
-          <form id="checkForm" class="stack">
-            <label>
-              <span>Pilih Pekerja</span>
-              <select id="checkWorkerId" name="worker_id" required>
-                <option value="">-- Pilih Pekerja --</option>
-              </select>
-            </label>
-            <label><span>Tanggal</span><input name="tanggal" type="date" required /></label>
-            <label><span>Jenis Pemeriksaan</span><input name="jenis_pemeriksaan" type="text" value="MCU" required /></label>
-            <label><span>Nilai</span><input name="nilai" type="number" step="0.01" value="0.00" required /></label>
-            <label><span>Catatan</span><textarea name="catatan" placeholder="Catatan pemeriksaan"></textarea></label>
-            <button type="submit">Simpan Pemeriksaan</button>
+      <!-- PROGRESS -->
+      <section id="screen-progress" class="screen" data-screen="progress">
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Cari Pekerja</h2>
+              <p class="hint">Cari nama atau NIK pekerja untuk melihat progress dan riwayat.</p>
+            </div>
+          </div>
+
+          <div class="search-box">
+            <input type="search" id="progressSearchInput" placeholder="Ketik nama atau NIK pekerja" />
+            <div id="progressSearchResults" class="worker-list">
+              <div class="empty-box">Hasil pencarian pekerja akan tampil di sini.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Ringkasan Pekerja</h2>
+              <p class="hint">Data pekerja yang dipilih.</p>
+            </div>
+          </div>
+
+          <div id="progressWorkerSummary" class="summary-list">
+            <div class="empty-box">Pilih pekerja terlebih dahulu.</div>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Riwayat Pemeriksaan</h2>
+              <p class="hint">Menampilkan 5 riwayat terakhir.</p>
+            </div>
+          </div>
+
+          <div id="progressHistoryList" class="history-list">
+            <div class="empty-box">Belum ada riwayat pemeriksaan.</div>
+          </div>
+
+          <button id="viewAllHistoryBtn" type="button" class="btn-ghost hidden">Lihat semua</button>
+
+          <div class="actions-row">
+            <button id="printProgressBtn" type="button" class="btn-secondary">Print</button>
+            <button id="shareProgressBtn" type="button" class="btn-ghost">Share</button>
+          </div>
+        </section>
+      </section>
+
+      <!-- PEKERJA -->
+      <section id="screen-workers" class="screen" data-screen="workers">
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Data Pekerja</h2>
+              <p class="hint">Cari, tambah, edit, dan hapus data pekerja.</p>
+            </div>
+          </div>
+
+          <div class="stack">
+            <input type="search" id="workerSearchInput" placeholder="Ketik nama atau NIK pekerja" />
+            <button id="openWorkerModalBtn" type="button" class="btn-primary">Daftarkan Pekerja Baru</button>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div id="workersList" class="worker-list">
+            <div class="empty-box">Belum ada data pekerja.</div>
+          </div>
+        </section>
+      </section>
+
+      <!-- LAPORAN -->
+      <section id="screen-reports" class="screen" data-screen="reports">
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Filter Laporan</h2>
+              <p class="hint">Pilih bulan dan tahun laporan bulanan.</p>
+            </div>
+          </div>
+
+          <form id="reportPeriodForm" class="stack">
+            <div class="grid-2">
+              <label>
+                Bulan
+                <select id="reportMonth" name="bulan"></select>
+              </label>
+              <label>
+                Tahun
+                <select id="reportYear" name="tahun"></select>
+              </label>
+            </div>
+            <button type="submit" class="btn-primary">Tampilkan</button>
           </form>
         </section>
 
-        <section class="card">
+        <section class="card stack">
           <div class="section-head">
-            <h2>Laporan Bulanan</h2>
-            <button id="loadReportBtn" class="secondary">Muat Laporan</button>
+            <div>
+              <h2>Ringkasan Laporan</h2>
+              <p class="hint">Total, pass, dan fail pada periode laporan.</p>
+            </div>
           </div>
-          <div id="reportBox" class="report-box">Belum ada laporan.</div>
+
+          <div id="reportSummaryKpi" class="kpi-grid">
+            <div class="kpi-card total">
+              <div class="kpi-label">Total</div>
+              <div class="kpi-value">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Pass</div>
+              <div class="kpi-value">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Fail</div>
+              <div class="kpi-value">0</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="section-head">
+              <h3>Grafik Laporan</h3>
+            </div>
+            <div id="reportChartBox">Chart bar per divisi/lokasi akan tampil di sini.</div>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Per Divisi</h2>
+              <p class="hint">Ringkasan pemeriksaan berdasarkan divisi.</p>
+            </div>
+          </div>
+          <div id="reportDivisiList" class="report-list">
+            <div class="empty-box">Belum ada data divisi.</div>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="section-head">
+            <div>
+              <h2>Per Lokasi</h2>
+              <p class="hint">Ringkasan pemeriksaan berdasarkan lokasi.</p>
+            </div>
+          </div>
+          <div id="reportLokasiList" class="report-list">
+            <div class="empty-box">Belum ada data lokasi.</div>
+          </div>
+
+          <div class="actions-row">
+            <button id="printReportBtn" type="button" class="btn-secondary">Print</button>
+            <button id="exportCsvBtn" type="button" class="btn-ghost">Export CSV</button>
+          </div>
         </section>
       </section>
     </main>
   </div>
 
+  <!-- BOTTOM NAV -->
+  <nav class="mobile-nav" aria-label="Navigasi utama aplikasi">
+    <button class="nav-btn active" data-target="dashboard" type="button">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-btn" data-target="input" type="button">
+      <span class="nav-icon">🧪</span>
+      <span class="nav-label">Input</span>
+    </button>
+    <button class="nav-btn" data-target="progress" type="button">
+      <span class="nav-icon">📈</span>
+      <span class="nav-label">Progress</span>
+    </button>
+    <button class="nav-btn" data-target="workers" type="button">
+      <span class="nav-icon">👷</span>
+      <span class="nav-label">Pekerja</span>
+    </button>
+    <button class="nav-btn" data-target="reports" type="button">
+      <span class="nav-icon">📄</span>
+      <span class="nav-label">Laporan</span>
+    </button>
+  </nav>
+
+  <!-- MODAL PEKERJA -->
+  <div id="workerModal" class="modal" aria-hidden="true">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3 id="workerModalTitle">Daftarkan Pekerja Baru</h3>
+        <button id="closeWorkerModalBtn" type="button" class="icon-btn" aria-label="Tutup modal">✕</button>
+      </div>
+
+      <form id="workerFormNew" class="stack">
+        <input type="hidden" id="workerFormMode" value="add" />
+        <input type="hidden" id="workerIdEdit" name="id" />
+
+        <label>
+          Nama Lengkap *
+          <input type="text" id="workerNama" name="nama" placeholder="Masukkan nama lengkap" />
+        </label>
+
+        <label>
+          Tanggal Lahir *
+          <input type="date" id="workerTanggalLahir" name="tanggal_lahir" />
+        </label>
+
+        <label>
+          Usia
+          <input type="text" id="workerUsia" name="usia" placeholder="Otomatis" readonly />
+        </label>
+
+        <label>
+          Jenis Kelamin *
+          <select id="workerJenisKelamin" name="jenis_kelamin">
+            <option value="">-- Pilih jenis kelamin --</option>
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </select>
+        </label>
+
+        <label>
+          No HP / WhatsApp *
+          <input type="tel" id="workerWhatsapp" name="no_hp" inputmode="numeric" placeholder="Contoh: 081234567890" />
+        </label>
+
+        <p class="hint">Nomor akan otomatis disesuaikan ke format WhatsApp.</p>
+
+        <div class="actions-row">
+          <button id="cancelWorkerModalBtn" type="button" class="btn-ghost">Batal</button>
+          <button type="submit" class="btn-primary">Simpan Pekerja</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    const state = {
-      webAppUrl: '',
-      token: '',
-      workers: []
+    const APP_META = {
+      dashboard: {
+        title: 'Dashboard',
+        subtitle: 'Ringkasan hasil pemeriksaan pekerja'
+      },
+      input: {
+        title: 'Input Pemeriksaan',
+        subtitle: 'Input cepat BAC test / alcohol test'
+      },
+      progress: {
+        title: 'Progress Pekerja',
+        subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan'
+      },
+      workers: {
+        title: 'Data Pekerja',
+        subtitle: 'Kelola data pekerja'
+      },
+      reports: {
+        title: 'Laporan Bulanan',
+        subtitle: 'Rekap hasil per periode'
+      }
     };
 
-    const els = {
-      webAppUrl: document.getElementById('webAppUrl'),
-      tokenField: document.getElementById('tokenField'),
-      logoutBtn: document.getElementById('logoutBtn'),
-      loginForm: document.getElementById('loginForm'),
-      statusBox: document.getElementById('statusBox'),
-      debugBox: document.getElementById('debugBox'),
-      appSection: document.getElementById('appSection'),
-      periodForm: document.getElementById('periodForm'),
-      periodMonth: document.getElementById('periodMonth'),
-      periodYear: document.getElementById('periodYear'),
-      dashboardCards: document.getElementById('dashboardCards'),
-      recentChecks: document.getElementById('recentChecks'),
-      progressSummary: document.getElementById('progressSummary'),
-      progressTable: document.getElementById('progressTable'),
-      loadProgressBtn: document.getElementById('loadProgressBtn'),
-      workerFilterForm: document.getElementById('workerFilterForm'),
-      workersTable: document.getElementById('workersTable'),
-      addWorkerForm: document.getElementById('addWorkerForm'),
-      loadWorkersBtn: document.getElementById('loadWorkersBtn'),
-      checkForm: document.getElementById('checkForm'),
-      checkWorkerId: document.getElementById('checkWorkerId'),
-      refreshDashboardBtn: document.getElementById('refreshDashboardBtn'),
-      loadReportBtn: document.getElementById('loadReportBtn'),
-      reportBox: document.getElementById('reportBox')
-    };
+    function switchScreen(name) {
+      document.querySelectorAll('.screen').forEach(el => {
+        el.classList.toggle('active', el.dataset.screen === name);
+      });
 
-    function init() {
-      const savedUrl = localStorage.getItem('gas_web_app_url') || '';
-      const savedToken = localStorage.getItem('gas_token') || '';
-      els.webAppUrl.value = savedUrl;
-      els.tokenField.value = savedToken;
-      state.webAppUrl = savedUrl;
-      state.token = savedToken;
-      setTodayDefault();
-      setDefaultPeriod();
-      bindEvents();
-      if (savedToken && savedUrl) {
-        verifyToken();
-      }
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.target === name);
+      });
+
+      const meta = APP_META[name] || APP_META.dashboard;
+      document.getElementById('pageTitle').textContent = meta.title;
+      document.getElementById('pageSubtitle').textContent = meta.subtitle;
     }
 
-    function bindEvents() {
-      els.webAppUrl.addEventListener('change', () => {
-        state.webAppUrl = els.webAppUrl.value.trim();
-        localStorage.setItem('gas_web_app_url', state.webAppUrl);
-      });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchScreen(btn.dataset.target));
+    });
 
-      els.loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const form = new FormData(els.loginForm);
-        await login(form.get('username'), form.get('password'));
-      });
+    const workerModal = document.getElementById('workerModal');
+    const openWorkerModalBtn = document.getElementById('openWorkerModalBtn');
+    const closeWorkerModalBtn = document.getElementById('closeWorkerModalBtn');
+    const cancelWorkerModalBtn = document.getElementById('cancelWorkerModalBtn');
 
-      els.logoutBtn.addEventListener('click', async () => {
-        if (!state.token) return;
-        try {
-          await postJson({ action: 'logout', token: state.token });
-        } catch (err) {}
-        clearSession();
-        setStatus('Logout berhasil.', 'success');
-      });
-
-      els.periodForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await Promise.all([loadDashboard(), loadProgress(), loadReport()]);
-      });
-
-      els.refreshDashboardBtn.addEventListener('click', loadDashboard);
-      els.loadWorkersBtn.addEventListener('click', loadWorkers);
-      els.loadReportBtn.addEventListener('click', loadReport);
-      els.loadProgressBtn.addEventListener('click', loadProgress);
-
-      els.workerFilterForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await loadWorkers();
-      });
-
-      els.addWorkerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const payload = formToObject(els.addWorkerForm);
-        payload.action = 'addWorker';
-        payload.token = state.token;
-        const res = await postJson(payload);
-        handleApiResponse(res, 'Pekerja berhasil ditambahkan.');
-        els.addWorkerForm.reset();
-        await loadWorkers();
-      });
-
-      els.checkForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const payload = formToObject(els.checkForm);
-        payload.action = 'saveCheck';
-        payload.token = state.token;
-        const res = await postJson(payload);
-        handleApiResponse(res, 'Pemeriksaan berhasil disimpan.');
-        await Promise.all([loadDashboard(), loadWorkers(), loadProgress(), loadReport()]);
-      });
+    function openWorkerModal(mode = 'add') {
+      workerModal.classList.add('show');
+      workerModal.setAttribute('aria-hidden', 'false');
+      document.getElementById('workerFormMode').value = mode;
+      document.getElementById('workerModalTitle').textContent =
+        mode === 'edit' ? 'Edit Data Pekerja' : 'Daftarkan Pekerja Baru';
     }
 
-    async function login(username, password) {
-      const res = await postJson({ action: 'login', username, password });
-      if (!res.ok) {
-        handleApiResponse(res);
+    function closeWorkerModal() {
+      workerModal.classList.remove('show');
+      workerModal.setAttribute('aria-hidden', 'true');
+    }
+
+    openWorkerModalBtn?.addEventListener('click', () => openWorkerModal('add'));
+    closeWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+    cancelWorkerModalBtn?.addEventListener('click', closeWorkerModal);
+
+    document.getElementById('workerTanggalLahir')?.addEventListener('change', function () {
+      const dob = this.value;
+      const usiaField = document.getElementById('workerUsia');
+      if (!dob) {
+        usiaField.value = '';
         return;
       }
-      state.token = res.data.token;
-      els.tokenField.value = state.token;
-      localStorage.setItem('gas_token', state.token);
-      setStatus(`Login berhasil sebagai ${res.data.user.nama}.`, 'success');
-      showDebug(res);
-      els.appSection.classList.remove('hidden');
-      await Promise.all([loadDashboard(), loadWorkers(), loadProgress(), loadReport()]);
-    }
-
-    async function verifyToken() {
-      try {
-        const res = await postJson({ action: 'verifyToken', token: state.token });
-        if (!res.ok) {
-          clearSession();
-          setStatus('Token sudah tidak valid. Silakan login lagi.', 'error');
-          return;
-        }
-        els.appSection.classList.remove('hidden');
-        setStatus(`Sesi aktif untuk ${res.data.user.nama}.`, 'success');
-        showDebug(res);
-        await Promise.all([loadDashboard(), loadWorkers(), loadProgress(), loadReport()]);
-      } catch (err) {
-        setStatus(err.message, 'error');
+      const birth = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
       }
-    }
+      usiaField.value = age >= 0 ? age + ' tahun' : '';
+    });
 
-    async function loadDashboard() {
-      const period = getSelectedPeriod();
-      const res = await postJson({ action: 'getDashboard', token: state.token, ...period });
-      handleApiResponse(res);
-      renderDashboard(res.data || {});
-    }
+    document.getElementById('workerWhatsapp')?.addEventListener('blur', function () {
+      let val = (this.value || '').replace(/\D/g, '');
+      if (val.startsWith('0')) val = '62' + val.slice(1);
+      if (val.startsWith('620')) val = '62' + val.slice(3);
+      this.value = val;
+    });
 
-    async function loadWorkers() {
-      const filters = formToObject(els.workerFilterForm);
-      const res = await postJson({ action: 'listWorkers', token: state.token, ...filters });
-      handleApiResponse(res);
-      state.workers = res.data || [];
-      renderWorkers(state.workers);
-      renderWorkerSelect(state.workers);
-    }
+    document.getElementById('inputNilai')?.addEventListener('input', function () {
+      const n = Number(this.value || 0);
+      document.getElementById('inputHasil').value = n > 0 ? 'FAIL' : 'PASS';
+    });
 
-    async function loadProgress() {
-      const period = getSelectedPeriod();
-      const res = await postJson({ action: 'getWorkerProgress', token: state.token, ...period });
-      handleApiResponse(res);
-      renderProgress(res.data || {});
-    }
-
-    async function loadReport() {
-      const period = getSelectedPeriod();
-      const res = await postJson({
-        action: 'getMonthlyReport',
-        token: state.token,
-        ...period
-      });
-      handleApiResponse(res);
-      renderReport(res.data || {});
-    }
-
-    async function postJson(body) {
-      const url = els.webAppUrl.value.trim();
-      if (!url) throw new Error('WEB_APP_URL belum diisi.');
-      state.webAppUrl = url;
-      localStorage.setItem('gas_web_app_url', url);
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(body)
-      });
-      const json = await response.json();
-      showDebug(json);
-      return json;
-    }
-
-    function renderDashboard(data) {
-      const summary = data.summary || {};
-      const cards = [
-        ['Total Pekerja', summary.totalWorkers || 0],
-        ['Sudah Dicek', summary.checkedWorkers || 0],
-        ['Belum Dicek', summary.pendingWorkers || 0],
-        ['FAIL', summary.failChecks || 0]
-      ];
-      els.dashboardCards.innerHTML = cards.map(item => `
-        <div class="stat-card">
-          <div class="label">${item[0]}</div>
-          <div class="value">${item[1]}</div>
-        </div>
-      `).join('');
-
-      const rows = data.recentChecks || [];
-      if (!rows.length) {
-        els.recentChecks.innerHTML = '<div class="report-box">Belum ada data pemeriksaan terbaru.</div>';
-        return;
-      }
-      els.recentChecks.innerHTML = tableHtml([
-        'Tanggal', 'Worker ID', 'Jenis', 'Nilai', 'Hasil', 'Input By'
-      ], rows.map(r => [
-        escapeHtml(r.tanggal || ''),
-        escapeHtml(r.worker_id || ''),
-        escapeHtml(r.jenis_pemeriksaan || ''),
-        escapeHtml(String(r.nilai ?? '')),
-        badgeHtml(r.hasil),
-        escapeHtml(r.input_by || '')
-      ]));
-    }
-
-    function renderWorkers(rows) {
-      if (!rows.length) {
-        els.workersTable.innerHTML = '<div class="report-box">Belum ada data pekerja.</div>';
-        return;
-      }
-      els.workersTable.innerHTML = tableHtml([
-        'NIK', 'Nama', 'Divisi', 'Jabatan', 'Lokasi', 'Status', 'Hasil Terakhir'
-      ], rows.map(r => [
-        escapeHtml(r.nik || ''),
-        escapeHtml(r.nama || ''),
-        escapeHtml(r.divisi || ''),
-        escapeHtml(r.jabatan || ''),
-        escapeHtml(r.lokasi || ''),
-        escapeHtml(r.status_aktif || ''),
-        r.latest_check ? badgeHtml(r.latest_check.hasil) : '<span class="badge pending">BELUM</span>'
-      ]));
-    }
-
-    function renderWorkerSelect(rows) {
-      const current = els.checkWorkerId.value;
-      const options = ['<option value="">-- Pilih Pekerja --</option>'].concat(
-        rows.map(r => `<option value="${escapeAttr(r.id)}">${escapeHtml(r.nama)} (${escapeHtml(r.nik || '-')})</option>`)
-      );
-      els.checkWorkerId.innerHTML = options.join('');
-      if (current) els.checkWorkerId.value = current;
-    }
-
-    function renderReport(data) {
-      const overall = data.overall || {};
-      const divisi = data.byDivisi || [];
-      const lokasi = data.byLokasi || [];
-      let html = '';
-      html += `<h3>Ringkasan</h3>`;
-      html += `<p>Total Checks: <strong>${overall.totalChecks || 0}</strong><br>PASS: <strong>${overall.passChecks || 0}</strong><br>FAIL: <strong>${overall.failChecks || 0}</strong></p>`;
-      html += `<h3>Per Divisi</h3>`;
-      html += divisi.length ? tableHtml(['Divisi', 'Total', 'PASS', 'FAIL'], divisi.map(r => [escapeHtml(r.name), r.total, r.pass, r.fail])) : '<p>Belum ada data.</p>';
-      html += `<h3>Per Lokasi</h3>`;
-      html += lokasi.length ? tableHtml(['Lokasi', 'Total', 'PASS', 'FAIL'], lokasi.map(r => [escapeHtml(r.name), r.total, r.pass, r.fail])) : '<p>Belum ada data.</p>';
-      els.reportBox.innerHTML = html;
-    }
-
-    function renderProgress(data) {
-      const summary = data.summary || {};
-      const rows = data.rows || data.workers || [];
-      const cards = [
-        ['Total Pekerja', summary.totalWorkers || rows.length || 0],
-        ['Sudah Dicek', summary.checkedWorkers || 0],
-        ['Belum Dicek', summary.pendingWorkers || 0],
-        ['Persentase', `${summary.progressPercent || 0}%`]
-      ];
-      els.progressSummary.innerHTML = cards.map(item => `
-        <div class="stat-card">
-          <div class="label">${item[0]}</div>
-          <div class="value">${item[1]}</div>
-        </div>
-      `).join('');
-
-      if (!rows.length) {
-        els.progressTable.innerHTML = '<div class="report-box">Belum ada data progress pekerja untuk periode ini.</div>';
-        return;
-      }
-
-      els.progressTable.innerHTML = tableHtml(
-        ['NIK', 'Nama', 'Divisi', 'Lokasi', 'Status Progress', 'Hasil Terakhir', 'Tanggal Terakhir'],
-        rows.map(r => [
-          escapeHtml(r.nik || ''),
-          escapeHtml(r.nama || ''),
-          escapeHtml(r.divisi || ''),
-          escapeHtml(r.lokasi || ''),
-          r.checked ? '<span class="badge pass">SUDAH</span>' : '<span class="badge pending">BELUM</span>',
-          badgeHtml(r.hasil_terakhir || r.hasil || 'BELUM'),
-          escapeHtml(r.tanggal_terakhir || r.tanggal || '-')
-        ])
-      );
-    }
-
-    function tableHtml(headers, rows) {
-      const head = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
-      const body = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
-      return `<table>${head}${body}</table>`;
-    }
-
-    function badgeHtml(value) {
-      const v = String(value || '').toUpperCase();
-      const cls = v === 'PASS' ? 'pass' : v === 'FAIL' ? 'fail' : 'pending';
-      return `<span class="badge ${cls}">${escapeHtml(v || 'BELUM')}</span>`;
-    }
-
-    function formToObject(form) {
-      const fd = new FormData(form);
-      const obj = {};
-      for (const [key, value] of fd.entries()) {
-        obj[key] = String(value).trim();
-      }
-      return obj;
-    }
-
-    function handleApiResponse(res, successMessage) {
-      if (!res.ok) {
-        setStatus(res.message || 'Request gagal.', 'error');
-        throw new Error(res.message || 'Request gagal.');
-      }
-      setStatus(successMessage || res.message || 'Request berhasil.', 'success');
-      showDebug(res);
-    }
-
-    function setStatus(message, type) {
-      els.statusBox.className = `status ${type || 'info'}`;
-      els.statusBox.textContent = message;
-    }
-
-    function showDebug(data) {
-      els.debugBox.textContent = JSON.stringify(data, null, 2);
-    }
-
-    function clearSession() {
-      state.token = '';
-      localStorage.removeItem('gas_token');
-      els.tokenField.value = '';
-      els.appSection.classList.add('hidden');
-      els.progressSummary.innerHTML = '';
-      els.progressTable.innerHTML = '';
-    }
-
-    function setTodayDefault() {
-      const today = new Date().toISOString().slice(0, 10);
-      const dateInput = els.checkForm.querySelector('input[name="tanggal"]');
-      if (dateInput) dateInput.value = today;
-    }
-
-    function setDefaultPeriod() {
-      const now = new Date();
-      els.periodMonth.value = String(now.getMonth() + 1);
-      els.periodYear.value = String(now.getFullYear());
-    }
-
-    function getSelectedPeriod() {
-      return {
-        bulan: Number(els.periodMonth.value || new Date().getMonth() + 1),
-        tahun: Number(els.periodYear.value || new Date().getFullYear())
-      };
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function escapeAttr(value) {
-      return escapeHtml(value);
-    }
-
-    init();
+    document.getElementById('inputTanggal').value = new Date().toISOString().slice(0, 10);
   </script>
 </body>
 </html>
