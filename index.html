@@ -1040,35 +1040,52 @@
       }
     }
 
-    async function handleSubmitWorker(e) {
-      e.preventDefault();
-      const mode = els.workerFormMode.value;
-      const nik = (els.workerNoId.value || '').trim();
-      const nama = (els.workerNama.value || '').trim();
-      if (!nik) return alert('No ID wajib diisi.');
-      if (!nama) return alert('Nama lengkap wajib diisi.');
+   async function handleSubmitWorker(e) {
+  e.preventDefault();
 
-      let payload = { nik, nama };
-      if (mode === 'edit') {
-        const id = (els.workerIdEdit.value || '').trim();
-        if (!id) return alert('ID data pekerja tidak ditemukan.');
-        payload = { id, nik, nama };
-      }
+  const mode = els.workerFormMode.value;
+  const nik = (els.workerNoId.value || '').trim();
+  const nama = (els.workerNama.value || '').trim();
 
-      try {
-        if (mode === 'edit') {
-          await apiRequest('updateWorker', payload);
-        } else {
-          await apiRequest('addWorker', payload);
-        }
-        closeWorkerModal();
-        resetWorkerForm();
-        await loadWorkers();
-        await loadWorkersForSelect();
-      } catch (err) {
-        alert(err.message || 'Gagal menyimpan data pekerja.');
-      }
+  if (!nik) return alert('No ID wajib diisi.');
+  if (!nama) return alert('Nama lengkap wajib diisi.');
+
+  let payload = {
+    nik,
+    nama,
+    tanggal_lahir: els.workerTanggalLahir?.value || '',
+    jenis_kelamin: els.workerJenisKelamin?.value || '',
+    no_hp: (els.workerWhatsapp?.value || '').trim()
+  };
+
+  if (mode === 'edit') {
+    const id = (els.workerIdEdit.value || '').trim();
+    if (!id) return alert('ID data pekerja tidak ditemukan.');
+    payload = {
+      id,
+      nik,
+      nama,
+      tanggal_lahir: els.workerTanggalLahir?.value || '',
+      jenis_kelamin: els.workerJenisKelamin?.value || '',
+      no_hp: (els.workerWhatsapp?.value || '').trim()
+    };
+  }
+
+  try {
+    if (mode === 'edit') {
+      await apiRequest('updateWorker', payload);
+    } else {
+      await apiRequest('addWorker', payload);
     }
+
+    closeWorkerModal();
+    resetWorkerForm();
+    await loadWorkers();
+    await loadWorkersForSelect();
+  } catch (err) {
+    alert(err.message || 'Gagal menyimpan data pekerja.');
+  }
+}
 
     async function handleShareDashboard() {
       try {
