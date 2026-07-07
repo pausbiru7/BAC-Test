@@ -1481,36 +1481,38 @@ async function selectWorkerForProgress(workerId) {
  const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/dev';
   
   async function apiRequest(action, payload = {}) {
-    const body = {
-      action,
-      token: state.auth.token || '',
-      ...payload
-    };
+  const body = {
+    action,
+    ...payload
+  };
 
-    const res = await fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(body)
-    });
-
-    const text = await res.text();
-    let json = null;
-
-    try {
-      json = JSON.parse(text);
-    } catch (err) {
-      throw new Error('Respons server bukan JSON yang valid.');
-    }
-
-    if (!json.ok) {
-      throw new Error(json.message || 'Permintaan gagal.');
-    }
-
-    return json.data ?? json;
+  if (state.auth.token) {
+    body.token = state.auth.token;
   }
 
+  const res = await fetch(GAS_WEB_APP_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify(body)
+  });
+
+  const text = await res.text();
+  let json = null;
+
+  try {
+    json = JSON.parse(text);
+  } catch (err) {
+    throw new Error('Respons server bukan JSON yang valid.');
+  }
+
+  if (!json.ok) {
+    throw new Error(json.message || 'Permintaan gagal.');
+  }
+
+  return json.data ?? json;
+}
  async function fetchWorkers() {
   const data = await apiRequest('listWorkers', {});
   return Array.isArray(data) ? data : [];
@@ -1582,10 +1584,7 @@ async function selectWorkerForProgress(workerId) {
     return;
   }
 
-  let payload = {
-    nik,
-    nama
-  };
+  let payload = { nik, nama };
 
   if (mode === 'edit') {
     const id = (els.workerIdEdit?.value || '').trim();
@@ -1595,11 +1594,7 @@ async function selectWorkerForProgress(workerId) {
       return;
     }
 
-    payload = {
-      id,
-      nik,
-      nama
-    };
+    payload = { id, nik, nama };
   }
 
   try {
@@ -1617,6 +1612,7 @@ async function selectWorkerForProgress(workerId) {
     alert(err.message || 'Gagal menyimpan data pekerja.');
   }
 }
+  
   async function handleSubmitCheck(e) {
     e.preventDefault();
 
