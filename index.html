@@ -1421,8 +1421,12 @@ function updateAgeFromBirthDate() {
     }
 
    function renderDashboard(data) {
+  console.log('dashboard data:', data);
+
   const summary = data?.summary || {};
-  const recentChecks = data?.recentChecks || [];
+  const recentChecks = data?.recentChecks || data?.recent_checks || data?.checks || [];
+
+  console.log('recentChecks final:', recentChecks);
 
   els.dashboardKpi.innerHTML = `
     <div class="kpi-card total"><div class="kpi-label">Total Pekerja</div><div class="kpi-value">${summary.totalWorkers ?? 0}</div></div>
@@ -1456,7 +1460,7 @@ function updateAgeFromBirthDate() {
   });
 
   els.dashboardRecentChecks.innerHTML = recentChecks.map(item => {
-    const worker = workerMap[String(item.worker_id)] || {};
+    const worker = workerMap[String(item.worker_id ?? item.workerId)] || {};
     const hasil = String(item.hasil || '').toUpperCase();
     const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
 
@@ -1465,9 +1469,9 @@ function updateAgeFromBirthDate() {
         <div class="worker-item-head">
           <div>
             <p class="meta">${escapeHtml(item.tanggal || '-')}</p>
-            <h3 class="worker-name">${escapeHtml(worker.nama || 'Pekerja tidak ditemukan')}</h3>
-            <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
-            <p class="meta">Jenis: ${escapeHtml(item.jenis_pemeriksaan || '-')}</p>
+            <h3 class="worker-name">${escapeHtml(worker.nama || item.nama || 'Pekerja tidak ditemukan')}</h3>
+            <p class="meta">No ID: ${escapeHtml(worker.nik || item.nik || '-')}</p>
+            <p class="meta">Jenis: ${escapeHtml(item.jenis_pemeriksaan || item.jenis || '-')}</p>
             <p class="meta">Nilai: ${escapeHtml(String(item.nilai ?? '-'))}</p>
           </div>
           <span class="badge ${badgeClass}">${escapeHtml(hasil || '-')}</span>
