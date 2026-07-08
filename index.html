@@ -1020,7 +1020,7 @@ function updateAgeFromBirthDate() {
       }).join('');
       els.inputWorkerId.innerHTML = `<option value="">-- Pilih pekerja --</option>${options}`;
     }
-
+    
     async function loadWorkersForSelect() {
       if (!state.workers.length) state.workers = await fetchWorkers();
       renderWorkerOptions(state.workers);
@@ -1072,36 +1072,51 @@ function updateAgeFromBirthDate() {
       renderWorkersList(filtered);
     }
 
-    async function handleSubmitCheck(e) {
-      e.preventDefault();
-      const payload = {
-        worker_id: (els.inputWorkerId.value || '').trim(),
-        tanggal: (els.inputTanggal.value || '').trim(),
-        jenis_pemeriksaan: (els.inputJenis.value || '').trim() || 'BAC Test / Alcohol Test',
-        nilai: (els.inputNilai.value || '').trim(),
-        catatan: (els.inputCatatan.value || '').trim()
-      };
+   async function handleSubmitCheck(e) {
+  e.preventDefault();
 
-      if (!payload.worker_id) return alert('Pekerja wajib dipilih.');
-      if (!payload.tanggal) return alert('Tanggal wajib diisi.');
-      if (payload.nilai === '') return alert('Nilai wajib diisi.');
+  const payload = {
+    worker_id: (els.inputWorkerId.value || '').trim(),
+    tanggal: (els.inputTanggal.value || '').trim(),
+    jenis_pemeriksaan: (els.inputJenis.value || '').trim() || 'BAC Test / Alcohol Test',
+    nilai: (els.inputNilai.value || '').trim(),
+    catatan: (els.inputCatatan.value || '').trim()
+  };
 
-      try {
-        const result = await apiRequest('saveCheck', payload);
-        if (result && result.hasil && els.inputHasil) els.inputHasil.value = result.hasil;
-        alert('Pemeriksaan berhasil disimpan.');
-        els.checkFormNew.reset();
-        setDefaultPeriod();
-        if (els.inputJenis) els.inputJenis.value = 'BAC Test / Alcohol Test';
-        if (els.inputHasil) els.inputHasil.value = '';
-        await loadDashboard();
-        await loadReports();
-        await loadWorkers();
-        if (state.selectedWorker?.id) await selectWorkerForProgress(state.selectedWorker.id);
-      } catch (err) {
-        alert(err.message || 'Gagal menyimpan pemeriksaan.');
-      }
+  if (!payload.worker_id) return alert('Pekerja wajib dipilih.');
+  if (!payload.tanggal) return alert('Tanggal wajib diisi.');
+  if (payload.nilai === '') return alert('Nilai wajib diisi.');
+
+  const selectedWorkerId = state.selectedWorker?.id || payload.worker_id;
+
+  try {
+    const result = await apiRequest('saveCheck', payload);
+
+    if (result && result.hasil && els.inputHasil) {
+      els.inputHasil.value = result.hasil;
     }
+
+    alert('Pemeriksaan berhasil disimpan.');
+    els.checkFormNew.reset();
+    setDefaultPeriod();
+    if (els.inputJenis) els.inputJenis.value = 'BAC Test / Alcohol Test';
+    if (els.inputHasil) els.inputHasil.value = '';
+
+    const tasks = [
+      loadDashboard(),
+      loadReports(),
+      loadWorkers()
+    ];
+
+    if (selectedWorkerId) {
+      tasks.push(selectWorkerForProgress(selectedWorkerId));
+    }
+
+    await Promise.all(tasks);
+  } catch (err) {
+    alert(err.message || 'Gagal menyimpan pemeriksaan.');
+  }
+}
 
  async function handleSubmitWorker(e) {
   e.preventDefault();
