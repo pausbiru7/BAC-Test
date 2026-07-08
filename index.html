@@ -374,14 +374,32 @@
         margin:0 auto;
       }
     }
+    .topbar-title.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-icon {
+  flex: 0 0 auto;
+  color: currentColor;
+}
   </style>
 </head>
 <body>
   <div class="app">
-    <header class="topbar">
-      <h1 class="topbar-title" id="pageTitle">Dashboard</h1>
-      <p class="topbar-subtitle" id="pageSubtitle">Monitoring pemeriksaan pekerja</p>
-    </header>
+   <header class="topbar">
+  <h1 class="topbar-title with-icon" id="pageTitle">
+    <svg class="title-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
+      <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
+      <rect x="14" y="10" width="7" height="11" rx="1.5"></rect>
+      <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+    </svg>
+    <span>Dashboard</span>
+  </h1>
+  <p class="topbar-subtitle" id="pageSubtitle">Monitoring pemeriksaan pekerja</p>
+</header>
 
     <main>
       <section id="screen-dashboard" class="screen active" data-screen="dashboard">
