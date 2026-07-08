@@ -903,9 +903,12 @@
       els.dashboardYear.value = String(state.period.year);
     }
 
-    function getSelectedPeriod() {
-      return { month: state.period.month, year: state.period.year };
-    }
+   function getSelectedPeriod() {
+  return {
+    bulan: state.period.month,
+    tahun: state.period.year
+  };
+}
 
    function normalizeWhatsappNumber() {
   let val = (els.workerWhatsapp?.value || '').replace(/\D/g, '');
