@@ -1657,24 +1657,34 @@ function updateAgeFromBirthDate() {
       return await apiRequest('getWorkerProgress', { worker_id: workerId });
     }
 
-    async function apiRequest(action, payload = {}) {
-      const body = { action, ...payload };
-      if (state.auth.token) body.token = state.auth.token;
-      const res = await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(body)
-      });
-      const text = await res.text();
-      let json = null;
-      try {
-        json = JSON.parse(text);
-      } catch (err) {
-        throw new Error('Respons server bukan JSON yang valid.');
-      }
-      if (!json.ok) throw new Error(json.message || 'Permintaan gagal.');
-      return json.data ?? json;
-    }
+   async function apiRequest(action, payload = {}) {
+  const body = { action, ...payload };
+  if (state.auth.token) body.token = state.auth.token;
+
+  const res = await fetch(GAS_WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body)
+  });
+
+  const text = await res.text();
+
+  console.log('API ACTION:', action);
+  console.log('API STATUS:', res.status);
+  console.log('API RAW TEXT:', text);
+
+  let json = null;
+  try {
+    json = JSON.parse(text);
+  } catch (err) {
+    throw new Error(`Respons server bukan JSON yang valid. Action: ${action}`);
+  }
+
+  console.log('API JSON:', json);
+
+  if (!json.ok) throw new Error(json.message || 'Permintaan gagal.');
+  return json.data ?? json;
+}
 
     async function editWorkerById(id) {
       const worker = state.workers.find(w => String(w.id) === String(id));
