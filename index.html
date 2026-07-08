@@ -1424,7 +1424,15 @@ function updateAgeFromBirthDate() {
   console.log('dashboard data:', data);
 
   const summary = data?.summary || {};
-  const recentChecks = data?.recentChecks || data?.recent_checks || data?.checks || [];
+  const recentChecks = (
+    data?.recentChecks ||
+    data?.recent_checks ||
+    data?.checks ||
+    state.checks ||
+    []
+  ).slice().sort((a, b) => {
+    return new Date(b.tanggal || 0) - new Date(a.tanggal || 0);
+  }).slice(0, 5);
 
   console.log('recentChecks final:', recentChecks);
 
