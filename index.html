@@ -5,20 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Monitoring Pemeriksaan Pekerja</title>
   <style>
-    :root{
-      --bg:#f4f7fb;
-      --card:#ffffff;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --line:#d7e0ea;
-      --primary:#2563eb;
-      --success:#15803d;
-      --danger:#dc2626;
-      --warning:#b45309;
-      --shadow:0 10px 24px rgba(15,23,42,.08);
-      --radius:16px;
-      --nav-h:72px;
-    }
+   :root{
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --line:#d7e0ea;
+  --primary:#2563eb;
+  --success:#15803d;
+  --danger:#dc2626;
+  --warning:#b45309;
+  --shadow:0 10px 24px rgba(15,23,42,.08);
+  --radius:16px;
+  --nav-h:72px;
+  --powered-h:24px;
+}
 
     *{box-sizing:border-box}
     body{
@@ -388,22 +389,27 @@
   align-items:center;
   justify-content:center;
 }
-    :root{
-  --bg:#f4f7fb;
-  --card:#ffffff;
-  --text:#1f2937;
-  --muted:#6b7280;
-  --line:#d7e0ea;
-  --primary:#2563eb;
-  --success:#15803d;
-  --danger:#dc2626;
-  --warning:#b45309;
-  --shadow:0 10px 24px rgba(15,23,42,.08);
-  --radius:16px;
-  --nav-h:72px;
-  --powered-h:24px;
+
+.app{
+  min-height:100vh;
+  padding-bottom:calc(var(--nav-h) + var(--powered-h) + 18px);
 }
-    .mobile-powered{
+
+.mobile-nav{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:var(--powered-h);
+  z-index:50;
+  height:var(--nav-h);
+  background:#fff;
+  border-top:1px solid var(--line);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  box-shadow:0 -8px 20px rgba(15,23,42,.06);
+}
+
+.mobile-powered{
   position:fixed;
   left:0;
   right:0;
@@ -417,10 +423,6 @@
   border-top:1px solid #eef2f7;
   font-size:11px;
   color:var(--muted);
-}
-
-.mobile-nav{
-  bottom:var(--powered-h);
 }
   </style>
 </head>
