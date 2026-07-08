@@ -790,12 +790,12 @@
       exportCsvBtn: document.getElementById('exportCsvBtn')
     };
 
-    const APP_META = {
-  dashboard: { title: 'Dashboard', subtitle: 'Ringkasan hasil pemeriksaan pekerja', icon: '📊' },
-  input: { title: 'Input Pemeriksaan', subtitle: 'Input cepat BAC test / alcohol test', icon: '🧪' },
-  progress: { title: 'Progress Pekerja', subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan', icon: '📈' },
-  workers: { title: 'Data Pekerja', subtitle: 'Kelola data pekerja', icon: '👷' },
-  reports: { title: 'Laporan Bulanan', subtitle: 'Rekap hasil per periode', icon: '📅' }
+   const APP_META = {
+  dashboard: { title: 'Dashboard', subtitle: 'Ringkasan hasil pemeriksaan pekerja' },
+  input: { title: 'Input Pemeriksaan', subtitle: 'Input cepat BAC test / alcohol test' },
+  progress: { title: 'Progress Pekerja', subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan' },
+  workers: { title: 'Data Pekerja', subtitle: 'Kelola data pekerja' },
+  reports: { title: 'Laporan Bulanan', subtitle: 'Rekap hasil per periode' }
 };
 
 document.addEventListener('DOMContentLoaded', init);
@@ -868,11 +868,11 @@ document.addEventListener('DOMContentLoaded', init);
  function switchScreen(name) {
   state.activeScreen = name;
 
+  let activeNavBtn = null;
+
   els.screens.forEach(el => {
     el.classList.toggle('active', el.dataset.screen === name);
   });
-
-  let activeNavBtn = null;
 
   els.navButtons.forEach(btn => {
     const isActive = btn.dataset.target === name;
@@ -882,9 +882,9 @@ document.addEventListener('DOMContentLoaded', init);
 
   const meta = APP_META[name] || APP_META.dashboard;
 
-  if (els.pageIcon && activeNavBtn) {
-    const navIconEl = activeNavBtn.querySelector('.nav-icon');
-    els.pageIcon.textContent = navIconEl ? navIconEl.textContent.trim() : (meta.icon || '📊');
+  if (els.pageIcon) {
+    const iconText = activeNavBtn?.querySelector('.nav-icon')?.textContent?.trim() || '🏠';
+    els.pageIcon.textContent = iconText;
   }
 
   els.pageTitle.textContent = meta.title;
