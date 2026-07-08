@@ -865,13 +865,28 @@ document.addEventListener('DOMContentLoaded', init);
   els.exportCsvBtn?.addEventListener('click', handleExportCsv);
 }
 
-  function switchScreen(name) {
+ function switchScreen(name) {
   state.activeScreen = name;
-  els.screens.forEach(el => el.classList.toggle('active', el.dataset.screen === name));
-  els.navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.target === name));
+
+  els.screens.forEach(el => {
+    el.classList.toggle('active', el.dataset.screen === name);
+  });
+
+  let activeNavBtn = null;
+
+  els.navButtons.forEach(btn => {
+    const isActive = btn.dataset.target === name;
+    btn.classList.toggle('active', isActive);
+    if (isActive) activeNavBtn = btn;
+  });
 
   const meta = APP_META[name] || APP_META.dashboard;
-  if (els.pageIcon) els.pageIcon.textContent = meta.icon || '📊';
+
+  if (els.pageIcon && activeNavBtn) {
+    const navIconEl = activeNavBtn.querySelector('.nav-icon');
+    els.pageIcon.textContent = navIconEl ? navIconEl.textContent.trim() : (meta.icon || '📊');
+  }
+
   els.pageTitle.textContent = meta.title;
   els.pageSubtitle.textContent = meta.subtitle;
 }
