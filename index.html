@@ -374,30 +374,29 @@
         margin:0 auto;
       }
     }
-    .topbar-title.with-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+   
+.topbar-heading{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-.title-icon {
-  flex: 0 0 auto;
-  color: currentColor;
+.topbar-icon{
+  font-size:18px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
   </style>
 </head>
 <body>
   <div class="app">
-  <header class="topbar">
-  <h1 class="topbar-title with-icon">
-    <svg class="title-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
-      <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
-      <rect x="14" y="10" width="7" height="11" rx="1.5"></rect>
-      <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
-    </svg>
-    <span id="pageTitle">Dashboard</span>
-  </h1>
+ <header class="topbar">
+  <div class="topbar-heading">
+    <span class="topbar-icon" id="pageIcon">📊</span>
+    <h1 class="topbar-title" id="pageTitle">Dashboard</h1>
+  </div>
   <p class="topbar-subtitle" id="pageSubtitle">Monitoring pemeriksaan pekerja</p>
 </header>
 
@@ -792,14 +791,14 @@
     };
 
     const APP_META = {
-      dashboard: { title: 'Dashboard', subtitle: 'Ringkasan hasil pemeriksaan pekerja' },
-      input: { title: 'Input Pemeriksaan', subtitle: 'Input cepat BAC test / alcohol test' },
-      progress: { title: 'Progress Pekerja', subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan' },
-      workers: { title: 'Data Pekerja', subtitle: 'Kelola data pekerja' },
-      reports: { title: 'Laporan Bulanan', subtitle: 'Rekap hasil per periode' }
-    };
+  dashboard: { title: 'Dashboard', subtitle: 'Ringkasan hasil pemeriksaan pekerja', icon: '📊' },
+  input: { title: 'Input Pemeriksaan', subtitle: 'Input cepat BAC test / alcohol test', icon: '🧪' },
+  progress: { title: 'Progress Pekerja', subtitle: 'Cari pekerja dan lihat riwayat pemeriksaan', icon: '📈' },
+  workers: { title: 'Data Pekerja', subtitle: 'Kelola data pekerja', icon: '👷' },
+  reports: { title: 'Laporan Bulanan', subtitle: 'Rekap hasil per periode', icon: '📅' }
+};
 
-    document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', init);
 
     async function init() {
       fillMonthOptions(els.dashboardMonth);
@@ -866,14 +865,16 @@
   els.exportCsvBtn?.addEventListener('click', handleExportCsv);
 }
 
-    function switchScreen(name) {
-      state.activeScreen = name;
-      els.screens.forEach(el => el.classList.toggle('active', el.dataset.screen === name));
-      els.navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.target === name));
-      const meta = APP_META[name] || APP_META.dashboard;
-      els.pageTitle.textContent = meta.title;
-      els.pageSubtitle.textContent = meta.subtitle;
-    }
+  function switchScreen(name) {
+  state.activeScreen = name;
+  els.screens.forEach(el => el.classList.toggle('active', el.dataset.screen === name));
+  els.navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.target === name));
+
+  const meta = APP_META[name] || APP_META.dashboard;
+  if (els.pageIcon) els.pageIcon.textContent = meta.icon || '📊';
+  els.pageTitle.textContent = meta.title;
+  els.pageSubtitle.textContent = meta.subtitle;
+}
 
     function handleScreenEnter(name) {
       if (name === 'dashboard') loadDashboard();
