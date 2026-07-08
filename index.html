@@ -424,6 +424,18 @@
   font-size:11px;
   color:var(--muted);
 }
+.chart-canvas-wrap{
+  position:relative;
+  width:100%;
+  max-width:320px;
+  height:220px;
+  margin:0 auto 12px;
+}
+#dashboardChartBox{
+  display:grid;
+  gap:12px;
+  justify-items:center;
+}
   </style>
 </head>
 <body>
@@ -475,10 +487,9 @@
             <div class="kpi-card"><div class="kpi-label">Fail</div><div class="kpi-value">0</div></div>
           </div>
 
-          <div class="chart-box">
-            <div class="section-head"><h3>Grafik Hasil</h3></div>
-           <div id="dashboardChartBox">
-  anvas id="dashboardDonutChart"></canvas>
+         <div class="chart-box">
+  <div class="section-head"><h3>Grafik Hasil</h3></div>
+  <div id="dashboardChartBox"></div>
 </div>
 
           <div class="actions-row">
@@ -761,6 +772,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script>
+    let dashboardDonutChart = null;
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec';
 
    const state = {
@@ -774,7 +786,51 @@
   progressHistory: [],
   reports: null
 };
+function renderDashboardDonutChart(summary) {
+  const canvas = document.getElementById('dashboardDonutChart');
+  if (!canvas || typeof Chart === 'undefined') return;
 
+  const passChecks = Number(summary?.passChecks ?? 0);
+  const failChecks = Number(summary?.failChecks ?? 0);
+
+  if (dashboardDonutChart) {
+    dashboardDonutChart.destroy();
+  }
+
+  dashboardDonutChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['PASS', 'FAIL'],
+      datasets: [{
+        data: [passChecks, failChecks],
+        backgroundColor: ['#22c55e', '#ef4444'],
+        borderColor: ['#ffffff', '#ffffff'],
+        borderWidth: 2,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: {
+          position: 'bottom'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const value = context.raw || 0;
+              const total = passChecks + failChecks;
+              const pct = total ? Math.round((value / total) * 100) : 0;
+              return `${context.label}: ${value} (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
     const els = {
       pageIcon: document.getElementById('pageIcon'),
       pageTitle: document.getElementById('pageTitle'),
@@ -1364,52 +1420,62 @@ function updateAgeFromBirthDate() {
       URL.revokeObjectURL(url);
     }
 
-    function renderDashboard(data) {
-      const summary = data?.summary || {};
-      const recentChecks = data?.recentChecks || [];
-      els.dashboardKpi.innerHTML = `
-        <div class="kpi-card total"><div class="kpi-label">Total Pekerja</div><div class="kpi-value">${summary.totalWorkers ?? 0}</div></div>
-        <div class="kpi-card"><div class="kpi-label">Sudah Diperiksa</div><div class="kpi-value">${summary.checkedWorkers ?? 0}</div></div>
-        <div class="kpi-card"><div class="kpi-label">Belum Diperiksa</div><div class="kpi-value">${summary.uncheckedWorkers ?? 0}</div></div>
-        <div class="kpi-card"><div class="kpi-label">PASS</div><div class="kpi-value">${summary.passChecks ?? 0}</div></div>
-        <div class="kpi-card"><div class="kpi-label">FAIL</div><div class="kpi-value">${summary.failChecks ?? 0}</div></div>
-      `;
+   function renderDashboard(data) {
+  const summary = data?.summary || {};
+  const recentChecks = data?.recentChecks || [];
 
-      els.dashboardChartBox.innerHTML = `
-        <div class="stack">
-          <p class="meta">Total pemeriksaan: ${summary.totalChecks ?? 0}</p>
-          <p class="meta">PASS: ${summary.passChecks ?? 0}</p>
-          <p class="meta">FAIL: ${summary.failChecks ?? 0}</p>
+  els.dashboardKpi.innerHTML = `
+    <div class="kpi-card total"><div class="kpi-label">Total Pekerja</div><div class="kpi-value">${summary.totalWorkers ?? 0}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Sudah Diperiksa</div><div class="kpi-value">${summary.checkedWorkers ?? 0}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Belum Diperiksa</div><div class="kpi-value">${summary.uncheckedWorkers ?? 0}</div></div>
+    <div class="kpi-card"><div class="kpi-label">PASS</div><div class="kpi-value">${summary.passChecks ?? 0}</div></div>
+    <div class="kpi-card"><div class="kpi-label">FAIL</div><div class="kpi-value">${summary.failChecks ?? 0}</div></div>
+  `;
+
+  els.dashboardChartBox.innerHTML = `
+    <div class="chart-canvas-wrap">
+      <canvas id="dashboardDonutChart"></canvas>
+    </div>
+    <div class="stack">
+      <p class="meta">Total pemeriksaan: ${summary.totalChecks ?? 0}</p>
+      <p class="meta">PASS: ${summary.passChecks ?? 0}</p>
+      <p class="meta">FAIL: ${summary.failChecks ?? 0}</p>
+    </div>
+  `;
+
+  renderDashboardDonutChart(summary);
+
+  if (!recentChecks.length) {
+    els.dashboardRecentChecks.innerHTML = `<div class="empty-box">Belum ada data pemeriksaan terbaru.</div>`;
+    return;
+  }
+
+  const workerMap = {};
+  state.workers.forEach(worker => {
+    workerMap[String(worker.id)] = worker;
+  });
+
+  els.dashboardRecentChecks.innerHTML = recentChecks.map(item => {
+    const worker = workerMap[String(item.worker_id)] || {};
+    const hasil = String(item.hasil || '').toUpperCase();
+    const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
+
+    return `
+      <article class="history-item">
+        <div class="worker-item-head">
+          <div>
+            <p class="meta">${escapeHtml(item.tanggal || '-')}</p>
+            <h3 class="worker-name">${escapeHtml(worker.nama || 'Pekerja tidak ditemukan')}</h3>
+            <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
+            <p class="meta">Jenis: ${escapeHtml(item.jenis_pemeriksaan || '-')}</p>
+            <p class="meta">Nilai: ${escapeHtml(String(item.nilai ?? '-'))}</p>
+          </div>
+          <span class="badge ${badgeClass}">${escapeHtml(hasil || '-')}</span>
         </div>
-      `;
-
-      if (!recentChecks.length) {
-        els.dashboardRecentChecks.innerHTML = `<div class="empty-box">Belum ada data pemeriksaan terbaru.</div>`;
-        return;
-      }
-
-      const workerMap = {};
-      state.workers.forEach(worker => { workerMap[String(worker.id)] = worker; });
-      els.dashboardRecentChecks.innerHTML = recentChecks.map(item => {
-        const worker = workerMap[String(item.worker_id)] || {};
-        const hasil = String(item.hasil || '').toUpperCase();
-        const badgeClass = hasil === 'PASS' ? 'pass' : hasil === 'FAIL' ? 'fail' : 'pending';
-        return `
-          <article class="history-item">
-            <div class="worker-item-head">
-              <div>
-                <p class="meta">${escapeHtml(item.tanggal || '-')}</p>
-                <h3 class="worker-name">${escapeHtml(worker.nama || 'Pekerja tidak ditemukan')}</h3>
-                <p class="meta">No ID: ${escapeHtml(worker.nik || '-')}</p>
-                <p class="meta">Jenis: ${escapeHtml(item.jenis_pemeriksaan || '-')}</p>
-                <p class="meta">Nilai: ${escapeHtml(String(item.nilai ?? '-'))}</p>
-              </div>
-              <span class="badge ${badgeClass}">${escapeHtml(hasil || '-')}</span>
-            </div>
-          </article>
-        `;
-      }).join('');
-    }
+      </article>
+    `;
+  }).join('');
+}
 
     function renderWorkersList(workers) {
       if (!workers.length) {
