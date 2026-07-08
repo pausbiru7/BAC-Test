@@ -436,6 +436,67 @@
   gap:12px;
   justify-items:center;
 }
+    @media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .mobile-nav,
+  .mobile-powered,
+  .topbar,
+  .actions-row,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .icon-btn,
+  #printDashboardBtn,
+  #shareDashboardBtn,
+  #printProgressBtn,
+  #shareProgressBtn,
+  #printReportBtn,
+  #exportCsvBtn,
+  #dashboardPeriodForm,
+  #reportPeriodForm,
+  #openWorkerModalBtn,
+  .modal {
+    display: none !important;
+  }
+
+  .app {
+    padding-bottom: 0 !important;
+  }
+
+  .screen {
+    display: none !important;
+  }
+
+  #dashboard.screen.active {
+    display: grid !important;
+    padding: 0 !important;
+    gap: 12px !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #d1d5db !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .chart-box,
+  .history-item,
+  .worker-item,
+  .report-item,
+  .kpi-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
   </style>
 </head>
 <body>
