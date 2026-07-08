@@ -477,8 +477,9 @@
 
           <div class="chart-box">
             <div class="section-head"><h3>Grafik Hasil</h3></div>
-            <div id="dashboardChartBox">Chart donut pass/fail akan tampil di sini.</div>
-          </div>
+           <div id="dashboardChartBox">
+  anvas id="dashboardDonutChart"></canvas>
+</div>
 
           <div class="actions-row">
             <button id="printDashboardBtn" type="button" class="btn-secondary">Print</button>
@@ -703,6 +704,7 @@
     <button class="nav-btn" data-target="reports" type="button"><span class="nav-icon">📄</span><span class="nav-label">Laporan</span></button>
   </nav>
 <div class="mobile-powered">Powered by Pausbiru</div>
+                                                 
   <div id="workerModal" class="modal" aria-hidden="true">
   <div class="modal-sheet">
     <div class="modal-head">
@@ -757,7 +759,7 @@
     </form>
   </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script>
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5UI9G0sQIFgiw6Zt88fdoLM3jwtMUqfFeo6rdGqqo4uNGKE_9Jmd1lXTGUJi4qFeq8w/exec';
 
