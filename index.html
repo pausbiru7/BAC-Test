@@ -1066,12 +1066,13 @@ function bindEvents() {
       }
     }
 
-    function syncPeriodFromDashboardForm() {
-      state.period.month = Number(els.dashboardMonth.value);
-      state.period.year = Number(els.dashboardYear.value);
-      els.reportMonth.value = String(state.period.month);
-      els.reportYear.value = String(state.period.year);
-    }
+ function syncPeriodFromDashboardForm() {
+  state.period.month = els.dashboardMonth.value || '';
+  state.period.year = els.dashboardYear.value || '';
+
+  els.reportMonth.value = state.period.month;
+  els.reportYear.value = state.period.year;
+}
 
     function syncPeriodFromReportForm() {
       state.period.month = Number(els.reportMonth.value);
@@ -1080,10 +1081,10 @@ function bindEvents() {
       els.dashboardYear.value = String(state.period.year);
     }
 
-   function getSelectedPeriod() {
+  function getSelectedPeriod() {
   return {
-    bulan: state.period.month,
-    tahun: state.period.year
+    bulan: els.dashboardMonth?.value || '',
+    tahun: els.dashboardYear?.value || ''
   };
 }
 
