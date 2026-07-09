@@ -1679,9 +1679,12 @@ function updateAgeFromBirthDate() {
       return Array.isArray(data) ? data : [];
     }
 
-    async function fetchDashboard(period) {
-      return await apiRequest('getDashboard', { bulan: period.month, tahun: period.year });
-    }
+   async function fetchDashboard(period) {
+  return await apiRequest('getDashboard', {
+    bulan: period.bulan,
+    tahun: period.tahun
+  });
+}
 
     async function fetchReports(period) {
       return await apiRequest('getMonthlyReport', { bulan: period.month, tahun: period.year });
