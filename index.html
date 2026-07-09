@@ -938,30 +938,73 @@ function renderDashboardDonutChart(summary) {
 
 document.addEventListener('DOMContentLoaded', init);
 
-    async function init() {
-      fillMonthOptions(els.dashboardMonth);
-      fillMonthOptions(els.reportMonth);
-      fillYearOptions(els.dashboardYear);
-      fillYearOptions(els.reportYear);
-      setDefaultPeriod();
-      bindEvents();
-      switchScreen('dashboard');
-      await bootstrapApp();
+async function init() {
+  fillMonthOptions(els.dashboardMonth);
+  fillMonthOptions(els.reportMonth);
+  fillYearOptions(els.dashboardYear);
+  fillYearOptions(els.reportYear);
+  setDefaultPeriod();
+  bindEvents();
+  switchScreen('dashboard');
+  await bootstrapApp();
+}
+
+async function bootstrapApp() {
+  try {
+    await loadWorkersForSelect();
+    await loadWorkers();
+    await loadDashboard();
+    await loadReports();
+  } catch (err) {
+    console.error('Bootstrap gagal:', err);
+    alert(err.message || 'Gagal memuat aplikasi.');
+  }
+}
+
+async function handleShareDashboard() {
+  const month = state.period?.month ?? '';
+  const year = state.period?.year ?? '';
+  const summary = state.dashboard?.summary || {};
+
+  const shareText = [
+    `Dashboard Monitoring Pemeriksaan Pekerja`,
+    `Periode: ${month}/${year}`,
+    `Total Pekerja: ${summary.totalWorkers ?? 0}`,
+    `Sudah Diperiksa: ${summary.checkedWorkers ?? 0}`,
+    `Belum Diperiksa: ${summary.uncheckedWorkers ?? 0}`,
+    `PASS: ${summary.passChecks ?? 0}`,
+    `FAIL: ${summary.failChecks ?? 0}`
+  ].join('\n');
+
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: 'Dashboard Monitoring Pemeriksaan Pekerja',
+        text: shareText
+      });
+      return;
     }
 
-    async function bootstrapApp() {
-      try {
-        await loadWorkersForSelect();
-        await loadWorkers();
-        await loadDashboard();
-        await loadReports();
-      } catch (err) {
-        console.error('Bootstrap gagal:', err);
-        alert(err.message || 'Gagal memuat aplikasi.');
-      }
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(shareText);
+      alert('Ringkasan dashboard berhasil disalin.');
+      return;
     }
 
-    function bindEvents() {
+    const textarea = document.createElement('textarea');
+    textarea.value = shareText;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    alert('Ringkasan dashboard berhasil disalin.');
+  } catch (err) {
+    console.error(err);
+    alert('Gagal membagikan dashboard.');
+  }
+}
+
+function bindEvents() {
   els.navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
@@ -992,7 +1035,6 @@ document.addEventListener('DOMContentLoaded', init);
   els.workerModal?.addEventListener('click', (e) => { if (e.target === els.workerModal) closeWorkerModal(); });
 
   els.workerTanggalLahir?.addEventListener('change', updateAgeFromBirthDate);
-
   els.workerWhatsapp?.addEventListener('blur', normalizeWhatsappNumber);
   els.inputNilai?.addEventListener('input', updateCheckResultFromValue);
   els.printDashboardBtn?.addEventListener('click', () => window.print());
