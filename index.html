@@ -436,7 +436,7 @@
   gap:12px;
   justify-items:center;
 }
-    @media print {
+@media print {
   @page {
     size: A4 portrait;
     margin: 12mm;
@@ -446,53 +446,31 @@
     background: #fff !important;
   }
 
-  .mobile-nav,
-  .mobile-powered,
-  .topbar,
-  .actions-row,
-  .btn-primary,
-  .btn-secondary,
-  .btn-ghost,
-  .icon-btn,
-  #printDashboardBtn,
-  #shareDashboardBtn,
-  #printProgressBtn,
-  #shareProgressBtn,
-  #printReportBtn,
-  #exportCsvBtn,
-  #dashboardPeriodForm,
-  #reportPeriodForm,
-  #openWorkerModalBtn,
-  .modal {
+  .no-print,
+  .no-print * {
     display: none !important;
   }
 
   .app {
-    padding-bottom: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .screen {
     display: none !important;
   }
 
-  #dashboard.screen.active {
+  #screen-dashboard {
     display: grid !important;
     padding: 0 !important;
     gap: 12px !important;
   }
 
-  .card {
-    box-shadow: none !important;
-    border: 1px solid #d1d5db !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .chart-box,
+  .card,
+  .kpi-card,
   .history-item,
-  .worker-item,
-  .report-item,
-  .kpi-card {
+  .chart-box {
+    box-shadow: none !important;
     break-inside: avoid;
     page-break-inside: avoid;
   }
@@ -501,7 +479,7 @@
 </head>
 <body>
   <div class="app">
- <header class="topbar">
+<header class="topbar no-print">
   <div class="topbar-heading">
     <span class="topbar-icon" id="pageIcon">📊</span>
     <h1 class="topbar-title" id="pageTitle">Dashboard</h1>
@@ -768,14 +746,14 @@
     </main>
   </div>
 
-  <nav class="mobile-nav" aria-label="Navigasi utama aplikasi">
+  <nav class="mobile-nav no-print" aria-label="Navigasi utama aplikasi">
     <button class="nav-btn active" data-target="dashboard" type="button"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></button>
     <button class="nav-btn" data-target="input" type="button"><span class="nav-icon">🧪</span><span class="nav-label">Input</span></button>
     <button class="nav-btn" data-target="progress" type="button"><span class="nav-icon">📈</span><span class="nav-label">Progress</span></button>
     <button class="nav-btn" data-target="workers" type="button"><span class="nav-icon">👷</span><span class="nav-label">Pekerja</span></button>
     <button class="nav-btn" data-target="reports" type="button"><span class="nav-icon">📄</span><span class="nav-label">Laporan</span></button>
   </nav>
-<div class="mobile-powered">Powered by Pausbiru</div>
+<div class="mobile-powered no-print">Powered by Pausbiru</div>
                                                  
   <div id="workerModal" class="modal" aria-hidden="true">
   <div class="modal-sheet">
